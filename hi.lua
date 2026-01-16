@@ -311,7 +311,7 @@ function lib:init(title, subtitle)
         Parent = btnHolder,
         BackgroundColor3 = theme.card,
         BorderSizePixel = 0,
-        Position = UDim2.new(0, 0, 0, 0),
+        Position = UDim2.new(0, 0, 0.5, -15),
         Size = UDim2.new(0, 30, 0, 30),
         Text = "",
         AutoButtonColor = false
@@ -421,7 +421,7 @@ function lib:init(title, subtitle)
     end)
     
     resizeHandle.InputBegan:Connect(function(inp)
-        if inp.UserInputType == Enum.UserInputType.MouseButton1 then
+        if inp.UserInputType == Enum.UserInputType.MouseButton1 and not minimized then
             resizing = true
             resizeStart = inp.Position
             startSize = main.Size
@@ -438,7 +438,7 @@ function lib:init(title, subtitle)
     end)
     
     input.InputChanged:Connect(function(inp)
-        if resizing and inp.UserInputType == Enum.UserInputType.MouseMovement then
+        if resizing and inp.UserInputType == Enum.UserInputType.MouseMovement and not minimized then
             local delta = inp.Position - resizeStart
             local newW = math.clamp(startSize.X.Offset + delta.X, 500, 1000)
             local newH = math.clamp(startSize.Y.Offset + delta.Y, 300, 700)
@@ -492,6 +492,7 @@ function lib:init(title, subtitle)
         task.delay(0.35, function()
             main.Visible = false
             gui.Enabled = false
+            openBtn.Visible = true
         end)
     end)
     
@@ -540,10 +541,13 @@ function lib:init(title, subtitle)
     
     local visible = true
     local toggleKey = Enum.KeyCode.Insert
+    local toggleCooldown = false
     
     input.InputBegan:Connect(function(key, gpe)
         if gpe then return end
-        if key.KeyCode == toggleKey then
+        if key.KeyCode == toggleKey and not toggleCooldown then
+            toggleCooldown = true
+            task.delay(0.5, function() toggleCooldown = false end)
             visible = not visible
             if visible then
                 openBtn.Visible = false
@@ -1136,7 +1140,7 @@ function lib:init(title, subtitle)
                     Size = UDim2.new(0.5, -20, 1, 0),
                     Font = Enum.Font.GothamMedium,
                     Text = val or "Select...",
-                    TextColor3 = theme.textDim,
+                    TextColor3 = (multi and default) and theme.accent or theme.textDim,
                     TextSize = 12,
                     TextXAlignment = Enum.TextXAlignment.Right
                 })
@@ -1217,8 +1221,7 @@ function lib:init(title, subtitle)
                                 if v then table.insert(list, k) end
                             end
                             valLbl.Text = #list > 0 and table.concat(list, ", ") or "Select..."
-                            tw(valLbl, {TextColor3 = theme.accent}, 0.15)
-                            task.delay(0.15, function() tw(valLbl, {TextColor3 = theme.textDim}, 0.15) end)
+                            valLbl.TextColor3 = #list > 0 and theme.accent or theme.textDim
                             for _, child in pairs(optHolder:GetChildren()) do
                                 if child:IsA("TextButton") then
                                     local isSelected = selected[child.Text]
@@ -1233,8 +1236,7 @@ function lib:init(title, subtitle)
                         else
                             val = opt
                             valLbl.Text = opt
-                            tw(valLbl, {TextColor3 = theme.accent}, 0.15)
-                            task.delay(0.15, function() tw(valLbl, {TextColor3 = theme.textDim}, 0.15) end)
+                            valLbl.TextColor3 = theme.accent
                             for _, child in pairs(optHolder:GetChildren()) do
                                 if child:IsA("TextButton") then
                                     if child.Text == val then
