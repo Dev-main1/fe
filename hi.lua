@@ -28,9 +28,9 @@ local theme = {
 }
 
 local icons = {
-    home = "rbxassetid://7072719587",
-    settings = "rbxassetid://7072720642",
-    combat = "rbxassetid://7072718110",
+    home = "rbxassetid://10723434711",
+    settings = "rbxassetid://10734950309",
+    combat = "rbxassetid://10723407389",
     user = "rbxassetid://7072721559",
     shield = "rbxassetid://7072720555",
     target = "rbxassetid://7072720979",
@@ -125,9 +125,9 @@ local icons = {
     watch = "rbxassetid://7072721726",
     airplay = "rbxassetid://7072717643",
     cast = "rbxassetid://7072717930",
-    Main = "rbxassetid://7072719587",
-    Combat = "rbxassetid://7072718110",
-    Configs = "rbxassetid://7072719005",
+    Main = "rbxassetid://10723434711",
+    Combat = "rbxassetid://10723407389",
+    Configs = "rbxassetid://10723424838",
     Settings = "rbxassetid://7072720642",
     Player = "rbxassetid://7072721559",
     Visual = "rbxassetid://7072718656",
@@ -251,10 +251,6 @@ function lib:init(title, subtitle)
     })
     tw(blur, {Size = 6}, 0.5)
     
-    local viewport = workspace.CurrentCamera.ViewportSize
-    local maxW = math.min(680, viewport.X - 40)
-    local maxH = math.min(450, viewport.Y - 40)
-    
     local main = create("Frame", {
         Parent = gui,
         Name = "Main",
@@ -269,7 +265,32 @@ function lib:init(title, subtitle)
     addShadow(main, 0.3)
     addStroke(main, theme.border, 1, 0.7)
     
-    tw(main, {Size = UDim2.new(0, maxW, 0, maxH)}, 0.4, Enum.EasingStyle.Back)
+    local stars = create("Frame", {
+        Parent = main,
+        BackgroundTransparency = 1,
+        Size = UDim2.new(1, 0, 1, 0),
+        ZIndex = 0
+    })
+    
+    for i = 1, 80 do
+        local star = create("Frame", {
+            Parent = stars,
+            BackgroundColor3 = theme.text,
+            BorderSizePixel = 0,
+            Position = UDim2.new(math.random(), 0, math.random(), 0),
+            Size = UDim2.new(0, math.random(1, 2), 0, math.random(1, 2)),
+            BackgroundTransparency = math.random(30, 70) / 100
+        })
+        addCorner(star, UDim.new(1, 0))
+        task.spawn(function()
+            while star and star.Parent do
+                tw(star, {BackgroundTransparency = math.random(10, 90) / 100}, math.random(10, 30) / 10)
+                task.wait(math.random(10, 30) / 10)
+            end
+        end)
+    end
+    
+    tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.4, Enum.EasingStyle.Back)
     
     local sidebar = create("Frame", {
         Parent = main,
@@ -598,9 +619,8 @@ function lib:init(title, subtitle)
     input.InputChanged:Connect(function(inp)
         if resizing and inp.UserInputType == Enum.UserInputType.MouseMovement and not minimized then
             local delta = inp.Position - resizeStart
-            local vp = workspace.CurrentCamera.ViewportSize
-            local newW = math.clamp(startSize.X.Offset + delta.X, 500, math.min(1000, vp.X - 40))
-            local newH = math.clamp(startSize.Y.Offset + delta.Y, 300, math.min(700, vp.Y - 40))
+            local newW = math.clamp(startSize.X.Offset + delta.X, 500, 1000)
+            local newH = math.clamp(startSize.Y.Offset + delta.Y, 300, 700)
             main.Size = UDim2.new(0, newW, 0, newH)
         end
     end)
@@ -624,14 +644,7 @@ function lib:init(title, subtitle)
     input.InputChanged:Connect(function(inp)
         if dragging and inp.UserInputType == Enum.UserInputType.MouseMovement then
             local delta = inp.Position - dragStart
-            local vp = workspace.CurrentCamera.ViewportSize
-            local newX = startPos.X.Offset + delta.X
-            local newY = startPos.Y.Offset + delta.Y
-            local w = main.AbsoluteSize.X
-            local h = main.AbsoluteSize.Y
-            newX = math.clamp(newX, -w/2 + 50, vp.X - w/2 - 50)
-            newY = math.clamp(newY, -h/2 + 50, vp.Y - h/2 - 50)
-            main.Position = UDim2.new(0.5, newX, 0.5, newY)
+            main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
     
@@ -647,10 +660,9 @@ function lib:init(title, subtitle)
             tw(main, {Size = UDim2.new(0, 400, 0, 55)}, 0.3, Enum.EasingStyle.Quart)
             tw(blur, {Size = 0}, 0.25)
         else
-            local vp = workspace.CurrentCamera.ViewportSize
             tw(sidebar, {Size = UDim2.new(0, 140, 1, 0)}, 0.3, Enum.EasingStyle.Quart)
             tw(content, {Position = UDim2.new(0, 140, 0, 0), Size = UDim2.new(1, -140, 1, 0)}, 0.3, Enum.EasingStyle.Quart)
-            tw(main, {Size = UDim2.new(0, math.min(680, vp.X - 40), 0, math.min(450, vp.Y - 40))}, 0.3, Enum.EasingStyle.Quart)
+            tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.3, Enum.EasingStyle.Quart)
             tw(blur, {Size = 6}, 0.25)
         end
     end)
@@ -735,8 +747,7 @@ function lib:init(title, subtitle)
         sidebar.Size = UDim2.new(0, 140, 1, 0)
         content.Position = UDim2.new(0, 140, 0, 0)
         content.Size = UDim2.new(1, -140, 1, 0)
-        local vp = workspace.CurrentCamera.ViewportSize
-        tw(main, {Size = UDim2.new(0, math.min(680, vp.X - 40), 0, math.min(450, vp.Y - 40))}, 0.4, Enum.EasingStyle.Back)
+        tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.4, Enum.EasingStyle.Back)
         tw(blur, {Size = 6}, 0.4)
     end)
     
@@ -770,8 +781,7 @@ function lib:init(title, subtitle)
                 sidebar.Size = UDim2.new(0, 140, 1, 0)
                 content.Position = UDim2.new(0, 140, 0, 0)
                 content.Size = UDim2.new(1, -140, 1, 0)
-                local vp = workspace.CurrentCamera.ViewportSize
-                tw(main, {Size = UDim2.new(0, math.min(680, vp.X - 40), 0, math.min(450, vp.Y - 40))}, 0.4, Enum.EasingStyle.Back)
+                tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.4, Enum.EasingStyle.Back)
                 tw(blur, {Size = 6}, 0.4)
             else
                 tw(blur, {Size = 0}, 0.3)
@@ -922,7 +932,6 @@ function lib:init(title, subtitle)
             end
         end)
         tabBtn.MouseButton1Click:Connect(function()
-            ripple(tabBtn, mouse.X, mouse.Y)
             activate()
         end)
         
