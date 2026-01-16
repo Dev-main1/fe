@@ -303,42 +303,15 @@ function lib:init(title, subtitle)
     local btnHolder = create("Frame", {
         Parent = topbar,
         BackgroundTransparency = 1,
-        Position = UDim2.new(1, -70, 0.5, -15),
-        Size = UDim2.new(0, 65, 0, 30)
+        Position = UDim2.new(1, -45, 0.5, -15),
+        Size = UDim2.new(0, 30, 0, 30)
     })
-    
-    local minimizeBtn = create("TextButton", {
-        Parent = btnHolder,
-        BackgroundColor3 = theme.card,
-        BorderSizePixel = 0,
-        Position = UDim2.new(0, 0, 0, 0),
-        Size = UDim2.new(0, 30, 0, 30),
-        Text = "",
-        AutoButtonColor = false
-    })
-    addCorner(minimizeBtn, UDim.new(0, 8))
-    
-    local minIcon = create("Frame", {
-        Parent = minimizeBtn,
-        BackgroundColor3 = theme.orange,
-        BorderSizePixel = 0,
-        Position = UDim2.new(0.5, -5, 0.5, -1),
-        Size = UDim2.new(0, 10, 0, 2)
-    })
-    addCorner(minIcon, UDim.new(1, 0))
-    
-    minimizeBtn.MouseEnter:Connect(function()
-        tw(minimizeBtn, {BackgroundColor3 = theme.cardHover}, 0.15)
-    end)
-    minimizeBtn.MouseLeave:Connect(function()
-        tw(minimizeBtn, {BackgroundColor3 = theme.card}, 0.15)
-    end)
     
     local closeBtn = create("TextButton", {
         Parent = btnHolder,
         BackgroundColor3 = theme.card,
         BorderSizePixel = 0,
-        Position = UDim2.new(0, 35, 0, 0),
+        Position = UDim2.new(0, 0, 0, 0),
         Size = UDim2.new(0, 30, 0, 30),
         Text = "",
         AutoButtonColor = false
@@ -468,21 +441,6 @@ function lib:init(title, subtitle)
         end
     end)
     
-    local minimized = false
-    minimizeBtn.MouseButton1Click:Connect(function()
-        minimized = not minimized
-        canDrag = not minimized
-        if minimized then
-            tw(main, {Size = UDim2.new(0, 680, 0, 55)}, 0.3, Enum.EasingStyle.Quart)
-            tw(blur, {Size = 0}, 0.3)
-            pages.Visible = false
-        else
-            tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.3, Enum.EasingStyle.Quart)
-            tw(blur, {Size = 6}, 0.3)
-            pages.Visible = true
-        end
-    end)
-    
     closeBtn.MouseButton1Click:Connect(function()
         tw(blur, {Size = 0}, 0.3)
         tw(main, {Size = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 1}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In)
@@ -494,8 +452,8 @@ function lib:init(title, subtitle)
     end)
     
     local visible = true
-    local closeKey = Enum.KeyCode.RightControl
     local toggleKey = Enum.KeyCode.Insert
+    local closeKey = Enum.KeyCode.Delete
     
     input.InputBegan:Connect(function(key, gpe)
         if gpe then return end
