@@ -251,6 +251,10 @@ function lib:init(title, subtitle)
     })
     tw(blur, {Size = 6}, 0.5)
     
+    local viewport = workspace.CurrentCamera.ViewportSize
+    local maxW = math.min(680, viewport.X - 40)
+    local maxH = math.min(450, viewport.Y - 40)
+    
     local main = create("Frame", {
         Parent = gui,
         Name = "Main",
@@ -265,7 +269,7 @@ function lib:init(title, subtitle)
     addShadow(main, 0.3)
     addStroke(main, theme.border, 1, 0.7)
     
-    tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.4, Enum.EasingStyle.Back)
+    tw(main, {Size = UDim2.new(0, maxW, 0, maxH)}, 0.4, Enum.EasingStyle.Back)
     
     local sidebar = create("Frame", {
         Parent = main,
@@ -594,8 +598,9 @@ function lib:init(title, subtitle)
     input.InputChanged:Connect(function(inp)
         if resizing and inp.UserInputType == Enum.UserInputType.MouseMovement and not minimized then
             local delta = inp.Position - resizeStart
-            local newW = math.clamp(startSize.X.Offset + delta.X, 500, 1000)
-            local newH = math.clamp(startSize.Y.Offset + delta.Y, 300, 700)
+            local vp = workspace.CurrentCamera.ViewportSize
+            local newW = math.clamp(startSize.X.Offset + delta.X, 500, math.min(1000, vp.X - 40))
+            local newH = math.clamp(startSize.Y.Offset + delta.Y, 300, math.min(700, vp.Y - 40))
             main.Size = UDim2.new(0, newW, 0, newH)
         end
     end)
@@ -619,7 +624,14 @@ function lib:init(title, subtitle)
     input.InputChanged:Connect(function(inp)
         if dragging and inp.UserInputType == Enum.UserInputType.MouseMovement then
             local delta = inp.Position - dragStart
-            main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            local vp = workspace.CurrentCamera.ViewportSize
+            local newX = startPos.X.Offset + delta.X
+            local newY = startPos.Y.Offset + delta.Y
+            local w = main.AbsoluteSize.X
+            local h = main.AbsoluteSize.Y
+            newX = math.clamp(newX, -w/2 + 50, vp.X - w/2 - 50)
+            newY = math.clamp(newY, -h/2 + 50, vp.Y - h/2 - 50)
+            main.Position = UDim2.new(0.5, newX, 0.5, newY)
         end
     end)
     
@@ -629,16 +641,16 @@ function lib:init(title, subtitle)
         resizeHandle.Visible = not minimized
         searchBox.Visible = not minimized
         timeLabel.Visible = minimized
-        timeLabel.Visible = minimized
         if minimized then
             tw(sidebar, {Size = UDim2.new(0, 0, 1, 0)}, 0.3, Enum.EasingStyle.Quart)
             tw(content, {Position = UDim2.new(0, 0, 0, 0), Size = UDim2.new(1, 0, 0, 55)}, 0.3, Enum.EasingStyle.Quart)
             tw(main, {Size = UDim2.new(0, 400, 0, 55)}, 0.3, Enum.EasingStyle.Quart)
             tw(blur, {Size = 0}, 0.25)
         else
+            local vp = workspace.CurrentCamera.ViewportSize
             tw(sidebar, {Size = UDim2.new(0, 140, 1, 0)}, 0.3, Enum.EasingStyle.Quart)
             tw(content, {Position = UDim2.new(0, 140, 0, 0), Size = UDim2.new(1, -140, 1, 0)}, 0.3, Enum.EasingStyle.Quart)
-            tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.3, Enum.EasingStyle.Quart)
+            tw(main, {Size = UDim2.new(0, math.min(680, vp.X - 40), 0, math.min(450, vp.Y - 40))}, 0.3, Enum.EasingStyle.Quart)
             tw(blur, {Size = 6}, 0.25)
         end
     end)
@@ -682,10 +694,11 @@ function lib:init(title, subtitle)
     local openIcon = create("ImageLabel", {
         Parent = openBtn,
         BackgroundTransparency = 1,
-        Position = UDim2.new(0.5, -10, 0.5, -10),
-        Size = UDim2.new(0, 20, 0, 20),
-        Image = "rbxassetid://7072719887",
-        ImageColor3 = theme.text
+        Position = UDim2.new(0.5, -8, 0.5, -8),
+        Size = UDim2.new(0, 16, 0, 16),
+        Image = "rbxassetid://7733992901",
+        ImageColor3 = theme.text,
+        ScaleType = Enum.ScaleType.Fit
     })
     
     openBtn.MouseEnter:Connect(function()
@@ -722,7 +735,8 @@ function lib:init(title, subtitle)
         sidebar.Size = UDim2.new(0, 140, 1, 0)
         content.Position = UDim2.new(0, 140, 0, 0)
         content.Size = UDim2.new(1, -140, 1, 0)
-        tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.4, Enum.EasingStyle.Back)
+        local vp = workspace.CurrentCamera.ViewportSize
+        tw(main, {Size = UDim2.new(0, math.min(680, vp.X - 40), 0, math.min(450, vp.Y - 40))}, 0.4, Enum.EasingStyle.Back)
         tw(blur, {Size = 6}, 0.4)
     end)
     
@@ -756,7 +770,8 @@ function lib:init(title, subtitle)
                 sidebar.Size = UDim2.new(0, 140, 1, 0)
                 content.Position = UDim2.new(0, 140, 0, 0)
                 content.Size = UDim2.new(1, -140, 1, 0)
-                tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.4, Enum.EasingStyle.Back)
+                local vp = workspace.CurrentCamera.ViewportSize
+                tw(main, {Size = UDim2.new(0, math.min(680, vp.X - 40), 0, math.min(450, vp.Y - 40))}, 0.4, Enum.EasingStyle.Back)
                 tw(blur, {Size = 6}, 0.4)
             else
                 tw(blur, {Size = 0}, 0.3)
@@ -775,15 +790,6 @@ function lib:init(title, subtitle)
     local autoSaveName = "autosave"
     local notifQueue = {}
     
-    local function saveElement(key, value)
-        cfgData[key] = value
-        if autoSave then
-            task.delay(0.5, function()
-                window:saveConfig(autoSaveName)
-            end)
-        end
-    end
-    
     local window = {
         gui = gui, 
         openGui = openGui,
@@ -796,6 +802,15 @@ function lib:init(title, subtitle)
         elements = elements,
         onConfigListUpdate = nil
     }
+    
+    local function saveElement(key, value)
+        cfgData[key] = value
+        if autoSave then
+            task.delay(0.5, function()
+                window:saveConfig(autoSaveName)
+            end)
+        end
+    end
     
     function window:tab(name, icon)
         local tabBtn = create("TextButton", {
@@ -821,14 +836,15 @@ function lib:init(title, subtitle)
         })
         addCorner(indicator, UDim.new(1, 0))
         
-        local iconId = icon and icons[icon] or icons[name] or icons.box
+        local iconId = (icon and icons[icon]) or icons[name] or "rbxassetid://7072717807"
         local tabIcon = create("ImageLabel", {
             Parent = tabBtn,
             BackgroundTransparency = 1,
             Position = UDim2.new(0, 12, 0.5, -8),
             Size = UDim2.new(0, 16, 0, 16),
             Image = iconId,
-            ImageColor3 = theme.textDim
+            ImageColor3 = theme.textDim,
+            ScaleType = Enum.ScaleType.Fit
         })
         
         local tabLbl = create("TextLabel", {
@@ -881,11 +897,7 @@ function lib:init(title, subtitle)
                 if txt then tw(txt, {TextColor3 = theme.textDim}, 0.2) end
                 if img then tw(img, {ImageColor3 = theme.textDim}, 0.2) end
                 if t.page ~= page and t.page.Visible then
-                    tw(t.page, {Position = UDim2.new(-0.03, 0, 0, 0)}, 0.15, Enum.EasingStyle.Quad)
-                    task.delay(0.15, function()
-                        t.page.Visible = false
-                        t.page.Position = UDim2.new(0, 0, 0, 0)
-                    end)
+                    t.page.Visible = false
                 end
             end
             tw(tabBtn, {BackgroundTransparency = 0.9}, 0.2)
@@ -893,9 +905,7 @@ function lib:init(title, subtitle)
             tw(tabLbl, {TextColor3 = theme.text}, 0.2)
             tw(tabIcon, {ImageColor3 = theme.accent}, 0.2)
             
-            page.Position = UDim2.new(0.03, 0, 0, 0)
             page.Visible = true
-            tw(page, {Position = UDim2.new(0, 0, 0, 0)}, 0.2, Enum.EasingStyle.Quad)
             
             window.activeTab = name
             activeTabName = name
