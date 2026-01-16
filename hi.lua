@@ -7,19 +7,23 @@ local players = game:GetService("Players")
 local player = players.LocalPlayer
 local mouse = player:GetMouse()
 
+local env = getgenv and getgenv() or _G
+if env.BioLibLoaded then return env.BioLib end
+env.BioLibLoaded = true
+
 local theme = {
-    bg = Color3.fromRGB(18, 18, 22),
-    sidebar = Color3.fromRGB(14, 14, 18),
-    card = Color3.fromRGB(25, 25, 32),
-    cardHover = Color3.fromRGB(32, 32, 42),
-    accent = Color3.fromRGB(40, 200, 135),
-    accentDark = Color3.fromRGB(30, 160, 110),
-    text = Color3.fromRGB(255, 255, 255),
-    textDim = Color3.fromRGB(140, 140, 155),
-    textDark = Color3.fromRGB(90, 90, 105),
-    border = Color3.fromRGB(45, 45, 55),
-    red = Color3.fromRGB(255, 85, 85),
-    orange = Color3.fromRGB(255, 170, 50),
+    bg = Color3.fromRGB(12, 10, 18),
+    sidebar = Color3.fromRGB(8, 6, 14),
+    card = Color3.fromRGB(18, 15, 28),
+    cardHover = Color3.fromRGB(28, 24, 42),
+    accent = Color3.fromRGB(138, 90, 255),
+    accentDark = Color3.fromRGB(98, 60, 200),
+    text = Color3.fromRGB(245, 245, 250),
+    textDim = Color3.fromRGB(120, 115, 140),
+    textDark = Color3.fromRGB(70, 65, 90),
+    border = Color3.fromRGB(40, 35, 60),
+    red = Color3.fromRGB(255, 75, 95),
+    orange = Color3.fromRGB(255, 160, 60),
     shadow = Color3.fromRGB(0, 0, 0)
 }
 
@@ -109,11 +113,16 @@ function lib:init(title, subtitle)
         IgnoreGuiInset = true
     })
     
-    if syn then
+    local protected = false
+    if syn and syn.protect_gui then
         syn.protect_gui(gui)
-        gui.Parent = game:GetService("CoreGui")
-    elseif gethui then
+        protected = true
+    end
+    
+    if gethui then
         gui.Parent = gethui()
+    elseif protected then
+        gui.Parent = game:GetService("CoreGui")
     else
         gui.Parent = player:WaitForChild("PlayerGui")
     end
@@ -148,15 +157,6 @@ function lib:init(title, subtitle)
         BorderSizePixel = 0,
         Position = UDim2.new(0, 0, 0, 0),
         Size = UDim2.new(0, 140, 1, 0)
-    })
-    
-    local sideGrad = create("UIGradient", {
-        Parent = sidebar,
-        Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(220, 220, 220))
-        }),
-        Rotation = 90
     })
     
     local logo = create("Frame", {
@@ -428,7 +428,18 @@ function lib:init(title, subtitle)
         task.delay(0.35, function()
             gui:Destroy()
             blur:Destroy()
+            env.BioLibLoaded = false
         end)
+    end)
+    
+    local visible = true
+    input.InputBegan:Connect(function(key, gpe)
+        if gpe then return end
+        if key.KeyCode == Enum.KeyCode.RightControl then
+            visible = not visible
+            gui.Enabled = visible
+            blur.Enabled = visible
+        end
     end)
     
     local window = {gui = gui, main = main, tabs = {}, activeTab = nil}
@@ -591,8 +602,8 @@ function lib:init(title, subtitle)
             local expandBtn = create("TextButton", {
                 Parent = header,
                 BackgroundTransparency = 1,
-                Position = UDim2.new(1, -40, 0, 0),
-                Size = UDim2.new(0, 40, 1, 0),
+                Position = UDim2.new(1, -35, 0, 0),
+                Size = UDim2.new(0, 35, 1, 0),
                 Text = "",
                 AutoButtonColor = false
             })
@@ -600,36 +611,12 @@ function lib:init(title, subtitle)
             local expandIcon = create("ImageLabel", {
                 Parent = expandBtn,
                 BackgroundTransparency = 1,
-                Position = UDim2.new(0.5, -6, 0.5, -6),
-                Size = UDim2.new(0, 12, 0, 12),
+                Position = UDim2.new(0.5, -5, 0.5, -5),
+                Size = UDim2.new(0, 10, 0, 10),
                 Image = "rbxassetid://7072706663",
                 ImageColor3 = theme.textDim,
                 Rotation = 90
             })
-            
-            local toggleFrame = create("Frame", {
-                Parent = header,
-                BackgroundTransparency = 1,
-                Position = UDim2.new(1, -90, 0.5, -10),
-                Size = UDim2.new(0, 40, 0, 20)
-            })
-            
-            local secToggle = create("Frame", {
-                Parent = toggleFrame,
-                BackgroundColor3 = theme.accent,
-                BorderSizePixel = 0,
-                Size = UDim2.new(1, 0, 1, 0)
-            })
-            addCorner(secToggle, UDim.new(1, 0))
-            
-            local toggleDot = create("Frame", {
-                Parent = secToggle,
-                BackgroundColor3 = theme.text,
-                BorderSizePixel = 0,
-                Position = UDim2.new(1, -18, 0.5, -8),
-                Size = UDim2.new(0, 16, 0, 16)
-            })
-            addCorner(toggleDot, UDim.new(1, 0))
             
             local holder = create("Frame", {
                 Parent = sec,
@@ -646,7 +633,6 @@ function lib:init(title, subtitle)
             })
             
             local expanded = true
-            local secEnabled = true
             
             local function updateSecSize()
                 local h = expanded and (holderList.AbsoluteContentSize.Y + 65) or 45
@@ -662,19 +648,6 @@ function lib:init(title, subtitle)
             expandBtn.MouseButton1Click:Connect(function()
                 expanded = not expanded
                 updateSecSize()
-            end)
-            
-            local toggleBtn = create("TextButton", {
-                Parent = toggleFrame,
-                BackgroundTransparency = 1,
-                Size = UDim2.new(1, 0, 1, 0),
-                Text = ""
-            })
-            
-            toggleBtn.MouseButton1Click:Connect(function()
-                secEnabled = not secEnabled
-                tw(secToggle, {BackgroundColor3 = secEnabled and theme.accent or theme.card}, 0.2)
-                tw(toggleDot, {Position = secEnabled and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)}, 0.2, Enum.EasingStyle.Back)
             end)
             
             updateSecSize()
@@ -1517,10 +1490,12 @@ function lib:init(title, subtitle)
         task.delay(0.35, function()
             gui:Destroy()
             blur:Destroy()
+            env.BioLibLoaded = false
         end)
     end
     
     return window
 end
 
+env.BioLib = lib
 return lib
