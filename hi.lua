@@ -565,6 +565,18 @@ function lib:init(title, subtitle)
     end)
     
     local cfgData = {}
+    local elements = {}
+    local autoSave = false
+    local autoSaveName = "autosave"
+    
+    local function saveElement(key, value)
+        cfgData[key] = value
+        if autoSave then
+            task.delay(0.5, function()
+                window:saveConfig(autoSaveName)
+            end)
+        end
+    end
     
     local window = {
         gui = gui, 
@@ -573,7 +585,8 @@ function lib:init(title, subtitle)
         tabs = {}, 
         activeTab = nil,
         cfgFolder = "configs",
-        cfgData = cfgData
+        cfgData = cfgData,
+        elements = elements
     }
     
     function window:tab(name)
@@ -865,15 +878,17 @@ function lib:init(title, subtitle)
                 btn.MouseButton1Click:Connect(function()
                     val = not val
                     update()
+                    saveElement(name, val)
                     if callback then callback(val) end
                 end)
                 
                 table.insert(allElements, {name = name, frame = frame})
                 updateSecSize()
-                return {
+                elements[name] = {
                     set = function(_, v) val = v update() end,
                     get = function() return val end
                 }
+                return elements[name]
             end
             
             function section:slider(name, min, max, default, callback)
@@ -1001,13 +1016,14 @@ function lib:init(title, subtitle)
                         val = math.floor(min + (max - min) * pct)
                         fill.Size = UDim2.new(pct, 0, 1, 0)
                         valLbl.Text = tostring(val)
+                        saveElement(name, val)
                         if callback then callback(val) end
                     end
                 end)
                 
                 table.insert(allElements, {name = name, frame = frame})
                 updateSecSize()
-                return {
+                elements[name] = {
                     set = function(_, v)
                         val = math.clamp(v, min, max)
                         local pct = (val - min) / (max - min)
@@ -1016,6 +1032,7 @@ function lib:init(title, subtitle)
                     end,
                     get = function() return val end
                 }
+                return elements[name]
             end
             
             function section:input(name, default, callback)
@@ -1678,6 +1695,15 @@ function lib:init(title, subtitle)
         self.cfgFolder = folder
     end
     
+    function window:enableAutoSave(name)
+        autoSave = true
+        autoSaveName = name or "autosave"
+    end
+    
+    function window:disableAutoSave()
+        autoSave = false
+    end
+    
     function window:saveConfig(name)
         local success, err = pcall(function()
             if not isfolder then return end
@@ -1703,7 +1729,7 @@ function lib:init(title, subtitle)
                 local data = readfile(path)
                 self.cfgData = game:GetService("HttpService"):JSONDecode(data)
                 for k, v in pairs(self.cfgData) do
-                    if self.elements and self.elements[k] and self.elements[k].set then
+                    if self.elements and self.elements[k] then
                         self.elements[k]:set(v)
                     end
                 end
@@ -1713,6 +1739,21 @@ function lib:init(title, subtitle)
             self:notify("Config", "Loaded: " .. name, 2)
         else
             self:notify("Error", "Failed to load config", 2, "error")
+        end
+    end
+    
+    function window:deleteConfig(name)
+        local success = pcall(function()
+            if not delfile then return end
+            local path = self.cfgFolder .. "/" .. name .. ".json"
+            if isfile(path) then
+                delfile(path)
+            end
+        end)
+        if success then
+            self:notify("Config", "Deleted: " .. name, 2)
+        else
+            self:notify("Error", "Failed to delete", 2, "error")
         end
     end
     
@@ -1728,6 +1769,48 @@ function lib:init(title, subtitle)
             if name then table.insert(configs, name) end
         end
         return configs
+    end
+    
+    function window:exportConfig(name)
+        local success, result = pcall(function()
+            if not isfile then return "" end
+            local path = self.cfgFolder .. "/" .. name .. ".json"
+            if isfile(path) then
+                local data = readfile(path)
+                if setclipboard then
+                    setclipboard(data)
+                    return "clipboard"
+                end
+                return data
+            end
+            return ""
+        end)
+        if success and result == "clipboard" then
+            self:notify("Export", "Copied to clipboard", 2)
+            return true
+        elseif success and result ~= "" then
+            self:notify("Export", "Config data ready", 2)
+            return result
+        else
+            self:notify("Error", "Export failed", 2, "error")
+            return false
+        end
+    end
+    
+    function window:importConfig(name, data)
+        local success = pcall(function()
+            if not writefile or not isfolder then return end
+            if not isfolder(self.cfgFolder) then
+                makefolder(self.cfgFolder)
+            end
+            local path = self.cfgFolder .. "/" .. name .. ".json"
+            writefile(path, data)
+        end)
+        if success then
+            self:notify("Import", "Imported: " .. name, 2)
+        else
+            self:notify("Error", "Import failed", 2, "error")
+        end
     end
     
     function window:setToggleKey(key)
