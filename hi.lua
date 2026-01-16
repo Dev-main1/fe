@@ -286,6 +286,16 @@ function lib:init(title, subtitle)
         tw(searchBox:FindFirstChild("UIStroke"), {Color = theme.border, Transparency = 0.7}, 0.2)
     end)
     
+    local allElements = {}
+    
+    searchInput:GetPropertyChangedSignal("Text"):Connect(function()
+        local q = searchInput.Text:lower()
+        for _, el in pairs(allElements) do
+            local match = q == "" or el.name:lower():find(q, 1, true)
+            el.frame.Visible = match
+        end
+    end)
+    
     local btnHolder = create("Frame", {
         Parent = topbar,
         BackgroundTransparency = 1,
@@ -387,6 +397,60 @@ function lib:init(title, subtitle)
         Size = UDim2.new(1, 0, 1, -55),
         ClipsDescendants = true
     })
+    
+    local resizeHandle = create("TextButton", {
+        Parent = main,
+        BackgroundTransparency = 1,
+        Position = UDim2.new(1, -15, 1, -15),
+        Size = UDim2.new(0, 15, 0, 15),
+        Text = "",
+        AutoButtonColor = false,
+        ZIndex = 10
+    })
+    
+    local resizeIcon = create("ImageLabel", {
+        Parent = resizeHandle,
+        BackgroundTransparency = 1,
+        Size = UDim2.new(1, 0, 1, 0),
+        Image = "rbxassetid://6034818375",
+        ImageColor3 = theme.textDark,
+        ImageTransparency = 0.5
+    })
+    
+    local resizing, resizeStart, startSize = false, nil, nil
+    
+    resizeHandle.MouseEnter:Connect(function()
+        tw(resizeIcon, {ImageColor3 = theme.textDim, ImageTransparency = 0}, 0.15)
+    end)
+    resizeHandle.MouseLeave:Connect(function()
+        if not resizing then
+            tw(resizeIcon, {ImageColor3 = theme.textDark, ImageTransparency = 0.5}, 0.15)
+        end
+    end)
+    
+    resizeHandle.InputBegan:Connect(function(inp)
+        if inp.UserInputType == Enum.UserInputType.MouseButton1 then
+            resizing = true
+            resizeStart = inp.Position
+            startSize = main.Size
+        end
+    end)
+    
+    input.InputEnded:Connect(function(inp)
+        if inp.UserInputType == Enum.UserInputType.MouseButton1 and resizing then
+            resizing = false
+            tw(resizeIcon, {ImageColor3 = theme.textDark, ImageTransparency = 0.5}, 0.15)
+        end
+    end)
+    
+    input.InputChanged:Connect(function(inp)
+        if resizing and inp.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = inp.Position - resizeStart
+            local newW = math.clamp(startSize.X.Offset + delta.X, 500, 1000)
+            local newH = math.clamp(startSize.Y.Offset + delta.Y, 300, 700)
+            main.Size = UDim2.new(0, newW, 0, newH)
+        end
+    end)
     
     local dragging, dragStart, startPos
     local canDrag = true
@@ -611,11 +675,11 @@ function lib:init(title, subtitle)
             local expandIcon = create("ImageLabel", {
                 Parent = expandBtn,
                 BackgroundTransparency = 1,
-                Position = UDim2.new(0.5, -5, 0.5, -5),
-                Size = UDim2.new(0, 10, 0, 10),
-                Image = "rbxassetid://7072706663",
+                Position = UDim2.new(0.5, -6, 0.5, -6),
+                Size = UDim2.new(0, 12, 0, 12),
+                Image = "rbxassetid://6031091004",
                 ImageColor3 = theme.textDim,
-                Rotation = 90
+                Rotation = 0
             })
             
             local holder = create("Frame", {
@@ -637,7 +701,7 @@ function lib:init(title, subtitle)
             local function updateSecSize()
                 local h = expanded and (holderList.AbsoluteContentSize.Y + 65) or 45
                 tw(sec, {Size = UDim2.new(1, 0, 0, h)}, 0.25, Enum.EasingStyle.Quart)
-                tw(expandIcon, {Rotation = expanded and 90 or 0}, 0.25)
+                tw(expandIcon, {Rotation = expanded and 180 or 0}, 0.25)
                 task.delay(0.25, updateCanvas)
             end
             
@@ -691,6 +755,7 @@ function lib:init(title, subtitle)
                     if callback then callback() end
                 end)
                 
+                table.insert(allElements, {name = name, frame = btn})
                 updateSecSize()
                 return btn
             end
@@ -755,6 +820,7 @@ function lib:init(title, subtitle)
                     if callback then callback(val) end
                 end)
                 
+                table.insert(allElements, {name = name, frame = frame})
                 updateSecSize()
                 return {
                     set = function(_, v) val = v update() end,
@@ -891,6 +957,7 @@ function lib:init(title, subtitle)
                     end
                 end)
                 
+                table.insert(allElements, {name = name, frame = frame})
                 updateSecSize()
                 return {
                     set = function(_, v)
@@ -953,6 +1020,7 @@ function lib:init(title, subtitle)
                     if callback then callback(inp.Text) end
                 end)
                 
+                table.insert(allElements, {name = name, frame = frame})
                 updateSecSize()
                 return {
                     set = function(_, v) inp.Text = v end,
@@ -1012,9 +1080,9 @@ function lib:init(title, subtitle)
                     BackgroundTransparency = 1,
                     Position = UDim2.new(1, -28, 0.5, -6),
                     Size = UDim2.new(0, 12, 0, 12),
-                    Image = "rbxassetid://7072706663",
+                    Image = "rbxassetid://6031091004",
                     ImageColor3 = theme.textDim,
-                    Rotation = 90
+                    Rotation = 0
                 })
                 
                 local optHolder = create("Frame", {
@@ -1068,10 +1136,11 @@ function lib:init(title, subtitle)
                     open = not open
                     local h = open and (44 + #opts * 30) or 36
                     tw(frame, {Size = UDim2.new(1, 0, 0, h)}, 0.2, Enum.EasingStyle.Quart)
-                    tw(arrow, {Rotation = open and 270 or 90}, 0.2)
+                    tw(arrow, {Rotation = open and 180 or 0}, 0.2)
                     task.delay(0.2, updateSecSize)
                 end)
                 
+                table.insert(allElements, {name = name, frame = frame})
                 updateSecSize()
                 return {
                     set = function(_, v) val = v valLbl.Text = v end,
@@ -1321,6 +1390,7 @@ function lib:init(title, subtitle)
                     task.delay(0.25, updateSecSize)
                 end)
                 
+                table.insert(allElements, {name = name, frame = frame})
                 updateSecSize()
                 return {
                     set = function(_, c) val = c h, s, v = c:ToHSV() updateColor() end,
@@ -1389,6 +1459,7 @@ function lib:init(title, subtitle)
                     end
                 end)
                 
+                table.insert(allElements, {name = name, frame = frame})
                 updateSecSize()
                 return {
                     set = function(_, k) key = k btn.Text = k and k.Name or "None" end,
@@ -1408,6 +1479,7 @@ function lib:init(title, subtitle)
                     TextXAlignment = Enum.TextXAlignment.Left
                 })
                 
+                table.insert(allElements, {name = text, frame = lbl})
                 updateSecSize()
                 return {set = function(_, t) lbl.Text = t end}
             end
