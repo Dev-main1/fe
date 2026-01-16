@@ -303,15 +303,44 @@ function lib:init(title, subtitle)
     local btnHolder = create("Frame", {
         Parent = topbar,
         BackgroundTransparency = 1,
-        Position = UDim2.new(1, -45, 0.5, -15),
-        Size = UDim2.new(0, 30, 0, 30)
+        Position = UDim2.new(1, -80, 0.5, -15),
+        Size = UDim2.new(0, 70, 0, 30)
     })
+    
+    local minimizeBtn = create("TextButton", {
+        Parent = btnHolder,
+        BackgroundColor3 = theme.card,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 0, 0, 0),
+        Size = UDim2.new(0, 30, 0, 30),
+        Text = "",
+        AutoButtonColor = false
+    })
+    addCorner(minimizeBtn, UDim.new(0, 8))
+    
+    local minIcon = create("Frame", {
+        Parent = minimizeBtn,
+        BackgroundColor3 = theme.orange,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0.5, -6, 0.5, -1),
+        Size = UDim2.new(0, 12, 0, 2)
+    })
+    addCorner(minIcon, UDim.new(1, 0))
+    
+    minimizeBtn.MouseEnter:Connect(function()
+        tw(minimizeBtn, {BackgroundColor3 = theme.cardHover}, 0.15)
+        tw(minIcon, {BackgroundColor3 = theme.text}, 0.15)
+    end)
+    minimizeBtn.MouseLeave:Connect(function()
+        tw(minimizeBtn, {BackgroundColor3 = theme.card}, 0.15)
+        tw(minIcon, {BackgroundColor3 = theme.orange}, 0.15)
+    end)
     
     local closeBtn = create("TextButton", {
         Parent = btnHolder,
         BackgroundColor3 = theme.card,
         BorderSizePixel = 0,
-        Position = UDim2.new(0, 0, 0, 0),
+        Position = UDim2.new(0, 40, 0, 0),
         Size = UDim2.new(0, 30, 0, 30),
         Text = "",
         AutoButtonColor = false
@@ -441,28 +470,97 @@ function lib:init(title, subtitle)
         end
     end)
     
+    local minimized = false
+    minimizeBtn.MouseButton1Click:Connect(function()
+        minimized = not minimized
+        canDrag = not minimized
+        if minimized then
+            tw(content, {Size = UDim2.new(1, -140, 0, 55)}, 0.3, Enum.EasingStyle.Quart)
+            tw(main, {Size = UDim2.new(0, 680, 0, 55)}, 0.3, Enum.EasingStyle.Quart)
+            tw(blur, {Size = 0}, 0.25)
+        else
+            tw(content, {Size = UDim2.new(1, -140, 1, 0)}, 0.3, Enum.EasingStyle.Quart)
+            tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.3, Enum.EasingStyle.Quart)
+            tw(blur, {Size = 6}, 0.25)
+        end
+    end)
+    
     closeBtn.MouseButton1Click:Connect(function()
+        visible = false
         tw(blur, {Size = 0}, 0.3)
-        tw(main, {Size = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 1}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+        tw(main, {Size = UDim2.new(0, 0, 0, 0)}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In)
         task.delay(0.35, function()
-            gui:Destroy()
-            blur:Destroy()
-            env.BioLibLoaded = false
+            main.Visible = false
+            gui.Enabled = false
         end)
+    end)
+    
+    local openBtn = create("TextButton", {
+        Parent = gui,
+        Name = "OpenButton",
+        BackgroundColor3 = theme.accent,
+        BackgroundTransparency = 0.3,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0.5, -30, 0, 10),
+        Size = UDim2.new(0, 60, 0, 40),
+        Text = "",
+        AutoButtonColor = false,
+        Visible = false,
+        ZIndex = 1000
+    })
+    addCorner(openBtn, UDim.new(0, 10))
+    addShadow(openBtn, 0.5)
+    
+    local openIcon = create("TextLabel", {
+        Parent = openBtn,
+        BackgroundTransparency = 1,
+        Size = UDim2.new(1, 0, 1, 0),
+        Font = Enum.Font.GothamBlack,
+        Text = "☰",
+        TextColor3 = theme.text,
+        TextSize = 24
+    })
+    
+    openBtn.MouseEnter:Connect(function()
+        tw(openBtn, {BackgroundTransparency = 0.1}, 0.2)
+    end)
+    openBtn.MouseLeave:Connect(function()
+        tw(openBtn, {BackgroundTransparency = 0.3}, 0.2)
+    end)
+    
+    openBtn.MouseButton1Click:Connect(function()
+        visible = true
+        openBtn.Visible = false
+        gui.Enabled = true
+        main.Visible = true
+        main.Size = UDim2.new(0, 0, 0, 0)
+        tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.4, Enum.EasingStyle.Back)
+        tw(blur, {Size = 6}, 0.4)
     end)
     
     local visible = true
     local toggleKey = Enum.KeyCode.Insert
-    local closeKey = Enum.KeyCode.Delete
     
     input.InputBegan:Connect(function(key, gpe)
         if gpe then return end
         if key.KeyCode == toggleKey then
             visible = not visible
-            gui.Enabled = visible
-            blur.Enabled = visible
-        elseif key.KeyCode == closeKey then
-            window:destroy()
+            if visible then
+                openBtn.Visible = false
+                gui.Enabled = true
+                main.Visible = true
+                main.Size = UDim2.new(0, 0, 0, 0)
+                tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.4, Enum.EasingStyle.Back)
+                tw(blur, {Size = 6}, 0.4)
+            else
+                tw(blur, {Size = 0}, 0.3)
+                tw(main, {Size = UDim2.new(0, 0, 0, 0)}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+                task.delay(0.35, function()
+                    main.Visible = false
+                    gui.Enabled = false
+                    openBtn.Visible = true
+                end)
+            end
         end
     end)
     
@@ -470,7 +568,8 @@ function lib:init(title, subtitle)
     
     local window = {
         gui = gui, 
-        main = main, 
+        main = main,
+        openBtn = openBtn,
         tabs = {}, 
         activeTab = nil,
         cfgFolder = "configs",
@@ -681,25 +780,14 @@ function lib:init(title, subtitle)
                 addCorner(btn, UDim.new(0, 8))
                 addStroke(btn, theme.border, 1, 0.8)
                 
-                local btnIcon = create("ImageLabel", {
-                    Parent = btn,
-                    BackgroundTransparency = 1,
-                    Position = UDim2.new(0, 12, 0.5, -8),
-                    Size = UDim2.new(0, 16, 0, 16),
-                    Image = "rbxassetid://7072706796",
-                    ImageColor3 = theme.text
-                })
-                
                 local btnLbl = create("TextLabel", {
                     Parent = btn,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0, 36, 0, 0),
-                    Size = UDim2.new(1, -36, 1, 0),
+                    Size = UDim2.new(1, 0, 1, 0),
                     Font = Enum.Font.GothamBlack,
                     Text = name,
                     TextColor3 = theme.text,
-                    TextSize = 13,
-                    TextXAlignment = Enum.TextXAlignment.Left
+                    TextSize = 13
                 })
                 
                 btn.MouseEnter:Connect(function()
@@ -1074,11 +1162,34 @@ function lib:init(title, subtitle)
                     })
                     addCorner(optBtn, UDim.new(0, 6))
                     
+                    local function updateOptColor()
+                        local isSelected = false
+                        if multi then
+                            isSelected = selected and selected[opt]
+                        else
+                            isSelected = val == opt
+                        end
+                        if isSelected then
+                            optBtn.BackgroundTransparency = 0
+                            optBtn.BackgroundColor3 = theme.accent
+                            optBtn.TextColor3 = theme.text
+                        end
+                    end
+                    
+                    updateOptColor()
+                    
                     optBtn.MouseEnter:Connect(function()
-                        tw(optBtn, {BackgroundTransparency = 0, TextColor3 = theme.text}, 0.15)
+                        if not ((multi and selected and selected[opt]) or (not multi and val == opt)) then
+                            tw(optBtn, {BackgroundTransparency = 0, BackgroundColor3 = theme.card, TextColor3 = theme.text}, 0.15)
+                        end
                     end)
                     optBtn.MouseLeave:Connect(function()
-                        tw(optBtn, {BackgroundTransparency = 1, TextColor3 = theme.textDim}, 0.15)
+                        local isSelected = (multi and selected and selected[opt]) or (not multi and val == opt)
+                        if isSelected then
+                            tw(optBtn, {BackgroundTransparency = 0, BackgroundColor3 = theme.accent, TextColor3 = theme.text}, 0.15)
+                        else
+                            tw(optBtn, {BackgroundTransparency = 1, TextColor3 = theme.textDim}, 0.15)
+                        end
                     end)
                     optBtn.MouseButton1Click:Connect(function()
                         if multi then
@@ -1091,12 +1202,31 @@ function lib:init(title, subtitle)
                             valLbl.Text = #list > 0 and table.concat(list, ", ") or "Select..."
                             tw(valLbl, {TextColor3 = theme.accent}, 0.15)
                             task.delay(0.15, function() tw(valLbl, {TextColor3 = theme.textDim}, 0.15) end)
+                            for _, child in pairs(optHolder:GetChildren()) do
+                                if child:IsA("TextButton") then
+                                    local isSelected = selected[child.Text]
+                                    if isSelected then
+                                        tw(child, {BackgroundTransparency = 0, BackgroundColor3 = theme.accent, TextColor3 = theme.text}, 0.15)
+                                    else
+                                        tw(child, {BackgroundTransparency = 1, TextColor3 = theme.textDim}, 0.15)
+                                    end
+                                end
+                            end
                             if callback then callback(list) end
                         else
                             val = opt
                             valLbl.Text = opt
                             tw(valLbl, {TextColor3 = theme.accent}, 0.15)
                             task.delay(0.15, function() tw(valLbl, {TextColor3 = theme.textDim}, 0.15) end)
+                            for _, child in pairs(optHolder:GetChildren()) do
+                                if child:IsA("TextButton") then
+                                    if child.Text == val then
+                                        tw(child, {BackgroundTransparency = 0, BackgroundColor3 = theme.accent, TextColor3 = theme.text}, 0.15)
+                                    else
+                                        tw(child, {BackgroundTransparency = 1, TextColor3 = theme.textDim}, 0.15)
+                                    end
+                                end
+                            end
                             open = false
                             tw(frame, {Size = UDim2.new(1, 0, 0, 36)}, 0.2, Enum.EasingStyle.Quart)
                             tw(arrow, {Rotation = 0}, 0.2)
@@ -1604,8 +1734,8 @@ function lib:init(title, subtitle)
         toggleKey = key
     end
     
-    function window:setCloseKey(key)
-        closeKey = key
+    function window:showOpenButton(show)
+        openBtn.Visible = show
     end
     
     return window
