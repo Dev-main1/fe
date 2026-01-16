@@ -27,6 +27,121 @@ local theme = {
     shadow = Color3.fromRGB(0, 0, 0)
 }
 
+local icons = {
+    home = "rbxassetid://7072719587",
+    settings = "rbxassetid://7072720642",
+    combat = "rbxassetid://7072718110",
+    user = "rbxassetid://7072721559",
+    shield = "rbxassetid://7072720555",
+    target = "rbxassetid://7072720979",
+    zap = "rbxassetid://7072722026",
+    star = "rbxassetid://7072720812",
+    heart = "rbxassetid://7072719338",
+    folder = "rbxassetid://7072719005",
+    file = "rbxassetid://7072718774",
+    save = "rbxassetid://7072720445",
+    download = "rbxassetid://7072718532",
+    upload = "rbxassetid://7072721475",
+    search = "rbxassetid://7072706663",
+    eye = "rbxassetid://7072718656",
+    lock = "rbxassetid://7072719841",
+    unlock = "rbxassetid://7072721392",
+    play = "rbxassetid://7072720175",
+    pause = "rbxassetid://7072720070",
+    stop = "rbxassetid://7072720896",
+    skip = "rbxassetid://7072720727",
+    volume = "rbxassetid://7072721643",
+    mute = "rbxassetid://7072719927",
+    bell = "rbxassetid://7072717766",
+    message = "rbxassetid://7072719927",
+    send = "rbxassetid://7072720537",
+    trash = "rbxassetid://7072721226",
+    edit = "rbxassetid://7072718607",
+    plus = "rbxassetid://7072720274",
+    minus = "rbxassetid://7072719887",
+    check = "rbxassetid://7072717988",
+    x = "rbxassetid://7072721893",
+    menu = "rbxassetid://7072719887",
+    grid = "rbxassetid://7072719173",
+    list = "rbxassetid://7072719756",
+    layers = "rbxassetid://7072719587",
+    box = "rbxassetid://7072717848",
+    package = "rbxassetid://7072720008",
+    gift = "rbxassetid://7072719090",
+    crown = "rbxassetid://7072718360",
+    flame = "rbxassetid://7072718856",
+    bolt = "rbxassetid://7072717807",
+    rocket = "rbxassetid://7072720359",
+    globe = "rbxassetid://7072719130",
+    map = "rbxassetid://7072719887",
+    compass = "rbxassetid://7072718193",
+    crosshair = "rbxassetid://7072718318",
+    gamepad = "rbxassetid://7072719047",
+    cpu = "rbxassetid://7072718277",
+    code = "rbxassetid://7072718110",
+    terminal = "rbxassetid://7072721060",
+    database = "rbxassetid://7072718443",
+    cloud = "rbxassetid://7072718068",
+    wifi = "rbxassetid://7072721810",
+    bluetooth = "rbxassetid://7072717807",
+    battery = "rbxassetid://7072717725",
+    power = "rbxassetid://7072720274",
+    sun = "rbxassetid://7072720896",
+    moon = "rbxassetid://7072719968",
+    clock = "rbxassetid://7072718027",
+    calendar = "rbxassetid://7072717889",
+    alarm = "rbxassetid://7072717643",
+    timer = "rbxassetid://7072721143",
+    activity = "rbxassetid://7072717602",
+    trending = "rbxassetid://7072721309",
+    chart = "rbxassetid://7072717930",
+    pie = "rbxassetid://7072720109",
+    award = "rbxassetid://7072717684",
+    trophy = "rbxassetid://7072721351",
+    medal = "rbxassetid://7072719841",
+    flag = "rbxassetid://7072718898",
+    bookmark = "rbxassetid://7072717807",
+    tag = "rbxassetid://7072720937",
+    hash = "rbxassetid://7072719256",
+    at = "rbxassetid://7072717684",
+    link = "rbxassetid://7072719714",
+    paperclip = "rbxassetid://7072720008",
+    scissors = "rbxassetid://7072720488",
+    copy = "rbxassetid://7072718235",
+    clipboard = "rbxassetid://7072718027",
+    printer = "rbxassetid://7072720274",
+    camera = "rbxassetid://7072717889",
+    image = "rbxassetid://7072719463",
+    film = "rbxassetid://7072718816",
+    music = "rbxassetid://7072719968",
+    headphones = "rbxassetid://7072719298",
+    mic = "rbxassetid://7072719887",
+    speaker = "rbxassetid://7072720770",
+    radio = "rbxassetid://7072720318",
+    tv = "rbxassetid://7072721392",
+    monitor = "rbxassetid://7072719927",
+    phone = "rbxassetid://7072720149",
+    tablet = "rbxassetid://7072720937",
+    watch = "rbxassetid://7072721726",
+    airplay = "rbxassetid://7072717643",
+    cast = "rbxassetid://7072717930",
+    Main = "rbxassetid://7072719587",
+    Combat = "rbxassetid://7072718110",
+    Configs = "rbxassetid://7072719005",
+    Settings = "rbxassetid://7072720642",
+    Player = "rbxassetid://7072721559",
+    Visual = "rbxassetid://7072718656",
+    Misc = "rbxassetid://7072720812",
+    ESP = "rbxassetid://7072718656",
+    Aimbot = "rbxassetid://7072718318",
+    Movement = "rbxassetid://7072720359",
+    World = "rbxassetid://7072719130",
+    Teleport = "rbxassetid://7072721309",
+    Scripts = "rbxassetid://7072718110",
+    Credits = "rbxassetid://7072719338",
+    Info = "rbxassetid://7072717766"
+}
+
 local function tw(obj, props, dur, style, dir)
     local info = TweenInfo.new(dur or 0.25, style or Enum.EasingStyle.Quart, dir or Enum.EasingDirection.Out)
     local t = tween:Create(obj, info, props)
@@ -91,8 +206,8 @@ local function ripple(parent, x, y)
     local rip = create("Frame", {
         Parent = parent,
         Name = "Ripple",
-        BackgroundColor3 = Color3.new(1, 1, 1),
-        BackgroundTransparency = 0.85,
+        BackgroundColor3 = theme.accent,
+        BackgroundTransparency = 0.7,
         BorderSizePixel = 0,
         Position = UDim2.new(0, rx, 0, ry),
         Size = UDim2.new(0, 0, 0, 0),
@@ -101,9 +216,11 @@ local function ripple(parent, x, y)
     })
     addCorner(rip, UDim.new(1, 0))
     
-    tw(rip, {Size = UDim2.new(0, maxSize, 0, maxSize), BackgroundTransparency = 1}, 0.5, Enum.EasingStyle.Quad)
-    task.delay(0.5, function() rip:Destroy() end)
+    tw(rip, {Size = UDim2.new(0, maxSize, 0, maxSize), BackgroundTransparency = 1}, 0.4, Enum.EasingStyle.Quad)
+    task.delay(0.4, function() rip:Destroy() end)
 end
+
+lib.icons = icons
 
 function lib:init(title, subtitle)
     local gui = create("ScreenGui", {
@@ -556,7 +673,6 @@ function lib:init(title, subtitle)
         tw(openBtn, {BackgroundTransparency = 0.1, Size = UDim2.new(0, 50, 0, 50)}, 0.2)
     end)
     
-    -- Pulse animation for open button
     task.spawn(function()
         while openGui and openGui.Parent do
             if openBtn.Visible then
@@ -659,7 +775,7 @@ function lib:init(title, subtitle)
         onConfigListUpdate = nil
     }
     
-    function window:tab(name)
+    function window:tab(name, icon)
         local tabBtn = create("TextButton", {
             Parent = tabScroll,
             Name = name,
@@ -683,11 +799,21 @@ function lib:init(title, subtitle)
         })
         addCorner(indicator, UDim.new(1, 0))
         
+        local iconId = icon and icons[icon] or icons[name] or icons.box
+        local tabIcon = create("ImageLabel", {
+            Parent = tabBtn,
+            BackgroundTransparency = 1,
+            Position = UDim2.new(0, 12, 0.5, -8),
+            Size = UDim2.new(0, 16, 0, 16),
+            Image = iconId,
+            ImageColor3 = theme.textDim
+        })
+        
         local tabLbl = create("TextLabel", {
             Parent = tabBtn,
             BackgroundTransparency = 1,
-            Position = UDim2.new(0, 14, 0, 0),
-            Size = UDim2.new(1, -20, 1, 0),
+            Position = UDim2.new(0, 34, 0, 0),
+            Size = UDim2.new(1, -40, 1, 0),
             Font = Enum.Font.GothamBold,
             Text = name,
             TextColor3 = theme.textDim,
@@ -723,24 +849,45 @@ function lib:init(title, subtitle)
         pageList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateCanvas)
         
         local function activate()
+            if window.activeTab == name then return end
+            
             for _, t in pairs(window.tabs) do
                 tw(t.btn, {BackgroundTransparency = 1}, 0.2)
                 tw(t.btn.Indicator, {BackgroundTransparency = 1}, 0.2)
-                tw(t.btn:FindFirstChild("TextLabel"), {TextColor3 = theme.textDim}, 0.2)
-                if t.page ~= page then
-                    tw(t.page, {BackgroundTransparency = 1}, 0.15)
-                    task.delay(0.15, function()
+                local txtLbl = t.btn:FindFirstChild("TextLabel")
+                local imgLbl = t.btn:FindFirstChildOfClass("ImageLabel")
+                if txtLbl then tw(txtLbl, {TextColor3 = theme.textDim}, 0.2) end
+                if imgLbl then tw(imgLbl, {ImageColor3 = theme.textDim}, 0.2) end
+                if t.page ~= page and t.page.Visible then
+                    t.page.Position = UDim2.new(0, 0, 0, 0)
+                    tw(t.page, {Position = UDim2.new(-0.05, 0, 0, 0)}, 0.2, Enum.EasingStyle.Quad)
+                    task.spawn(function()
+                        for i = 1, 10 do
+                            t.page.GroupTransparency = i * 0.1
+                            task.wait(0.02)
+                        end
                         t.page.Visible = false
-                        t.page.BackgroundTransparency = 0
+                        t.page.GroupTransparency = 0
+                        t.page.Position = UDim2.new(0, 0, 0, 0)
                     end)
                 end
             end
             tw(tabBtn, {BackgroundTransparency = 0.9}, 0.2)
             tw(indicator, {BackgroundTransparency = 0}, 0.2)
             tw(tabLbl, {TextColor3 = theme.text}, 0.2)
+            tw(tabIcon, {ImageColor3 = theme.accent}, 0.2)
+            
+            page.Position = UDim2.new(0.05, 0, 0, 0)
+            page.GroupTransparency = 1
             page.Visible = true
-            page.BackgroundTransparency = 1
-            tw(page, {BackgroundTransparency = 0}, 0.2)
+            tw(page, {Position = UDim2.new(0, 0, 0, 0)}, 0.25, Enum.EasingStyle.Quad)
+            task.spawn(function()
+                for i = 10, 0, -1 do
+                    page.GroupTransparency = i * 0.1
+                    task.wait(0.025)
+                end
+            end)
+            
             window.activeTab = name
             activeTabName = name
         end
@@ -763,7 +910,13 @@ function lib:init(title, subtitle)
         window.tabs[name] = {btn = tabBtn, page = page}
         
         if not window.activeTab then
-            activate()
+            tw(tabBtn, {BackgroundTransparency = 0.9}, 0.2)
+            tw(indicator, {BackgroundTransparency = 0}, 0.2)
+            tw(tabLbl, {TextColor3 = theme.text}, 0.2)
+            tw(tabIcon, {ImageColor3 = theme.accent}, 0.2)
+            page.Visible = true
+            window.activeTab = name
+            activeTabName = name
         end
         
         tabList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
@@ -1273,7 +1426,7 @@ function lib:init(title, subtitle)
                     Size = UDim2.new(0.5, -20, 1, 0),
                     Font = Enum.Font.GothamMedium,
                     Text = val or "Select...",
-                    TextColor3 = (multi and default) and theme.accent or theme.textDim,
+                    TextColor3 = val and theme.accent or theme.textDim,
                     TextSize = 12,
                     TextXAlignment = Enum.TextXAlignment.Right
                 })
@@ -1712,14 +1865,14 @@ function lib:init(title, subtitle)
                     BorderSizePixel = 0,
                     Position = UDim2.new(0.62, 0, 0, 0),
                     Size = UDim2.new(0.38, 0, 1, 0),
-                    Font = Enum.Font.GothamMedium,
+                    Font = Enum.Font.GothamBold,
                     Text = key and key.Name or "None",
-                    TextColor3 = theme.textDim,
+                    TextColor3 = theme.accent,
                     TextSize = 12,
                     AutoButtonColor = false
                 })
                 addCorner(btn, UDim.new(0, 6))
-                addStroke(btn, theme.border, 1, 0.7)
+                addStroke(btn, theme.accent, 1, 0.5)
                 
                 btn.MouseEnter:Connect(function()
                     tw(btn, {BackgroundColor3 = theme.card}, 0.15)
