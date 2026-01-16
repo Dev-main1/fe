@@ -179,24 +179,24 @@ function lib:init(title, subtitle)
     local titleLbl = create("TextLabel", {
         Parent = logo,
         BackgroundTransparency = 1,
-        Position = UDim2.new(0, 45, 0, 15),
-        Size = UDim2.new(1, -50, 0, 20),
-        Font = Enum.Font.GothamBold,
+        Position = UDim2.new(0, 45, 0, 14),
+        Size = UDim2.new(1, -50, 0, 22),
+        Font = Enum.Font.GothamBlack,
         Text = title or "BioHazard",
         TextColor3 = theme.text,
-        TextSize = 15,
+        TextSize = 16,
         TextXAlignment = Enum.TextXAlignment.Left
     })
     
     local subLbl = create("TextLabel", {
         Parent = logo,
         BackgroundTransparency = 1,
-        Position = UDim2.new(0, 45, 0, 35),
+        Position = UDim2.new(0, 45, 0, 36),
         Size = UDim2.new(1, -50, 0, 16),
-        Font = Enum.Font.Gotham,
+        Font = Enum.Font.GothamMedium,
         Text = subtitle or "Sneak Peek",
         TextColor3 = theme.textDim,
-        TextSize = 11,
+        TextSize = 12,
         TextXAlignment = Enum.TextXAlignment.Left
     })
     
@@ -401,30 +401,45 @@ function lib:init(title, subtitle)
     local resizeHandle = create("TextButton", {
         Parent = main,
         BackgroundTransparency = 1,
-        Position = UDim2.new(1, -15, 1, -15),
-        Size = UDim2.new(0, 15, 0, 15),
+        Position = UDim2.new(1, -20, 1, -20),
+        Size = UDim2.new(0, 20, 0, 20),
         Text = "",
         AutoButtonColor = false,
         ZIndex = 10
     })
     
-    local resizeIcon = create("ImageLabel", {
+    local resizeDots = create("Frame", {
         Parent = resizeHandle,
         BackgroundTransparency = 1,
-        Size = UDim2.new(1, 0, 1, 0),
-        Image = "rbxassetid://6034818375",
-        ImageColor3 = theme.textDark,
-        ImageTransparency = 0.5
+        Size = UDim2.new(1, 0, 1, 0)
     })
+    
+    for i = 1, 3 do
+        for j = 1, 3 do
+            if i + j >= 4 then
+                create("Frame", {
+                    Parent = resizeDots,
+                    BackgroundColor3 = theme.textDark,
+                    BorderSizePixel = 0,
+                    Position = UDim2.new(0, (i-1)*6 + 2, 0, (j-1)*6 + 2),
+                    Size = UDim2.new(0, 3, 0, 3)
+                })
+            end
+        end
+    end
     
     local resizing, resizeStart, startSize = false, nil, nil
     
     resizeHandle.MouseEnter:Connect(function()
-        tw(resizeIcon, {ImageColor3 = theme.textDim, ImageTransparency = 0}, 0.15)
+        for _, dot in pairs(resizeDots:GetChildren()) do
+            tw(dot, {BackgroundColor3 = theme.accent}, 0.15)
+        end
     end)
     resizeHandle.MouseLeave:Connect(function()
         if not resizing then
-            tw(resizeIcon, {ImageColor3 = theme.textDark, ImageTransparency = 0.5}, 0.15)
+            for _, dot in pairs(resizeDots:GetChildren()) do
+                tw(dot, {BackgroundColor3 = theme.textDark}, 0.15)
+            end
         end
     end)
     
@@ -439,7 +454,9 @@ function lib:init(title, subtitle)
     input.InputEnded:Connect(function(inp)
         if inp.UserInputType == Enum.UserInputType.MouseButton1 and resizing then
             resizing = false
-            tw(resizeIcon, {ImageColor3 = theme.textDark, ImageTransparency = 0.5}, 0.15)
+            for _, dot in pairs(resizeDots:GetChildren()) do
+                tw(dot, {BackgroundColor3 = theme.textDark}, 0.15)
+            end
         end
     end)
     
@@ -546,7 +563,7 @@ function lib:init(title, subtitle)
             BackgroundTransparency = 1,
             Position = UDim2.new(0, 36, 0, 0),
             Size = UDim2.new(1, -44, 1, 0),
-            Font = Enum.Font.GothamMedium,
+            Font = Enum.Font.GothamBold,
             Text = name,
             TextColor3 = theme.textDim,
             TextSize = 13,
@@ -656,7 +673,7 @@ function lib:init(title, subtitle)
                 BackgroundTransparency = 1,
                 Position = UDim2.new(0, 45, 0, 0),
                 Size = UDim2.new(0.6, 0, 1, 0),
-                Font = Enum.Font.GothamBold,
+                Font = Enum.Font.GothamBlack,
                 Text = name,
                 TextColor3 = theme.text,
                 TextSize = 14,
