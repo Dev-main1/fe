@@ -525,7 +525,7 @@ function lib:init(title, subtitle)
     
     local window = {gui = gui, main = main, tabs = {}, activeTab = nil}
     
-    function window:tab(name, icon)
+    function window:tab(name)
         local tabBtn = create("TextButton", {
             Parent = tabScroll,
             Name = name,
@@ -549,20 +549,11 @@ function lib:init(title, subtitle)
         })
         addCorner(indicator, UDim.new(1, 0))
         
-        local tabIcon = create("ImageLabel", {
-            Parent = tabBtn,
-            BackgroundTransparency = 1,
-            Position = UDim2.new(0, 12, 0.5, -8),
-            Size = UDim2.new(0, 16, 0, 16),
-            Image = icon or "rbxassetid://7072706796",
-            ImageColor3 = theme.textDim
-        })
-        
         local tabLbl = create("TextLabel", {
             Parent = tabBtn,
             BackgroundTransparency = 1,
-            Position = UDim2.new(0, 36, 0, 0),
-            Size = UDim2.new(1, -44, 1, 0),
+            Position = UDim2.new(0, 14, 0, 0),
+            Size = UDim2.new(1, -20, 1, 0),
             Font = Enum.Font.GothamBold,
             Text = name,
             TextColor3 = theme.textDim,
@@ -601,13 +592,11 @@ function lib:init(title, subtitle)
             for _, t in pairs(window.tabs) do
                 tw(t.btn, {BackgroundTransparency = 1}, 0.2)
                 tw(t.btn.Indicator, {BackgroundTransparency = 1}, 0.2)
-                tw(t.btn:FindFirstChild("ImageLabel"), {ImageColor3 = theme.textDim}, 0.2)
                 tw(t.btn:FindFirstChild("TextLabel"), {TextColor3 = theme.textDim}, 0.2)
                 t.page.Visible = false
             end
             tw(tabBtn, {BackgroundTransparency = 0.9}, 0.2)
             tw(indicator, {BackgroundTransparency = 0}, 0.2)
-            tw(tabIcon, {ImageColor3 = theme.accent}, 0.2)
             tw(tabLbl, {TextColor3 = theme.text}, 0.2)
             page.Visible = true
             window.activeTab = name
