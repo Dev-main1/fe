@@ -854,20 +854,14 @@ function lib:init(title, subtitle)
             for _, t in pairs(window.tabs) do
                 tw(t.btn, {BackgroundTransparency = 1}, 0.2)
                 tw(t.btn.Indicator, {BackgroundTransparency = 1}, 0.2)
-                local txtLbl = t.btn:FindFirstChild("TextLabel")
-                local imgLbl = t.btn:FindFirstChildOfClass("ImageLabel")
-                if txtLbl then tw(txtLbl, {TextColor3 = theme.textDim}, 0.2) end
-                if imgLbl then tw(imgLbl, {ImageColor3 = theme.textDim}, 0.2) end
+                local txt = t.btn:FindFirstChild("TextLabel")
+                local img = t.btn:FindFirstChildOfClass("ImageLabel")
+                if txt then tw(txt, {TextColor3 = theme.textDim}, 0.2) end
+                if img then tw(img, {ImageColor3 = theme.textDim}, 0.2) end
                 if t.page ~= page and t.page.Visible then
-                    t.page.Position = UDim2.new(0, 0, 0, 0)
-                    tw(t.page, {Position = UDim2.new(-0.05, 0, 0, 0)}, 0.2, Enum.EasingStyle.Quad)
-                    task.spawn(function()
-                        for i = 1, 10 do
-                            t.page.GroupTransparency = i * 0.1
-                            task.wait(0.02)
-                        end
+                    tw(t.page, {Position = UDim2.new(-0.03, 0, 0, 0)}, 0.15, Enum.EasingStyle.Quad)
+                    task.delay(0.15, function()
                         t.page.Visible = false
-                        t.page.GroupTransparency = 0
                         t.page.Position = UDim2.new(0, 0, 0, 0)
                     end)
                 end
@@ -877,16 +871,9 @@ function lib:init(title, subtitle)
             tw(tabLbl, {TextColor3 = theme.text}, 0.2)
             tw(tabIcon, {ImageColor3 = theme.accent}, 0.2)
             
-            page.Position = UDim2.new(0.05, 0, 0, 0)
-            page.GroupTransparency = 1
+            page.Position = UDim2.new(0.03, 0, 0, 0)
             page.Visible = true
-            tw(page, {Position = UDim2.new(0, 0, 0, 0)}, 0.25, Enum.EasingStyle.Quad)
-            task.spawn(function()
-                for i = 10, 0, -1 do
-                    page.GroupTransparency = i * 0.1
-                    task.wait(0.025)
-                end
-            end)
+            tw(page, {Position = UDim2.new(0, 0, 0, 0)}, 0.2, Enum.EasingStyle.Quad)
             
             window.activeTab = name
             activeTabName = name
