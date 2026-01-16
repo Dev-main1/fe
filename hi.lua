@@ -438,6 +438,27 @@ function lib:init(title, subtitle)
         Size = UDim2.new(0, 70, 0, 30)
     })
     
+    local timeLabel = create("TextLabel", {
+        Parent = topbar,
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0.5, -60, 0, 0),
+        Size = UDim2.new(0, 120, 1, 0),
+        Font = Enum.Font.GothamBold,
+        Text = os.date("%H:%M:%S"),
+        TextColor3 = theme.text,
+        TextSize = 16,
+        Visible = false
+    })
+    
+    task.spawn(function()
+        while timeLabel and timeLabel.Parent do
+            if timeLabel.Visible then
+                timeLabel.Text = os.date("%H:%M:%S")
+            end
+            task.wait(1)
+        end
+    end)
+    
     local minimizeBtn = create("TextButton", {
         Parent = btnHolder,
         BackgroundColor3 = theme.card,
@@ -607,6 +628,8 @@ function lib:init(title, subtitle)
         minimized = not minimized
         resizeHandle.Visible = not minimized
         searchBox.Visible = not minimized
+        timeLabel.Visible = minimized
+        timeLabel.Visible = minimized
         if minimized then
             tw(sidebar, {Size = UDim2.new(0, 0, 1, 0)}, 0.3, Enum.EasingStyle.Quart)
             tw(content, {Position = UDim2.new(0, 0, 0, 0), Size = UDim2.new(1, 0, 0, 55)}, 0.3, Enum.EasingStyle.Quart)
@@ -656,14 +679,13 @@ function lib:init(title, subtitle)
     addShadow(openBtn, 0.3)
     addStroke(openBtn, theme.accent, 2, 0.3)
     
-    local openIcon = create("TextLabel", {
+    local openIcon = create("ImageLabel", {
         Parent = openBtn,
         BackgroundTransparency = 1,
-        Size = UDim2.new(1, 0, 1, 0),
-        Font = Enum.Font.GothamBlack,
-        Text = "☰",
-        TextColor3 = theme.text,
-        TextSize = 22
+        Position = UDim2.new(0.5, -10, 0.5, -10),
+        Size = UDim2.new(0, 20, 0, 20),
+        Image = "rbxassetid://7072719887",
+        ImageColor3 = theme.text
     })
     
     openBtn.MouseEnter:Connect(function()
