@@ -294,9 +294,21 @@ function lib:init(title, subtitle)
     
     searchInput:GetPropertyChangedSignal("Text"):Connect(function()
         local q = searchInput.Text:lower()
-        for _, el in pairs(allElements) do
-            local match = q == "" or el.name:lower():find(q, 1, true)
-            el.frame.Visible = match
+        if q ~= "" then
+            for _, t in pairs(window.tabs) do
+                t.page.Visible = true
+            end
+            for _, el in pairs(allElements) do
+                local match = el.name:lower():find(q, 1, true)
+                el.frame.Visible = match
+            end
+        else
+            for _, t in pairs(window.tabs) do
+                t.page.Visible = (t == window.tabs[window.activeTab])
+            end
+            for _, el in pairs(allElements) do
+                el.frame.Visible = true
+            end
         end
     end)
     
@@ -311,7 +323,7 @@ function lib:init(title, subtitle)
         Parent = btnHolder,
         BackgroundColor3 = theme.card,
         BorderSizePixel = 0,
-        Position = UDim2.new(0, 0, 0.5, -15),
+        Position = UDim2.new(0, 0, 0, 0),
         Size = UDim2.new(0, 30, 0, 30),
         Text = "",
         AutoButtonColor = false
@@ -594,7 +606,8 @@ function lib:init(title, subtitle)
         activeTab = nil,
         cfgFolder = "configs",
         cfgData = cfgData,
-        elements = elements
+        elements = elements,
+        onConfigListUpdate = nil
     }
     
     function window:tab(name)
@@ -641,7 +654,7 @@ function lib:init(title, subtitle)
             Position = UDim2.new(0, 0, 0, 0),
             Size = UDim2.new(1, 0, 1, 0),
             CanvasSize = UDim2.new(0, 0, 0, 0),
-            ScrollBarThickness = 3,
+            ScrollBarThickness = 0,
             ScrollBarImageColor3 = theme.accent,
             ScrollBarImageTransparency = 0.5,
             Visible = false,
@@ -1261,7 +1274,52 @@ function lib:init(title, subtitle)
                 updateSecSize()
                 return {
                     set = function(_, v) val = v valLbl.Text = v end,
-                    get = function() return val end
+                    get = function() return val end,
+                    updateOptions = function(_, newOpts)
+                        opts = newOpts
+                        for _, child in pairs(optHolder:GetChildren()) do
+                            if child:IsA("TextButton") then
+                                child:Destroy()
+                            end
+                        end
+                        for i, opt in ipairs(opts) do
+                            local optBtn = create("TextButton", {
+                                Parent = optHolder,
+                                BackgroundColor3 = theme.card,
+                                BackgroundTransparency = 1,
+                                BorderSizePixel = 0,
+                                Size = UDim2.new(1, 0, 0, 28),
+                                Font = Enum.Font.Gotham,
+                                Text = opt,
+                                TextColor3 = theme.textDim,
+                                TextSize = 12,
+                                AutoButtonColor = false
+                            })
+                            addCorner(optBtn, UDim.new(0, 6))
+                            optBtn.MouseEnter:Connect(function()
+                                tw(optBtn, {BackgroundTransparency = 0, BackgroundColor3 = theme.card}, 0.15)
+                            end)
+                            optBtn.MouseLeave:Connect(function()
+                                tw(optBtn, {BackgroundTransparency = 1}, 0.15)
+                            end)
+                            optBtn.MouseButton1Click:Connect(function()
+                                val = opt
+                                valLbl.Text = opt
+                                valLbl.TextColor3 = theme.accent
+                                for _, child in pairs(optHolder:GetChildren()) do
+                                    if child:IsA("TextButton") then
+                                        tw(child, {TextColor3 = child.Text == val and theme.accent or theme.textDim}, 0.15)
+                                    end
+                                end
+                                open = false
+                                tw(frame, {Size = UDim2.new(1, 0, 0, 36)}, 0.2, Enum.EasingStyle.Quart)
+                                tw(arrow, {Rotation = 0}, 0.2)
+                                task.delay(0.2, updateSecSize)
+                                if callback then callback(val) end
+                            end)
+                        end
+                        optHolder.Size = UDim2.new(1, -16, 0, #opts * 30)
+                    end
                 }
             end
             
@@ -1730,6 +1788,9 @@ function lib:init(title, subtitle)
         end)
         if success then
             self:notify("Config", "Saved: " .. name, 2)
+            if self.onConfigListUpdate then
+                self.onConfigListUpdate()
+            end
         else
             self:notify("Error", "Failed to save config", 2, "error")
         end
@@ -1757,15 +1818,23 @@ function lib:init(title, subtitle)
     end
     
     function window:deleteConfig(name)
+        if not isfile or not delfile then
+            self:notify("Error", "File functions not available", 2, "error")
+            return
+        end
+        local path = self.cfgFolder .. "/" .. name .. ".json"
+        if not isfile(path) then
+            self:notify("Error", "Config doesn't exist", 2, "error")
+            return
+        end
         local success = pcall(function()
-            if not delfile then return end
-            local path = self.cfgFolder .. "/" .. name .. ".json"
-            if isfile(path) then
-                delfile(path)
-            end
+            delfile(path)
         end)
         if success then
             self:notify("Config", "Deleted: " .. name, 2)
+            if self.onConfigListUpdate then
+                self.onConfigListUpdate()
+            end
         else
             self:notify("Error", "Failed to delete", 2, "error")
         end
@@ -1822,6 +1891,9 @@ function lib:init(title, subtitle)
         end)
         if success then
             self:notify("Import", "Imported: " .. name, 2)
+            if self.onConfigListUpdate then
+                self.onConfigListUpdate()
+            end
         else
             self:notify("Error", "Import failed", 2, "error")
         end
