@@ -265,27 +265,29 @@ function lib:init(title, subtitle)
     addShadow(main, 0.3)
     addStroke(main, theme.border, 1, 0.7)
     
-    local stars = create("Frame", {
+    local bgOverlay = create("Frame", {
         Parent = main,
-        BackgroundTransparency = 1,
+        BackgroundColor3 = theme.bg,
+        BackgroundTransparency = 0.3,
         Size = UDim2.new(1, 0, 1, 0),
-        ZIndex = 0
+        ZIndex = 1
     })
     
-    for i = 1, 80 do
+    for i = 1, 100 do
         local star = create("Frame", {
-            Parent = stars,
-            BackgroundColor3 = theme.text,
+            Parent = main,
+            BackgroundColor3 = Color3.fromRGB(200, 180, 255),
             BorderSizePixel = 0,
             Position = UDim2.new(math.random(), 0, math.random(), 0),
-            Size = UDim2.new(0, math.random(1, 2), 0, math.random(1, 2)),
-            BackgroundTransparency = math.random(30, 70) / 100
+            Size = UDim2.new(0, math.random(1, 3), 0, math.random(1, 3)),
+            BackgroundTransparency = math.random(20, 80) / 100,
+            ZIndex = 0
         })
         addCorner(star, UDim.new(1, 0))
         task.spawn(function()
             while star and star.Parent do
-                tw(star, {BackgroundTransparency = math.random(10, 90) / 100}, math.random(10, 30) / 10)
-                task.wait(math.random(10, 30) / 10)
+                tw(star, {BackgroundTransparency = math.random(0, 90) / 100}, math.random(5, 25) / 10)
+                task.wait(math.random(5, 25) / 10)
             end
         end)
     end
@@ -299,7 +301,8 @@ function lib:init(title, subtitle)
         BorderSizePixel = 0,
         Position = UDim2.new(0, 0, 0, 0),
         Size = UDim2.new(0, 140, 1, 0),
-        ClipsDescendants = true
+        ClipsDescendants = true,
+        ZIndex = 2
     })
     addCorner(sidebar, UDim.new(0, 12))
     
@@ -379,7 +382,8 @@ function lib:init(title, subtitle)
         BorderSizePixel = 0,
         Position = UDim2.new(0, 140, 0, 0),
         Size = UDim2.new(1, -140, 1, 0),
-        ClipsDescendants = true
+        ClipsDescendants = true,
+        ZIndex = 2
     })
     addCorner(content, UDim.new(0, 12))
     
@@ -708,7 +712,7 @@ function lib:init(title, subtitle)
         BackgroundTransparency = 1,
         Position = UDim2.new(0.5, -8, 0.5, -8),
         Size = UDim2.new(0, 16, 0, 16),
-        Image = "rbxassetid://7733992901",
+        Image = "rbxassetid://10734923549",
         ImageColor3 = theme.text,
         ScaleType = Enum.ScaleType.Fit
     })
@@ -817,7 +821,7 @@ function lib:init(title, subtitle)
         cfgData[key] = value
         if autoSave then
             task.delay(0.5, function()
-                window:saveConfig(autoSaveName)
+                window:saveConfig(autoSaveName, true)
             end)
         end
     end
