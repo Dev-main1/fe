@@ -461,10 +461,9 @@ function lib:init(title, subtitle)
     end)
     
     local dragging, dragStart, startPos
-    local canDrag = true
     
     topbar.InputBegan:Connect(function(inp)
-        if inp.UserInputType == Enum.UserInputType.MouseButton1 and canDrag then
+        if inp.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
             dragStart = inp.Position
             startPos = main.Position
@@ -487,7 +486,6 @@ function lib:init(title, subtitle)
     local minimized = false
     minimizeBtn.MouseButton1Click:Connect(function()
         minimized = not minimized
-        canDrag = not minimized
         resizeHandle.Visible = not minimized
         if minimized then
             tw(content, {Size = UDim2.new(1, -140, 0, 55)}, 0.3, Enum.EasingStyle.Quart)
@@ -546,10 +544,13 @@ function lib:init(title, subtitle)
     
     openBtn.MouseButton1Click:Connect(function()
         visible = true
+        minimized = false
+        resizeHandle.Visible = true
         openBtn.Visible = false
         gui.Enabled = true
         main.Visible = true
         main.Size = UDim2.new(0, 0, 0, 0)
+        tw(content, {Size = UDim2.new(1, -140, 1, 0)}, 0.3, Enum.EasingStyle.Quart)
         tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.4, Enum.EasingStyle.Back)
         tw(blur, {Size = 6}, 0.4)
     end)
@@ -713,7 +714,7 @@ function lib:init(title, subtitle)
         window.tabs[name] = {btn = tabBtn, page = page}
         
         if not window.activeTab then
-            task.delay(0.1, activate)
+            activate()
         end
         
         tabList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
