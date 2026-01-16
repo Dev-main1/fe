@@ -489,6 +489,7 @@ function lib:init(title, subtitle)
     minimizeBtn.MouseButton1Click:Connect(function()
         minimized = not minimized
         resizeHandle.Visible = not minimized
+        searchBox.Visible = not minimized
         if minimized then
             tw(sidebar, {Size = UDim2.new(0, 0, 1, 0)}, 0.3, Enum.EasingStyle.Quart)
             tw(content, {Position = UDim2.new(0, 0, 0, 0), Size = UDim2.new(1, 0, 0, 55)}, 0.3, Enum.EasingStyle.Quart)
@@ -502,21 +503,41 @@ function lib:init(title, subtitle)
         end
     end)
     
+    local openGui = create("ScreenGui", {
+        Name = "BioLib_OpenBtn",
+        ResetOnSpawn = false,
+        ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+        IgnoreGuiInset = true,
+        DisplayOrder = 100
+    })
+    
+    if syn and syn.protect_gui then
+        syn.protect_gui(openGui)
+    end
+    
+    if gethui then
+        openGui.Parent = gethui()
+    elseif protected then
+        openGui.Parent = game:GetService("CoreGui")
+    else
+        openGui.Parent = player:WaitForChild("PlayerGui")
+    end
+    
     local openBtn = create("TextButton", {
-        Parent = gui,
+        Parent = openGui,
         Name = "OpenButton",
         BackgroundColor3 = theme.accent,
-        BackgroundTransparency = 0.3,
+        BackgroundTransparency = 0.1,
         BorderSizePixel = 0,
-        Position = UDim2.new(0.5, -30, 0, 10),
-        Size = UDim2.new(0, 60, 0, 40),
+        Position = UDim2.new(0.5, -25, 0, 15),
+        Size = UDim2.new(0, 50, 0, 50),
         Text = "",
         AutoButtonColor = false,
-        Visible = false,
-        ZIndex = 1000
+        Visible = false
     })
-    addCorner(openBtn, UDim.new(0, 10))
-    addShadow(openBtn, 0.5)
+    addCorner(openBtn, UDim.new(1, 0))
+    addShadow(openBtn, 0.3)
+    addStroke(openBtn, theme.accent, 2, 0.3)
     
     local openIcon = create("TextLabel", {
         Parent = openBtn,
@@ -525,22 +546,39 @@ function lib:init(title, subtitle)
         Font = Enum.Font.GothamBlack,
         Text = "☰",
         TextColor3 = theme.text,
-        TextSize = 24
+        TextSize = 22
     })
     
     openBtn.MouseEnter:Connect(function()
-        tw(openBtn, {BackgroundTransparency = 0.1}, 0.2)
+        tw(openBtn, {BackgroundTransparency = 0, Size = UDim2.new(0, 55, 0, 55)}, 0.2)
     end)
     openBtn.MouseLeave:Connect(function()
-        tw(openBtn, {BackgroundTransparency = 0.3}, 0.2)
+        tw(openBtn, {BackgroundTransparency = 0.1, Size = UDim2.new(0, 50, 0, 50)}, 0.2)
+    end)
+    
+    -- Pulse animation for open button
+    task.spawn(function()
+        while openGui and openGui.Parent do
+            if openBtn.Visible then
+                local stroke = openBtn:FindFirstChild("UIStroke")
+                if stroke then
+                    tw(stroke, {Transparency = 0}, 0.8)
+                    task.wait(0.8)
+                    tw(stroke, {Transparency = 0.6}, 0.8)
+                    task.wait(0.8)
+                end
+            else
+                task.wait(0.5)
+            end
+        end
     end)
     
     openBtn.MouseButton1Click:Connect(function()
         visible = true
         minimized = false
         resizeHandle.Visible = true
+        searchBox.Visible = true
         openBtn.Visible = false
-        gui.Enabled = true
         main.Visible = true
         main.Size = UDim2.new(0, 0, 0, 0)
         sidebar.Size = UDim2.new(0, 140, 1, 0)
@@ -556,7 +594,6 @@ function lib:init(title, subtitle)
         tw(main, {Size = UDim2.new(0, 0, 0, 0)}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In)
         task.delay(0.35, function()
             main.Visible = false
-            gui.Enabled = false
             openBtn.Visible = true
         end)
     end)
@@ -572,10 +609,15 @@ function lib:init(title, subtitle)
             task.delay(0.5, function() toggleCooldown = false end)
             visible = not visible
             if visible then
+                minimized = false
+                resizeHandle.Visible = true
+                searchBox.Visible = true
                 openBtn.Visible = false
-                gui.Enabled = true
                 main.Visible = true
                 main.Size = UDim2.new(0, 0, 0, 0)
+                sidebar.Size = UDim2.new(0, 140, 1, 0)
+                content.Position = UDim2.new(0, 140, 0, 0)
+                content.Size = UDim2.new(1, -140, 1, 0)
                 tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.4, Enum.EasingStyle.Back)
                 tw(blur, {Size = 6}, 0.4)
             else
@@ -583,7 +625,6 @@ function lib:init(title, subtitle)
                 tw(main, {Size = UDim2.new(0, 0, 0, 0)}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In)
                 task.delay(0.35, function()
                     main.Visible = false
-                    gui.Enabled = false
                     openBtn.Visible = true
                 end)
             end
@@ -607,6 +648,7 @@ function lib:init(title, subtitle)
     
     local window = {
         gui = gui, 
+        openGui = openGui,
         main = main,
         openBtn = openBtn,
         tabs = windowTabs, 
@@ -895,12 +937,25 @@ function lib:init(title, subtitle)
                     Parent = box,
                     Color = ColorSequence.new({
                         ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 60, 180)),
-                        ColorSequenceKeypoint.new(0.5, theme.accent),
-                        ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 120, 255))
+                        ColorSequenceKeypoint.new(0.3, theme.accent),
+                        ColorSequenceKeypoint.new(0.7, Color3.fromRGB(180, 120, 255)),
+                        ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 60, 180))
                     }),
-                    Rotation = 0,
+                    Offset = Vector2.new(-1, 0),
                     Enabled = val
                 })
+                
+                if val then
+                    task.spawn(function()
+                        while box and box.Parent and boxGrad.Enabled do
+                            tw(boxGrad, {Offset = Vector2.new(1, 0)}, 1.5, Enum.EasingStyle.Linear)
+                            task.wait(1.5)
+                            if boxGrad.Enabled then
+                                boxGrad.Offset = Vector2.new(-1, 0)
+                            end
+                        end
+                    end)
+                end
                 
                 local dot = create("Frame", {
                     Parent = box,
@@ -923,6 +978,17 @@ function lib:init(title, subtitle)
                     tw(box:FindFirstChild("UIStroke"), {Color = val and theme.accent or theme.border, Transparency = val and 0 or 0.6}, 0.2)
                     tw(dot, {Position = val and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)}, 0.2, Enum.EasingStyle.Back)
                     boxGrad.Enabled = val
+                    if val then
+                        task.spawn(function()
+                            while box and box.Parent and boxGrad.Enabled do
+                                tw(boxGrad, {Offset = Vector2.new(1, 0)}, 1.5, Enum.EasingStyle.Linear)
+                                task.wait(1.5)
+                                if boxGrad.Enabled then
+                                    boxGrad.Offset = Vector2.new(-1, 0)
+                                end
+                            end
+                        end)
+                    end
                 end
                 
                 btn.MouseButton1Click:Connect(function()
@@ -1001,19 +1067,18 @@ function lib:init(title, subtitle)
                     Parent = fill,
                     Color = ColorSequence.new({
                         ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 60, 180)),
-                        ColorSequenceKeypoint.new(0.5, theme.accent),
-                        ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 120, 255))
+                        ColorSequenceKeypoint.new(0.3, theme.accent),
+                        ColorSequenceKeypoint.new(0.7, Color3.fromRGB(180, 120, 255)),
+                        ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 60, 180))
                     }),
-                    Rotation = 0
+                    Offset = Vector2.new(-1, 0)
                 })
                 
                 task.spawn(function()
                     while fill and fill.Parent do
-                        for i = 0, 360, 2 do
-                            if not fill or not fill.Parent then break end
-                            fillGrad.Rotation = i
-                            task.wait(0.02)
-                        end
+                        tw(fillGrad, {Offset = Vector2.new(1, 0)}, 1.5, Enum.EasingStyle.Linear)
+                        task.wait(1.5)
+                        fillGrad.Offset = Vector2.new(-1, 0)
                     end
                 end)
                 
@@ -1140,7 +1205,9 @@ function lib:init(title, subtitle)
                     Position = UDim2.new(0, 12, 0, 0),
                     Size = UDim2.new(1, -24, 1, 0),
                     Font = Enum.Font.Gotham,
-                    Text = default or "",
+                    Text = "",
+                    PlaceholderText = default or "",
+                    PlaceholderColor3 = theme.textDark,
                     TextColor3 = theme.text,
                     TextSize = 12,
                     ClearTextOnFocus = false,
