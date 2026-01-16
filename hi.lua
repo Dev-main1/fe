@@ -291,20 +291,22 @@ function lib:init(title, subtitle)
     end)
     
     local allElements = {}
+    local windowTabs = {}
+    local activeTabName = nil
     
     searchInput:GetPropertyChangedSignal("Text"):Connect(function()
         local q = searchInput.Text:lower()
         if q ~= "" then
-            for _, t in pairs(window.tabs) do
-                t.page.Visible = true
+            for _, t in pairs(windowTabs) do
+                if t.page then t.page.Visible = true end
             end
             for _, el in pairs(allElements) do
                 local match = el.name:lower():find(q, 1, true)
                 el.frame.Visible = match
             end
         else
-            for _, t in pairs(window.tabs) do
-                t.page.Visible = (t == window.tabs[window.activeTab])
+            for _, t in pairs(windowTabs) do
+                if t.page then t.page.Visible = (t == windowTabs[activeTabName]) end
             end
             for _, el in pairs(allElements) do
                 el.frame.Visible = true
@@ -488,25 +490,16 @@ function lib:init(title, subtitle)
         minimized = not minimized
         resizeHandle.Visible = not minimized
         if minimized then
-            tw(content, {Size = UDim2.new(1, -140, 0, 55)}, 0.3, Enum.EasingStyle.Quart)
-            tw(main, {Size = UDim2.new(0, 680, 0, 55)}, 0.3, Enum.EasingStyle.Quart)
+            tw(sidebar, {Size = UDim2.new(0, 0, 1, 0)}, 0.3, Enum.EasingStyle.Quart)
+            tw(content, {Position = UDim2.new(0, 0, 0, 0), Size = UDim2.new(1, 0, 0, 55)}, 0.3, Enum.EasingStyle.Quart)
+            tw(main, {Size = UDim2.new(0, 400, 0, 55)}, 0.3, Enum.EasingStyle.Quart)
             tw(blur, {Size = 0}, 0.25)
         else
-            tw(content, {Size = UDim2.new(1, -140, 1, 0)}, 0.3, Enum.EasingStyle.Quart)
+            tw(sidebar, {Size = UDim2.new(0, 140, 1, 0)}, 0.3, Enum.EasingStyle.Quart)
+            tw(content, {Position = UDim2.new(0, 140, 0, 0), Size = UDim2.new(1, -140, 1, 0)}, 0.3, Enum.EasingStyle.Quart)
             tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.3, Enum.EasingStyle.Quart)
             tw(blur, {Size = 6}, 0.25)
         end
-    end)
-    
-    closeBtn.MouseButton1Click:Connect(function()
-        visible = false
-        tw(blur, {Size = 0}, 0.3)
-        tw(main, {Size = UDim2.new(0, 0, 0, 0)}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In)
-        task.delay(0.35, function()
-            main.Visible = false
-            gui.Enabled = false
-            openBtn.Visible = true
-        end)
     end)
     
     local openBtn = create("TextButton", {
@@ -550,9 +543,22 @@ function lib:init(title, subtitle)
         gui.Enabled = true
         main.Visible = true
         main.Size = UDim2.new(0, 0, 0, 0)
-        tw(content, {Size = UDim2.new(1, -140, 1, 0)}, 0.3, Enum.EasingStyle.Quart)
+        sidebar.Size = UDim2.new(0, 140, 1, 0)
+        content.Position = UDim2.new(0, 140, 0, 0)
+        content.Size = UDim2.new(1, -140, 1, 0)
         tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.4, Enum.EasingStyle.Back)
         tw(blur, {Size = 6}, 0.4)
+    end)
+    
+    closeBtn.MouseButton1Click:Connect(function()
+        visible = false
+        tw(blur, {Size = 0}, 0.3)
+        tw(main, {Size = UDim2.new(0, 0, 0, 0)}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+        task.delay(0.35, function()
+            main.Visible = false
+            gui.Enabled = false
+            openBtn.Visible = true
+        end)
     end)
     
     local visible = true
@@ -603,7 +609,7 @@ function lib:init(title, subtitle)
         gui = gui, 
         main = main,
         openBtn = openBtn,
-        tabs = {}, 
+        tabs = windowTabs, 
         activeTab = nil,
         cfgFolder = "configs",
         cfgData = cfgData,
@@ -694,6 +700,7 @@ function lib:init(title, subtitle)
             page.BackgroundTransparency = 1
             tw(page, {BackgroundTransparency = 0}, 0.2)
             window.activeTab = name
+            activeTabName = name
         end
         
         tabBtn.MouseEnter:Connect(function()
@@ -884,6 +891,17 @@ function lib:init(title, subtitle)
                 addCorner(box, UDim.new(1, 0))
                 addStroke(box, val and theme.accent or theme.border, 1, val and 0 or 0.6)
                 
+                local boxGrad = create("UIGradient", {
+                    Parent = box,
+                    Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 60, 180)),
+                        ColorSequenceKeypoint.new(0.5, theme.accent),
+                        ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 120, 255))
+                    }),
+                    Rotation = 0,
+                    Enabled = val
+                })
+                
                 local dot = create("Frame", {
                     Parent = box,
                     BackgroundColor3 = theme.text,
@@ -904,6 +922,7 @@ function lib:init(title, subtitle)
                     tw(box, {BackgroundColor3 = val and theme.accent or theme.bg}, 0.2)
                     tw(box:FindFirstChild("UIStroke"), {Color = val and theme.accent or theme.border, Transparency = val and 0 or 0.6}, 0.2)
                     tw(dot, {Position = val and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)}, 0.2, Enum.EasingStyle.Back)
+                    boxGrad.Enabled = val
                 end
                 
                 btn.MouseButton1Click:Connect(function()
@@ -977,6 +996,26 @@ function lib:init(title, subtitle)
                     Size = UDim2.new((val - min) / (max - min), 0, 1, 0)
                 })
                 addCorner(fill, UDim.new(1, 0))
+                
+                local fillGrad = create("UIGradient", {
+                    Parent = fill,
+                    Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 60, 180)),
+                        ColorSequenceKeypoint.new(0.5, theme.accent),
+                        ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 120, 255))
+                    }),
+                    Rotation = 0
+                })
+                
+                task.spawn(function()
+                    while fill and fill.Parent do
+                        for i = 0, 360, 2 do
+                            if not fill or not fill.Parent then break end
+                            fillGrad.Rotation = i
+                            task.wait(0.02)
+                        end
+                    end
+                end)
                 
                 local fillGlow = create("Frame", {
                     Parent = fill,
