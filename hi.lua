@@ -303,44 +303,15 @@ function lib:init(title, subtitle)
     local btnHolder = create("Frame", {
         Parent = topbar,
         BackgroundTransparency = 1,
-        Position = UDim2.new(1, -100, 0.5, -15),
-        Size = UDim2.new(0, 90, 0, 30)
+        Position = UDim2.new(1, -70, 0.5, -15),
+        Size = UDim2.new(0, 65, 0, 30)
     })
-    
-    local settingsBtn = create("TextButton", {
-        Parent = btnHolder,
-        BackgroundColor3 = theme.card,
-        BorderSizePixel = 0,
-        Position = UDim2.new(0, 0, 0, 0),
-        Size = UDim2.new(0, 30, 0, 30),
-        Text = "",
-        AutoButtonColor = false
-    })
-    addCorner(settingsBtn, UDim.new(0, 8))
-    
-    local settingsIcon = create("ImageLabel", {
-        Parent = settingsBtn,
-        BackgroundTransparency = 1,
-        Position = UDim2.new(0.5, -8, 0.5, -8),
-        Size = UDim2.new(0, 16, 0, 16),
-        Image = "rbxassetid://7072719338",
-        ImageColor3 = theme.textDim
-    })
-    
-    settingsBtn.MouseEnter:Connect(function()
-        tw(settingsBtn, {BackgroundColor3 = theme.cardHover}, 0.15)
-        tw(settingsIcon, {ImageColor3 = theme.text}, 0.15)
-    end)
-    settingsBtn.MouseLeave:Connect(function()
-        tw(settingsBtn, {BackgroundColor3 = theme.card}, 0.15)
-        tw(settingsIcon, {ImageColor3 = theme.textDim}, 0.15)
-    end)
     
     local minimizeBtn = create("TextButton", {
         Parent = btnHolder,
         BackgroundColor3 = theme.card,
         BorderSizePixel = 0,
-        Position = UDim2.new(0, 35, 0, 0),
+        Position = UDim2.new(0, 0, 0, 0),
         Size = UDim2.new(0, 30, 0, 30),
         Text = "",
         AutoButtonColor = false
@@ -367,7 +338,7 @@ function lib:init(title, subtitle)
         Parent = btnHolder,
         BackgroundColor3 = theme.card,
         BorderSizePixel = 0,
-        Position = UDim2.new(0, 70, 0, 0),
+        Position = UDim2.new(0, 35, 0, 0),
         Size = UDim2.new(0, 30, 0, 30),
         Text = "",
         AutoButtonColor = false
@@ -500,10 +471,15 @@ function lib:init(title, subtitle)
     local minimized = false
     minimizeBtn.MouseButton1Click:Connect(function()
         minimized = not minimized
+        canDrag = not minimized
         if minimized then
             tw(main, {Size = UDim2.new(0, 680, 0, 55)}, 0.3, Enum.EasingStyle.Quart)
+            tw(blur, {Size = 0}, 0.3)
+            pages.Visible = false
         else
             tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.3, Enum.EasingStyle.Quart)
+            tw(blur, {Size = 6}, 0.3)
+            pages.Visible = true
         end
     end)
     
@@ -518,16 +494,30 @@ function lib:init(title, subtitle)
     end)
     
     local visible = true
+    local closeKey = Enum.KeyCode.RightControl
+    local toggleKey = Enum.KeyCode.Insert
+    
     input.InputBegan:Connect(function(key, gpe)
         if gpe then return end
-        if key.KeyCode == Enum.KeyCode.RightControl then
+        if key.KeyCode == toggleKey then
             visible = not visible
             gui.Enabled = visible
             blur.Enabled = visible
+        elseif key.KeyCode == closeKey then
+            window:destroy()
         end
     end)
     
-    local window = {gui = gui, main = main, tabs = {}, activeTab = nil}
+    local cfgData = {}
+    
+    local window = {
+        gui = gui, 
+        main = main, 
+        tabs = {}, 
+        activeTab = nil,
+        cfgFolder = "configs",
+        cfgData = cfgData
+    }
     
     function window:tab(name)
         local tabBtn = create("TextButton", {
@@ -733,14 +723,25 @@ function lib:init(title, subtitle)
                 addCorner(btn, UDim.new(0, 8))
                 addStroke(btn, theme.border, 1, 0.8)
                 
+                local btnIcon = create("ImageLabel", {
+                    Parent = btn,
+                    BackgroundTransparency = 1,
+                    Position = UDim2.new(0, 12, 0.5, -8),
+                    Size = UDim2.new(0, 16, 0, 16),
+                    Image = "rbxassetid://7072706796",
+                    ImageColor3 = theme.text
+                })
+                
                 local btnLbl = create("TextLabel", {
                     Parent = btn,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 1, 0),
-                    Font = Enum.Font.GothamBold,
+                    Position = UDim2.new(0, 36, 0, 0),
+                    Size = UDim2.new(1, -36, 1, 0),
+                    Font = Enum.Font.GothamBlack,
                     Text = name,
                     TextColor3 = theme.text,
-                    TextSize = 13
+                    TextSize = 13,
+                    TextXAlignment = Enum.TextXAlignment.Left
                 })
                 
                 btn.MouseEnter:Connect(function()
@@ -776,7 +777,7 @@ function lib:init(title, subtitle)
                     BackgroundTransparency = 1,
                     Position = UDim2.new(0, 0, 0, 0),
                     Size = UDim2.new(0.7, 0, 1, 0),
-                    Font = Enum.Font.GothamMedium,
+                    Font = Enum.Font.GothamBold,
                     Text = name,
                     TextColor3 = theme.text,
                     TextSize = 13,
@@ -849,7 +850,7 @@ function lib:init(title, subtitle)
                     Parent = top,
                     BackgroundTransparency = 1,
                     Size = UDim2.new(0.5, 0, 1, 0),
-                    Font = Enum.Font.GothamMedium,
+                    Font = Enum.Font.GothamBold,
                     Text = name,
                     TextColor3 = theme.text,
                     TextSize = 13,
@@ -983,7 +984,7 @@ function lib:init(title, subtitle)
                     Parent = frame,
                     BackgroundTransparency = 1,
                     Size = UDim2.new(0.3, 0, 1, 0),
-                    Font = Enum.Font.GothamMedium,
+                    Font = Enum.Font.GothamBold,
                     Text = name,
                     TextColor3 = theme.text,
                     TextSize = 13,
@@ -1029,9 +1030,10 @@ function lib:init(title, subtitle)
                 }
             end
             
-            function section:dropdown(name, opts, default, callback)
+            function section:dropdown(name, opts, default, callback, multi)
                 local val = default
                 local open = false
+                local selected = multi and {} or nil
                 
                 local frame = create("Frame", {
                     Parent = holder,
@@ -1057,7 +1059,7 @@ function lib:init(title, subtitle)
                     BackgroundTransparency = 1,
                     Position = UDim2.new(0, 12, 0, 0),
                     Size = UDim2.new(0.4, 0, 1, 0),
-                    Font = Enum.Font.GothamMedium,
+                    Font = Enum.Font.GothamBold,
                     Text = name,
                     TextColor3 = theme.text,
                     TextSize = 13,
@@ -1121,15 +1123,28 @@ function lib:init(title, subtitle)
                         tw(optBtn, {BackgroundTransparency = 1, TextColor3 = theme.textDim}, 0.15)
                     end)
                     optBtn.MouseButton1Click:Connect(function()
-                        val = opt
-                        valLbl.Text = opt
-                        tw(valLbl, {TextColor3 = theme.accent}, 0.15)
-                        task.delay(0.15, function() tw(valLbl, {TextColor3 = theme.textDim}, 0.15) end)
-                        open = false
-                        tw(frame, {Size = UDim2.new(1, 0, 0, 36)}, 0.2, Enum.EasingStyle.Quart)
-                        tw(arrow, {Rotation = 90}, 0.2)
-                        task.delay(0.2, updateSecSize)
-                        if callback then callback(val) end
+                        if multi then
+                            if not selected then selected = {} end
+                            selected[opt] = not selected[opt]
+                            local list = {}
+                            for k, v in pairs(selected) do
+                                if v then table.insert(list, k) end
+                            end
+                            valLbl.Text = #list > 0 and table.concat(list, ", ") or "Select..."
+                            tw(valLbl, {TextColor3 = theme.accent}, 0.15)
+                            task.delay(0.15, function() tw(valLbl, {TextColor3 = theme.textDim}, 0.15) end)
+                            if callback then callback(list) end
+                        else
+                            val = opt
+                            valLbl.Text = opt
+                            tw(valLbl, {TextColor3 = theme.accent}, 0.15)
+                            task.delay(0.15, function() tw(valLbl, {TextColor3 = theme.textDim}, 0.15) end)
+                            open = false
+                            tw(frame, {Size = UDim2.new(1, 0, 0, 36)}, 0.2, Enum.EasingStyle.Quart)
+                            tw(arrow, {Rotation = 0}, 0.2)
+                            task.delay(0.2, updateSecSize)
+                            if callback then callback(val) end
+                        end
                     end)
                 end
                 
@@ -1178,7 +1193,7 @@ function lib:init(title, subtitle)
                     BackgroundTransparency = 1,
                     Position = UDim2.new(0, 12, 0, 0),
                     Size = UDim2.new(0.5, 0, 1, 0),
-                    Font = Enum.Font.GothamMedium,
+                    Font = Enum.Font.GothamBold,
                     Text = name,
                     TextColor3 = theme.text,
                     TextSize = 13,
@@ -1209,7 +1224,8 @@ function lib:init(title, subtitle)
                     Parent = frame,
                     BackgroundTransparency = 1,
                     Position = UDim2.new(0, 10, 0, 42),
-                    Size = UDim2.new(1, -20, 0, 130)
+                    Size = UDim2.new(1, -20, 0, 130),
+                    Visible = false
                 })
                 
                 local sat = create("ImageLabel", {
@@ -1227,7 +1243,8 @@ function lib:init(title, subtitle)
                     BackgroundColor3 = theme.text,
                     BorderSizePixel = 0,
                     Position = UDim2.new(s, -7, 1 - v, -7),
-                    Size = UDim2.new(0, 14, 0, 14)
+                    Size = UDim2.new(0, 14, 0, 14),
+                    Visible = false
                 })
                 addCorner(satCursor, UDim.new(1, 0))
                 addStroke(satCursor, theme.shadow, 2, 0)
@@ -1387,6 +1404,8 @@ function lib:init(title, subtitle)
                 
                 header.MouseButton1Click:Connect(function()
                     open = not open
+                    picker.Visible = open
+                    satCursor.Visible = open
                     tw(frame, {Size = UDim2.new(1, 0, 0, open and 180 or 36)}, 0.25, Enum.EasingStyle.Quart)
                     task.delay(0.25, updateSecSize)
                 end)
@@ -1414,7 +1433,7 @@ function lib:init(title, subtitle)
                     Parent = frame,
                     BackgroundTransparency = 1,
                     Size = UDim2.new(0.6, 0, 1, 0),
-                    Font = Enum.Font.GothamMedium,
+                    Font = Enum.Font.GothamBold,
                     Text = name,
                     TextColor3 = theme.text,
                     TextSize = 13,
@@ -1565,6 +1584,70 @@ function lib:init(title, subtitle)
             blur:Destroy()
             env.BioLibLoaded = false
         end)
+    end
+    
+    function window:setCfgFolder(folder)
+        self.cfgFolder = folder
+    end
+    
+    function window:saveConfig(name)
+        local success, err = pcall(function()
+            if not isfolder then return end
+            if not isfolder(self.cfgFolder) then
+                makefolder(self.cfgFolder)
+            end
+            local path = self.cfgFolder .. "/" .. name .. ".json"
+            local data = game:GetService("HttpService"):JSONEncode(self.cfgData)
+            writefile(path, data)
+        end)
+        if success then
+            self:notify("Config", "Saved: " .. name, 2)
+        else
+            self:notify("Error", "Failed to save config", 2, "error")
+        end
+    end
+    
+    function window:loadConfig(name)
+        local success, err = pcall(function()
+            if not isfile then return end
+            local path = self.cfgFolder .. "/" .. name .. ".json"
+            if isfile(path) then
+                local data = readfile(path)
+                self.cfgData = game:GetService("HttpService"):JSONDecode(data)
+                for k, v in pairs(self.cfgData) do
+                    if self.elements and self.elements[k] and self.elements[k].set then
+                        self.elements[k]:set(v)
+                    end
+                end
+            end
+        end)
+        if success then
+            self:notify("Config", "Loaded: " .. name, 2)
+        else
+            self:notify("Error", "Failed to load config", 2, "error")
+        end
+    end
+    
+    function window:listConfigs()
+        local configs = {}
+        if not isfolder or not listfiles then return configs end
+        if not isfolder(self.cfgFolder) then
+            makefolder(self.cfgFolder)
+            return configs
+        end
+        for _, file in pairs(listfiles(self.cfgFolder)) do
+            local name = file:match("([^/\\]+)%.json$")
+            if name then table.insert(configs, name) end
+        end
+        return configs
+    end
+    
+    function window:setToggleKey(key)
+        toggleKey = key
+    end
+    
+    function window:setCloseKey(key)
+        closeKey = key
     end
     
     return window
