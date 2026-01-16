@@ -156,8 +156,10 @@ function lib:init(title, subtitle)
         BackgroundColor3 = theme.sidebar,
         BorderSizePixel = 0,
         Position = UDim2.new(0, 0, 0, 0),
-        Size = UDim2.new(0, 140, 1, 0)
+        Size = UDim2.new(0, 140, 1, 0),
+        ClipsDescendants = true
     })
+    addCorner(sidebar, UDim.new(0, 12))
     
     local logo = create("Frame", {
         Parent = sidebar,
@@ -234,8 +236,10 @@ function lib:init(title, subtitle)
         BackgroundColor3 = theme.bg,
         BorderSizePixel = 0,
         Position = UDim2.new(0, 140, 0, 0),
-        Size = UDim2.new(1, -140, 1, 0)
+        Size = UDim2.new(1, -140, 1, 0),
+        ClipsDescendants = true
     })
+    addCorner(content, UDim.new(0, 12))
     
     local topbar = create("Frame", {
         Parent = content,
@@ -312,7 +316,7 @@ function lib:init(title, subtitle)
         Text = "",
         AutoButtonColor = false
     })
-    addCorner(settingsBtn, UDim.new(0, 6))
+    addCorner(settingsBtn, UDim.new(0, 8))
     
     local settingsIcon = create("ImageLabel", {
         Parent = settingsBtn,
@@ -341,7 +345,7 @@ function lib:init(title, subtitle)
         Text = "",
         AutoButtonColor = false
     })
-    addCorner(minimizeBtn, UDim.new(0, 6))
+    addCorner(minimizeBtn, UDim.new(0, 8))
     
     local minIcon = create("Frame", {
         Parent = minimizeBtn,
@@ -368,7 +372,7 @@ function lib:init(title, subtitle)
         Text = "",
         AutoButtonColor = false
     })
-    addCorner(closeBtn, UDim.new(0, 6))
+    addCorner(closeBtn, UDim.new(0, 8))
     
     local closeIcon = create("TextLabel", {
         Parent = closeBtn,
@@ -629,7 +633,7 @@ function lib:init(title, subtitle)
         
         local tab = {}
         
-        function tab:section(name, icon)
+        function tab:section(name)
             local sec = create("Frame", {
                 Parent = page,
                 Name = name,
@@ -648,20 +652,11 @@ function lib:init(title, subtitle)
                 Size = UDim2.new(1, 0, 0, 45)
             })
             
-            local secIcon = create("ImageLabel", {
-                Parent = header,
-                BackgroundTransparency = 1,
-                Position = UDim2.new(0, 15, 0.5, -10),
-                Size = UDim2.new(0, 20, 0, 20),
-                Image = icon or "rbxassetid://7072717857",
-                ImageColor3 = theme.accent
-            })
-            
             local secTitle = create("TextLabel", {
                 Parent = header,
                 BackgroundTransparency = 1,
-                Position = UDim2.new(0, 45, 0, 0),
-                Size = UDim2.new(0.6, 0, 1, 0),
+                Position = UDim2.new(0, 15, 0, 0),
+                Size = UDim2.new(0.7, 0, 1, 0),
                 Font = Enum.Font.GothamBlack,
                 Text = name,
                 TextColor3 = theme.text,
@@ -742,7 +737,7 @@ function lib:init(title, subtitle)
                     Parent = btn,
                     BackgroundTransparency = 1,
                     Size = UDim2.new(1, 0, 1, 0),
-                    Font = Enum.Font.GothamMedium,
+                    Font = Enum.Font.GothamBold,
                     Text = name,
                     TextColor3 = theme.text,
                     TextSize = 13
@@ -781,7 +776,7 @@ function lib:init(title, subtitle)
                     BackgroundTransparency = 1,
                     Position = UDim2.new(0, 0, 0, 0),
                     Size = UDim2.new(0.7, 0, 1, 0),
-                    Font = Enum.Font.Gotham,
+                    Font = Enum.Font.GothamMedium,
                     Text = name,
                     TextColor3 = theme.text,
                     TextSize = 13,
@@ -854,7 +849,7 @@ function lib:init(title, subtitle)
                     Parent = top,
                     BackgroundTransparency = 1,
                     Size = UDim2.new(0.5, 0, 1, 0),
-                    Font = Enum.Font.Gotham,
+                    Font = Enum.Font.GothamMedium,
                     Text = name,
                     TextColor3 = theme.text,
                     TextSize = 13,
@@ -988,7 +983,7 @@ function lib:init(title, subtitle)
                     Parent = frame,
                     BackgroundTransparency = 1,
                     Size = UDim2.new(0.3, 0, 1, 0),
-                    Font = Enum.Font.Gotham,
+                    Font = Enum.Font.GothamMedium,
                     Text = name,
                     TextColor3 = theme.text,
                     TextSize = 13,
@@ -1062,7 +1057,7 @@ function lib:init(title, subtitle)
                     BackgroundTransparency = 1,
                     Position = UDim2.new(0, 12, 0, 0),
                     Size = UDim2.new(0.4, 0, 1, 0),
-                    Font = Enum.Font.Gotham,
+                    Font = Enum.Font.GothamMedium,
                     Text = name,
                     TextColor3 = theme.text,
                     TextSize = 13,
@@ -1183,7 +1178,7 @@ function lib:init(title, subtitle)
                     BackgroundTransparency = 1,
                     Position = UDim2.new(0, 12, 0, 0),
                     Size = UDim2.new(0.5, 0, 1, 0),
-                    Font = Enum.Font.Gotham,
+                    Font = Enum.Font.GothamMedium,
                     Text = name,
                     TextColor3 = theme.text,
                     TextSize = 13,
@@ -1419,7 +1414,7 @@ function lib:init(title, subtitle)
                     Parent = frame,
                     BackgroundTransparency = 1,
                     Size = UDim2.new(0.6, 0, 1, 0),
-                    Font = Enum.Font.Gotham,
+                    Font = Enum.Font.GothamMedium,
                     Text = name,
                     TextColor3 = theme.text,
                     TextSize = 13,
