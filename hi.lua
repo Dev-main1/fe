@@ -294,9 +294,22 @@ function lib:init(title, subtitle)
     
     searchInput:GetPropertyChangedSignal("Text"):Connect(function()
         local q = searchInput.Text:lower()
+        local firstTab = nil
         for _, el in pairs(allElements) do
             local match = q == "" or el.name:lower():find(q, 1, true)
             el.frame.Visible = match
+            if match and not firstTab and el.tab then
+                firstTab = el.tab
+            end
+        end
+        if q ~= "" and firstTab then
+            for _, t in pairs(window.tabs) do
+                t.page.Visible = true
+            end
+        else
+            for _, t in pairs(window.tabs) do
+                t.page.Visible = (t == window.tabs[window.activeTab])
+            end
         end
     end)
     
@@ -572,6 +585,7 @@ function lib:init(title, subtitle)
     local elements = {}
     local autoSave = false
     local autoSaveName = "autosave"
+    local notifQueue = {}
     
     local function saveElement(key, value)
         cfgData[key] = value
@@ -696,6 +710,7 @@ function lib:init(title, subtitle)
         end)
         
         local tab = {}
+        tab.name = name
         
         function tab:section(name)
             local sec = create("Frame", {
@@ -820,7 +835,7 @@ function lib:init(title, subtitle)
                     if callback then callback() end
                 end)
                 
-                table.insert(allElements, {name = name, frame = btn})
+                table.insert(allElements, {name = name, frame = btn, tab = tab.name})
                 updateSecSize()
                 return btn
             end
@@ -886,7 +901,7 @@ function lib:init(title, subtitle)
                     if callback then callback(val) end
                 end)
                 
-                table.insert(allElements, {name = name, frame = frame})
+                table.insert(allElements, {name = name, frame = frame, tab = tab.name})
                 updateSecSize()
                 elements[name] = {
                     set = function(_, v) val = v update() end,
@@ -1025,7 +1040,7 @@ function lib:init(title, subtitle)
                     end
                 end)
                 
-                table.insert(allElements, {name = name, frame = frame})
+                table.insert(allElements, {name = name, frame = frame, tab = tab.name})
                 updateSecSize()
                 elements[name] = {
                     set = function(_, v)
@@ -1089,7 +1104,7 @@ function lib:init(title, subtitle)
                     if callback then callback(inp.Text) end
                 end)
                 
-                table.insert(allElements, {name = name, frame = frame})
+                table.insert(allElements, {name = name, frame = frame, tab = tab.name})
                 updateSecSize()
                 return {
                     set = function(_, v) inp.Text = v end,
@@ -1263,7 +1278,7 @@ function lib:init(title, subtitle)
                     task.delay(0.2, updateSecSize)
                 end)
                 
-                table.insert(allElements, {name = name, frame = frame})
+                table.insert(allElements, {name = name, frame = frame, tab = tab.name})
                 updateSecSize()
                 return {
                     set = function(_, v) val = v valLbl.Text = v end,
@@ -1517,7 +1532,7 @@ function lib:init(title, subtitle)
                     task.delay(0.25, updateSecSize)
                 end)
                 
-                table.insert(allElements, {name = name, frame = frame})
+                table.insert(allElements, {name = name, frame = frame, tab = tab.name})
                 updateSecSize()
                 return {
                     set = function(_, c) val = c h, s, v = c:ToHSV() updateColor() end,
@@ -1606,7 +1621,7 @@ function lib:init(title, subtitle)
                     TextXAlignment = Enum.TextXAlignment.Left
                 })
                 
-                table.insert(allElements, {name = text, frame = lbl})
+                table.insert(allElements, {name = text, frame = lbl, tab = tab.name})
                 updateSecSize()
                 return {set = function(_, t) lbl.Text = t end}
             end
@@ -1619,33 +1634,35 @@ function lib:init(title, subtitle)
     
     function window:notify(title, text, dur, type)
         local col = type == "error" and theme.red or type == "warning" and theme.orange or theme.accent
+        dur = dur or 3
+        
+        local ypos = 0.85
+        for i, n in ipairs(notifQueue) do
+            if n and n.Parent then
+                ypos = ypos - 0.11
+            end
+        end
         
         local notif = create("Frame", {
             Parent = gui,
             Name = "Notification",
             BackgroundColor3 = theme.card,
             BorderSizePixel = 0,
-            Position = UDim2.new(1, 20, 0.85, 0),
-            Size = UDim2.new(0, 280, 0, 70),
-            AnchorPoint = Vector2.new(0, 0.5)
+            Position = UDim2.new(1, 20, ypos, 0),
+            Size = UDim2.new(0, 300, 0, 75),
+            AnchorPoint = Vector2.new(0, 0.5),
+            ZIndex = 100
         })
-        addCorner(notif, UDim.new(0, 10))
-        addShadow(notif, 0.5)
-        
-        local accent = create("Frame", {
-            Parent = notif,
-            BackgroundColor3 = col,
-            BorderSizePixel = 0,
-            Size = UDim2.new(0, 4, 1, 0)
-        })
-        addCorner(accent, UDim.new(0, 10))
+        addCorner(notif, UDim.new(0, 12))
+        addShadow(notif, 0.4)
+        addStroke(notif, col, 1.5, 0.5)
         
         create("TextLabel", {
             Parent = notif,
             BackgroundTransparency = 1,
-            Position = UDim2.new(0, 15, 0, 10),
-            Size = UDim2.new(1, -25, 0, 20),
-            Font = Enum.Font.GothamBold,
+            Position = UDim2.new(0, 15, 0, 12),
+            Size = UDim2.new(1, -25, 0, 22),
+            Font = Enum.Font.GothamBlack,
             Text = title,
             TextColor3 = col,
             TextSize = 14,
@@ -1655,8 +1672,8 @@ function lib:init(title, subtitle)
         create("TextLabel", {
             Parent = notif,
             BackgroundTransparency = 1,
-            Position = UDim2.new(0, 15, 0, 32),
-            Size = UDim2.new(1, -25, 0, 30),
+            Position = UDim2.new(0, 15, 0, 36),
+            Size = UDim2.new(1, -25, 0, 28),
             Font = Enum.Font.Gotham,
             Text = text,
             TextColor3 = theme.textDim,
@@ -1668,18 +1685,34 @@ function lib:init(title, subtitle)
         local progress = create("Frame", {
             Parent = notif,
             BackgroundColor3 = col,
-            BackgroundTransparency = 0.7,
+            BackgroundTransparency = 0.3,
             BorderSizePixel = 0,
-            Position = UDim2.new(0, 0, 1, -3),
-            Size = UDim2.new(1, 0, 0, 3)
+            Position = UDim2.new(0, 0, 1, -4),
+            Size = UDim2.new(1, 0, 0, 4)
         })
+        addCorner(progress, UDim.new(1, 0))
         
-        tw(notif, {Position = UDim2.new(1, -290, 0.85, 0)}, 0.4, Enum.EasingStyle.Quart)
-        tw(progress, {Size = UDim2.new(0, 0, 0, 3)}, dur or 3, Enum.EasingStyle.Linear)
+        table.insert(notifQueue, notif)
         
-        task.delay(dur or 3, function()
-            tw(notif, {Position = UDim2.new(1, 20, 0.85, 0)}, 0.3, Enum.EasingStyle.Quart)
-            task.delay(0.35, function() notif:Destroy() end)
+        tw(notif, {Position = UDim2.new(1, -310, ypos, 0)}, 0.4, Enum.EasingStyle.Back)
+        tw(progress, {Size = UDim2.new(0, 0, 0, 4)}, dur, Enum.EasingStyle.Linear)
+        
+        task.delay(dur, function()
+            tw(notif, {Position = UDim2.new(1, 20, ypos, 0)}, 0.3, Enum.EasingStyle.Quart)
+            task.delay(0.35, function()
+                for i, n in ipairs(notifQueue) do
+                    if n == notif then
+                        table.remove(notifQueue, i)
+                        break
+                    end
+                end
+                notif:Destroy()
+                for i, n in ipairs(notifQueue) do
+                    if n and n.Parent then
+                        tw(n, {Position = UDim2.new(n.Position.X.Scale, n.Position.X.Offset, 0.85 - (i - 1) * 0.11, 0)}, 0.3, Enum.EasingStyle.Quart)
+                    end
+                end
+            end)
         end)
     end
     
