@@ -294,22 +294,9 @@ function lib:init(title, subtitle)
     
     searchInput:GetPropertyChangedSignal("Text"):Connect(function()
         local q = searchInput.Text:lower()
-        local firstTab = nil
         for _, el in pairs(allElements) do
             local match = q == "" or el.name:lower():find(q, 1, true)
             el.frame.Visible = match
-            if match and not firstTab and el.tab then
-                firstTab = el.tab
-            end
-        end
-        if q ~= "" and firstTab then
-            for _, t in pairs(window.tabs) do
-                t.page.Visible = true
-            end
-        else
-            for _, t in pairs(window.tabs) do
-                t.page.Visible = (t == window.tabs[window.activeTab])
-            end
         end
     end)
     
@@ -421,8 +408,10 @@ function lib:init(title, subtitle)
     local resizing, resizeStart, startSize = false, nil, nil
     
     resizeHandle.MouseEnter:Connect(function()
-        for _, dot in pairs(resizeDots:GetChildren()) do
-            tw(dot, {BackgroundColor3 = theme.accent}, 0.15)
+        if not minimized then
+            for _, dot in pairs(resizeDots:GetChildren()) do
+                tw(dot, {BackgroundColor3 = theme.accent}, 0.15)
+            end
         end
     end)
     resizeHandle.MouseLeave:Connect(function()
@@ -487,6 +476,7 @@ function lib:init(title, subtitle)
     minimizeBtn.MouseButton1Click:Connect(function()
         minimized = not minimized
         canDrag = not minimized
+        resizeHandle.Visible = not minimized
         if minimized then
             tw(content, {Size = UDim2.new(1, -140, 0, 55)}, 0.3, Enum.EasingStyle.Quart)
             tw(main, {Size = UDim2.new(0, 680, 0, 55)}, 0.3, Enum.EasingStyle.Quart)
@@ -675,12 +665,20 @@ function lib:init(title, subtitle)
                 tw(t.btn, {BackgroundTransparency = 1}, 0.2)
                 tw(t.btn.Indicator, {BackgroundTransparency = 1}, 0.2)
                 tw(t.btn:FindFirstChild("TextLabel"), {TextColor3 = theme.textDim}, 0.2)
-                t.page.Visible = false
+                if t.page ~= page then
+                    tw(t.page, {BackgroundTransparency = 1}, 0.15)
+                    task.delay(0.15, function()
+                        t.page.Visible = false
+                        t.page.BackgroundTransparency = 0
+                    end)
+                end
             end
             tw(tabBtn, {BackgroundTransparency = 0.9}, 0.2)
             tw(indicator, {BackgroundTransparency = 0}, 0.2)
             tw(tabLbl, {TextColor3 = theme.text}, 0.2)
             page.Visible = true
+            page.BackgroundTransparency = 1
+            tw(page, {BackgroundTransparency = 0}, 0.2)
             window.activeTab = name
         end
         
@@ -1205,27 +1203,16 @@ function lib:init(title, subtitle)
                         else
                             isSelected = val == opt
                         end
-                        if isSelected then
-                            optBtn.BackgroundTransparency = 0
-                            optBtn.BackgroundColor3 = theme.accent
-                            optBtn.TextColor3 = theme.text
-                        end
+                        optBtn.TextColor3 = isSelected and theme.accent or theme.textDim
                     end
                     
                     updateOptColor()
                     
                     optBtn.MouseEnter:Connect(function()
-                        if not ((multi and selected and selected[opt]) or (not multi and val == opt)) then
-                            tw(optBtn, {BackgroundTransparency = 0, BackgroundColor3 = theme.card, TextColor3 = theme.text}, 0.15)
-                        end
+                        tw(optBtn, {BackgroundTransparency = 0, BackgroundColor3 = theme.card}, 0.15)
                     end)
                     optBtn.MouseLeave:Connect(function()
-                        local isSelected = (multi and selected and selected[opt]) or (not multi and val == opt)
-                        if isSelected then
-                            tw(optBtn, {BackgroundTransparency = 0, BackgroundColor3 = theme.accent, TextColor3 = theme.text}, 0.15)
-                        else
-                            tw(optBtn, {BackgroundTransparency = 1, TextColor3 = theme.textDim}, 0.15)
-                        end
+                        tw(optBtn, {BackgroundTransparency = 1}, 0.15)
                     end)
                     optBtn.MouseButton1Click:Connect(function()
                         if multi then
@@ -1240,11 +1227,7 @@ function lib:init(title, subtitle)
                             for _, child in pairs(optHolder:GetChildren()) do
                                 if child:IsA("TextButton") then
                                     local isSelected = selected[child.Text]
-                                    if isSelected then
-                                        tw(child, {BackgroundTransparency = 0, BackgroundColor3 = theme.accent, TextColor3 = theme.text}, 0.15)
-                                    else
-                                        tw(child, {BackgroundTransparency = 1, TextColor3 = theme.textDim}, 0.15)
-                                    end
+                                    tw(child, {TextColor3 = isSelected and theme.accent or theme.textDim}, 0.15)
                                 end
                             end
                             if callback then callback(list) end
@@ -1254,11 +1237,7 @@ function lib:init(title, subtitle)
                             valLbl.TextColor3 = theme.accent
                             for _, child in pairs(optHolder:GetChildren()) do
                                 if child:IsA("TextButton") then
-                                    if child.Text == val then
-                                        tw(child, {BackgroundTransparency = 0, BackgroundColor3 = theme.accent, TextColor3 = theme.text}, 0.15)
-                                    else
-                                        tw(child, {BackgroundTransparency = 1, TextColor3 = theme.textDim}, 0.15)
-                                    end
+                                    tw(child, {TextColor3 = child.Text == val and theme.accent or theme.textDim}, 0.15)
                                 end
                             end
                             open = false
