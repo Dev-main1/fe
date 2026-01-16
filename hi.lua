@@ -2,28 +2,32 @@ local lib = {}
 local tween = game:GetService("TweenService")
 local input = game:GetService("UserInputService")
 local run = game:GetService("RunService")
+local lighting = game:GetService("Lighting")
+local players = game:GetService("Players")
+local player = players.LocalPlayer
+local mouse = player:GetMouse()
 
-local cfg = {
-    main = Color3.fromRGB(30, 30, 35),
-    sec = Color3.fromRGB(40, 40, 48),
-    acc = Color3.fromRGB(45, 200, 140),
-    txt = Color3.fromRGB(255, 255, 255),
-    txt2 = Color3.fromRGB(180, 180, 180),
-    dark = Color3.fromRGB(25, 25, 30),
-    font = Enum.Font.Gotham,
-    round = UDim.new(0, 6)
+local theme = {
+    bg = Color3.fromRGB(18, 18, 22),
+    sidebar = Color3.fromRGB(14, 14, 18),
+    card = Color3.fromRGB(25, 25, 32),
+    cardHover = Color3.fromRGB(32, 32, 42),
+    accent = Color3.fromRGB(40, 200, 135),
+    accentDark = Color3.fromRGB(30, 160, 110),
+    text = Color3.fromRGB(255, 255, 255),
+    textDim = Color3.fromRGB(140, 140, 155),
+    textDark = Color3.fromRGB(90, 90, 105),
+    border = Color3.fromRGB(45, 45, 55),
+    red = Color3.fromRGB(255, 85, 85),
+    orange = Color3.fromRGB(255, 170, 50),
+    shadow = Color3.fromRGB(0, 0, 0)
 }
 
-local icons = {
-    search = "rbxassetid://3926305904",
-    star = "rbxassetid://3926305904",
-    arrow = "rbxassetid://3926305904",
-    settings = "rbxassetid://3926305904",
-    close = "rbxassetid://3926305904"
-}
-
-local function tw(obj, props, dur)
-    tween:Create(obj, TweenInfo.new(dur or 0.2, Enum.EasingStyle.Quad), props):Play()
+local function tw(obj, props, dur, style, dir)
+    local info = TweenInfo.new(dur or 0.25, style or Enum.EasingStyle.Quart, dir or Enum.EasingDirection.Out)
+    local t = tween:Create(obj, info, props)
+    t:Play()
+    return t
 end
 
 local function create(class, props)
@@ -35,28 +39,74 @@ local function create(class, props)
     return obj
 end
 
-local function ripple(btn)
-    local rip = create("Frame", {
-        Parent = btn,
-        BackgroundColor3 = Color3.new(1, 1, 1),
-        BackgroundTransparency = 0.7,
-        BorderSizePixel = 0,
-        Position = UDim2.new(0.5, 0, 0.5, 0),
-        Size = UDim2.new(0, 0, 0, 0),
-        AnchorPoint = Vector2.new(0.5, 0.5),
-        ZIndex = btn.ZIndex + 1
+local function addStroke(parent, col, thick, trans)
+    return create("UIStroke", {
+        Parent = parent,
+        Color = col or theme.border,
+        Thickness = thick or 1,
+        Transparency = trans or 0.5
     })
-    create("UICorner", {Parent = rip, CornerRadius = UDim.new(1, 0)})
-    local sz = math.max(btn.AbsoluteSize.X, btn.AbsoluteSize.Y) * 2
-    tw(rip, {Size = UDim2.new(0, sz, 0, sz), BackgroundTransparency = 1}, 0.4)
-    task.delay(0.4, function() rip:Destroy() end)
 end
 
-function lib:new(title)
+local function addCorner(parent, rad)
+    return create("UICorner", {Parent = parent, CornerRadius = rad or UDim.new(0, 8)})
+end
+
+local function addPadding(parent, l, r, t, b)
+    return create("UIPadding", {
+        Parent = parent,
+        PaddingLeft = UDim.new(0, l or 0),
+        PaddingRight = UDim.new(0, r or 0),
+        PaddingTop = UDim.new(0, t or 0),
+        PaddingBottom = UDim.new(0, b or 0)
+    })
+end
+
+local function addShadow(parent, trans)
+    return create("ImageLabel", {
+        Parent = parent,
+        Name = "Shadow",
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, -20, 0, -20),
+        Size = UDim2.new(1, 40, 1, 40),
+        ZIndex = -1,
+        Image = "rbxassetid://6014261993",
+        ImageColor3 = theme.shadow,
+        ImageTransparency = trans or 0.4,
+        ScaleType = Enum.ScaleType.Slice,
+        SliceCenter = Rect.new(49, 49, 450, 450)
+    })
+end
+
+local function ripple(parent, x, y)
+    local abs = parent.AbsoluteSize
+    local pos = parent.AbsolutePosition
+    local rx, ry = x - pos.X, y - pos.Y
+    local maxSize = math.max(abs.X, abs.Y) * 2.5
+    
+    local rip = create("Frame", {
+        Parent = parent,
+        Name = "Ripple",
+        BackgroundColor3 = Color3.new(1, 1, 1),
+        BackgroundTransparency = 0.85,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, rx, 0, ry),
+        Size = UDim2.new(0, 0, 0, 0),
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        ZIndex = 100
+    })
+    addCorner(rip, UDim.new(1, 0))
+    
+    tw(rip, {Size = UDim2.new(0, maxSize, 0, maxSize), BackgroundTransparency = 1}, 0.5, Enum.EasingStyle.Quad)
+    task.delay(0.5, function() rip:Destroy() end)
+end
+
+function lib:init(title, subtitle)
     local gui = create("ScreenGui", {
-        Name = "UILib",
+        Name = "BioLib_" .. tostring(math.random(1000, 9999)),
         ResetOnSpawn = false,
-        ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+        IgnoreGuiInset = true
     })
     
     if syn then
@@ -65,342 +115,610 @@ function lib:new(title)
     elseif gethui then
         gui.Parent = gethui()
     else
-        gui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+        gui.Parent = player:WaitForChild("PlayerGui")
     end
+    
+    local blur = create("BlurEffect", {
+        Parent = lighting,
+        Name = "BioLibBlur",
+        Size = 0
+    })
+    tw(blur, {Size = 6}, 0.5)
     
     local main = create("Frame", {
         Parent = gui,
-        BackgroundColor3 = cfg.main,
+        Name = "Main",
+        BackgroundColor3 = theme.bg,
         BorderSizePixel = 0,
-        Position = UDim2.new(0.5, -300, 0.5, -200),
-        Size = UDim2.new(0, 600, 0, 400),
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        Size = UDim2.new(0, 0, 0, 0),
+        AnchorPoint = Vector2.new(0.5, 0.5),
         ClipsDescendants = true
     })
-    create("UICorner", {Parent = main, CornerRadius = cfg.round})
+    addCorner(main, UDim.new(0, 12))
+    addShadow(main, 0.3)
+    addStroke(main, theme.border, 1, 0.7)
     
-    main.Size = UDim2.new(0, 0, 0, 0)
-    main.Position = UDim2.new(0.5, 0, 0.5, 0)
-    tw(main, {Size = UDim2.new(0, 600, 0, 400), Position = UDim2.new(0.5, -300, 0.5, -200)}, 0.3)
-    
-    local shadow = create("ImageLabel", {
-        Parent = main,
-        BackgroundTransparency = 1,
-        Position = UDim2.new(0, -15, 0, -15),
-        Size = UDim2.new(1, 30, 1, 30),
-        ZIndex = 0,
-        Image = "rbxassetid://5554236805",
-        ImageColor3 = Color3.new(0, 0, 0),
-        ImageTransparency = 0.5,
-        ScaleType = Enum.ScaleType.Slice,
-        SliceCenter = Rect.new(23, 23, 277, 277)
-    })
-    
-    local topbar = create("Frame", {
-        Parent = main,
-        BackgroundColor3 = cfg.dark,
-        BorderSizePixel = 0,
-        Size = UDim2.new(1, 0, 0, 30)
-    })
-    create("UICorner", {Parent = topbar, CornerRadius = cfg.round})
-    create("Frame", {
-        Parent = topbar,
-        BackgroundColor3 = cfg.dark,
-        BorderSizePixel = 0,
-        Position = UDim2.new(0, 0, 0.5, 0),
-        Size = UDim2.new(1, 0, 0.5, 0)
-    })
-    
-    local titleLbl = create("TextLabel", {
-        Parent = topbar,
-        BackgroundTransparency = 1,
-        Position = UDim2.new(0, 10, 0, 0),
-        Size = UDim2.new(0.5, 0, 1, 0),
-        Font = cfg.font,
-        Text = title or "UILib",
-        TextColor3 = cfg.txt,
-        TextSize = 14,
-        TextXAlignment = Enum.TextXAlignment.Left
-    })
-    
-    local closeBtn = create("TextButton", {
-        Parent = topbar,
-        BackgroundTransparency = 1,
-        Position = UDim2.new(1, -30, 0, 0),
-        Size = UDim2.new(0, 30, 1, 0),
-        Font = cfg.font,
-        Text = "×",
-        TextColor3 = cfg.txt2,
-        TextSize = 20
-    })
-    closeBtn.MouseButton1Click:Connect(function()
-        tw(main, {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 0)}, 0.2)
-        task.delay(0.2, function() gui:Destroy() end)
-    end)
-    
-    local settingsBtn = create("TextButton", {
-        Parent = topbar,
-        BackgroundTransparency = 1,
-        Position = UDim2.new(1, -55, 0, 0),
-        Size = UDim2.new(0, 25, 1, 0),
-        Font = cfg.font,
-        Text = "⚙",
-        TextColor3 = cfg.txt2,
-        TextSize = 16
-    })
+    tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.4, Enum.EasingStyle.Back)
     
     local sidebar = create("Frame", {
         Parent = main,
-        BackgroundColor3 = cfg.dark,
+        Name = "Sidebar",
+        BackgroundColor3 = theme.sidebar,
         BorderSizePixel = 0,
-        Position = UDim2.new(0, 0, 0, 30),
-        Size = UDim2.new(0, 100, 1, -30)
+        Position = UDim2.new(0, 0, 0, 0),
+        Size = UDim2.new(0, 140, 1, 0)
     })
     
-    local tabHolder = create("ScrollingFrame", {
+    local sideGrad = create("UIGradient", {
         Parent = sidebar,
+        Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(220, 220, 220))
+        }),
+        Rotation = 90
+    })
+    
+    local logo = create("Frame", {
+        Parent = sidebar,
+        Name = "Logo",
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 0, 0, 0),
+        Size = UDim2.new(1, 0, 0, 70)
+    })
+    
+    local logoIcon = create("ImageLabel", {
+        Parent = logo,
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 15, 0.5, -12),
+        Size = UDim2.new(0, 24, 0, 24),
+        Image = "rbxassetid://7733715400",
+        ImageColor3 = theme.accent
+    })
+    
+    local titleLbl = create("TextLabel", {
+        Parent = logo,
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 45, 0, 15),
+        Size = UDim2.new(1, -50, 0, 20),
+        Font = Enum.Font.GothamBold,
+        Text = title or "BioHazard",
+        TextColor3 = theme.text,
+        TextSize = 15,
+        TextXAlignment = Enum.TextXAlignment.Left
+    })
+    
+    local subLbl = create("TextLabel", {
+        Parent = logo,
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 45, 0, 35),
+        Size = UDim2.new(1, -50, 0, 16),
+        Font = Enum.Font.Gotham,
+        Text = subtitle or "Sneak Peek",
+        TextColor3 = theme.textDim,
+        TextSize = 11,
+        TextXAlignment = Enum.TextXAlignment.Left
+    })
+    
+    local divider = create("Frame", {
+        Parent = sidebar,
+        BackgroundColor3 = theme.border,
+        BackgroundTransparency = 0.5,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0.1, 0, 0, 70),
+        Size = UDim2.new(0.8, 0, 0, 1)
+    })
+    
+    local tabScroll = create("ScrollingFrame", {
+        Parent = sidebar,
+        Name = "Tabs",
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
-        Position = UDim2.new(0, 5, 0, 5),
-        Size = UDim2.new(1, -10, 1, -10),
+        Position = UDim2.new(0, 0, 0, 80),
+        Size = UDim2.new(1, 0, 1, -80),
         CanvasSize = UDim2.new(0, 0, 0, 0),
-        ScrollBarThickness = 2,
-        ScrollBarImageColor3 = cfg.acc
+        ScrollBarThickness = 0,
+        ScrollingDirection = Enum.ScrollingDirection.Y
     })
-    create("UIListLayout", {Parent = tabHolder, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 3)})
+    addPadding(tabScroll, 10, 10, 5, 5)
+    
+    local tabList = create("UIListLayout", {
+        Parent = tabScroll,
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        Padding = UDim.new(0, 4)
+    })
     
     local content = create("Frame", {
         Parent = main,
-        BackgroundColor3 = cfg.sec,
+        Name = "Content",
+        BackgroundColor3 = theme.bg,
         BorderSizePixel = 0,
-        Position = UDim2.new(0, 100, 0, 30),
-        Size = UDim2.new(1, -100, 1, -30)
+        Position = UDim2.new(0, 140, 0, 0),
+        Size = UDim2.new(1, -140, 1, 0)
+    })
+    
+    local topbar = create("Frame", {
+        Parent = content,
+        Name = "Topbar",
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 0, 0, 0),
+        Size = UDim2.new(1, 0, 0, 55)
     })
     
     local searchBox = create("Frame", {
-        Parent = content,
-        BackgroundColor3 = cfg.dark,
+        Parent = topbar,
+        Name = "Search",
+        BackgroundColor3 = theme.card,
         BorderSizePixel = 0,
-        Position = UDim2.new(0, 10, 0, 10),
-        Size = UDim2.new(1, -20, 0, 30)
+        Position = UDim2.new(0, 15, 0.5, -17),
+        Size = UDim2.new(0.55, -30, 0, 34)
     })
-    create("UICorner", {Parent = searchBox, CornerRadius = cfg.round})
+    addCorner(searchBox, UDim.new(0, 8))
+    addStroke(searchBox, theme.border, 1, 0.7)
     
-    create("ImageLabel", {
+    local searchIcon = create("ImageLabel", {
         Parent = searchBox,
         BackgroundTransparency = 1,
-        Position = UDim2.new(0, 8, 0.5, -8),
+        Position = UDim2.new(0, 12, 0.5, -8),
         Size = UDim2.new(0, 16, 0, 16),
-        Image = icons.search,
-        ImageColor3 = cfg.txt2,
-        ImageRectOffset = Vector2.new(964, 324),
-        ImageRectSize = Vector2.new(36, 36)
+        Image = "rbxassetid://7072706663",
+        ImageColor3 = theme.textDim
     })
     
     local searchInput = create("TextBox", {
         Parent = searchBox,
         BackgroundTransparency = 1,
-        Position = UDim2.new(0, 30, 0, 0),
-        Size = UDim2.new(1, -40, 1, 0),
-        Font = cfg.font,
+        Position = UDim2.new(0, 36, 0, 0),
+        Size = UDim2.new(1, -48, 1, 0),
+        Font = Enum.Font.Gotham,
         PlaceholderText = "Search for a module...",
-        PlaceholderColor3 = cfg.txt2,
+        PlaceholderColor3 = theme.textDark,
         Text = "",
-        TextColor3 = cfg.txt,
+        TextColor3 = theme.text,
         TextSize = 13,
         TextXAlignment = Enum.TextXAlignment.Left
     })
     
+    searchInput.Focused:Connect(function()
+        tw(searchBox:FindFirstChild("UIStroke"), {Color = theme.accent, Transparency = 0.3}, 0.2)
+    end)
+    searchInput.FocusLost:Connect(function()
+        tw(searchBox:FindFirstChild("UIStroke"), {Color = theme.border, Transparency = 0.7}, 0.2)
+    end)
+    
+    local btnHolder = create("Frame", {
+        Parent = topbar,
+        BackgroundTransparency = 1,
+        Position = UDim2.new(1, -100, 0.5, -15),
+        Size = UDim2.new(0, 90, 0, 30)
+    })
+    
+    local settingsBtn = create("TextButton", {
+        Parent = btnHolder,
+        BackgroundColor3 = theme.card,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 0, 0, 0),
+        Size = UDim2.new(0, 30, 0, 30),
+        Text = "",
+        AutoButtonColor = false
+    })
+    addCorner(settingsBtn, UDim.new(0, 6))
+    
+    local settingsIcon = create("ImageLabel", {
+        Parent = settingsBtn,
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0.5, -8, 0.5, -8),
+        Size = UDim2.new(0, 16, 0, 16),
+        Image = "rbxassetid://7072719338",
+        ImageColor3 = theme.textDim
+    })
+    
+    settingsBtn.MouseEnter:Connect(function()
+        tw(settingsBtn, {BackgroundColor3 = theme.cardHover}, 0.15)
+        tw(settingsIcon, {ImageColor3 = theme.text}, 0.15)
+    end)
+    settingsBtn.MouseLeave:Connect(function()
+        tw(settingsBtn, {BackgroundColor3 = theme.card}, 0.15)
+        tw(settingsIcon, {ImageColor3 = theme.textDim}, 0.15)
+    end)
+    
+    local minimizeBtn = create("TextButton", {
+        Parent = btnHolder,
+        BackgroundColor3 = theme.card,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 35, 0, 0),
+        Size = UDim2.new(0, 30, 0, 30),
+        Text = "",
+        AutoButtonColor = false
+    })
+    addCorner(minimizeBtn, UDim.new(0, 6))
+    
+    local minIcon = create("Frame", {
+        Parent = minimizeBtn,
+        BackgroundColor3 = theme.orange,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0.5, -5, 0.5, -1),
+        Size = UDim2.new(0, 10, 0, 2)
+    })
+    addCorner(minIcon, UDim.new(1, 0))
+    
+    minimizeBtn.MouseEnter:Connect(function()
+        tw(minimizeBtn, {BackgroundColor3 = theme.cardHover}, 0.15)
+    end)
+    minimizeBtn.MouseLeave:Connect(function()
+        tw(minimizeBtn, {BackgroundColor3 = theme.card}, 0.15)
+    end)
+    
+    local closeBtn = create("TextButton", {
+        Parent = btnHolder,
+        BackgroundColor3 = theme.card,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 70, 0, 0),
+        Size = UDim2.new(0, 30, 0, 30),
+        Text = "",
+        AutoButtonColor = false
+    })
+    addCorner(closeBtn, UDim.new(0, 6))
+    
+    local closeIcon = create("TextLabel", {
+        Parent = closeBtn,
+        BackgroundTransparency = 1,
+        Size = UDim2.new(1, 0, 1, 0),
+        Font = Enum.Font.GothamBold,
+        Text = "×",
+        TextColor3 = theme.red,
+        TextSize = 20
+    })
+    
+    closeBtn.MouseEnter:Connect(function()
+        tw(closeBtn, {BackgroundColor3 = theme.red}, 0.15)
+        tw(closeIcon, {TextColor3 = theme.text}, 0.15)
+    end)
+    closeBtn.MouseLeave:Connect(function()
+        tw(closeBtn, {BackgroundColor3 = theme.card}, 0.15)
+        tw(closeIcon, {TextColor3 = theme.red}, 0.15)
+    end)
+    
     local pages = create("Frame", {
         Parent = content,
+        Name = "Pages",
         BackgroundTransparency = 1,
-        Position = UDim2.new(0, 10, 0, 50),
-        Size = UDim2.new(1, -20, 1, -60)
+        Position = UDim2.new(0, 0, 0, 55),
+        Size = UDim2.new(1, 0, 1, -55),
+        ClipsDescendants = true
     })
     
     local dragging, dragStart, startPos
+    local canDrag = true
+    
     topbar.InputBegan:Connect(function(inp)
-        if inp.UserInputType == Enum.UserInputType.MouseButton1 then
+        if inp.UserInputType == Enum.UserInputType.MouseButton1 and canDrag then
             dragging = true
             dragStart = inp.Position
             startPos = main.Position
         end
     end)
+    
     topbar.InputEnded:Connect(function(inp)
         if inp.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = false
         end
     end)
+    
     input.InputChanged:Connect(function(inp)
         if dragging and inp.UserInputType == Enum.UserInputType.MouseMovement then
             local delta = inp.Position - dragStart
-            tw(main, {Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)}, 0.05)
+            main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
     
-    local window = {}
-    local tabs = {}
-    local activeTab = nil
+    local minimized = false
+    minimizeBtn.MouseButton1Click:Connect(function()
+        minimized = not minimized
+        if minimized then
+            tw(main, {Size = UDim2.new(0, 680, 0, 55)}, 0.3, Enum.EasingStyle.Quart)
+        else
+            tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.3, Enum.EasingStyle.Quart)
+        end
+    end)
     
-    function window:tab(name)
+    closeBtn.MouseButton1Click:Connect(function()
+        tw(blur, {Size = 0}, 0.3)
+        tw(main, {Size = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 1}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+        task.delay(0.35, function()
+            gui:Destroy()
+            blur:Destroy()
+        end)
+    end)
+    
+    local window = {gui = gui, main = main, tabs = {}, activeTab = nil}
+    
+    function window:tab(name, icon)
         local tabBtn = create("TextButton", {
-            Parent = tabHolder,
-            BackgroundColor3 = cfg.sec,
+            Parent = tabScroll,
+            Name = name,
+            BackgroundColor3 = theme.card,
             BackgroundTransparency = 1,
             BorderSizePixel = 0,
-            Size = UDim2.new(1, 0, 0, 28),
-            Font = cfg.font,
-            Text = name,
-            TextColor3 = cfg.txt2,
-            TextSize = 13
+            Size = UDim2.new(1, 0, 0, 36),
+            Text = "",
+            AutoButtonColor = false
         })
-        create("UICorner", {Parent = tabBtn, CornerRadius = cfg.round})
+        addCorner(tabBtn, UDim.new(0, 8))
+        
+        local indicator = create("Frame", {
+            Parent = tabBtn,
+            Name = "Indicator",
+            BackgroundColor3 = theme.accent,
+            BorderSizePixel = 0,
+            Position = UDim2.new(0, 0, 0.15, 0),
+            Size = UDim2.new(0, 3, 0.7, 0),
+            BackgroundTransparency = 1
+        })
+        addCorner(indicator, UDim.new(1, 0))
+        
+        local tabIcon = create("ImageLabel", {
+            Parent = tabBtn,
+            BackgroundTransparency = 1,
+            Position = UDim2.new(0, 12, 0.5, -8),
+            Size = UDim2.new(0, 16, 0, 16),
+            Image = icon or "rbxassetid://7072706796",
+            ImageColor3 = theme.textDim
+        })
+        
+        local tabLbl = create("TextLabel", {
+            Parent = tabBtn,
+            BackgroundTransparency = 1,
+            Position = UDim2.new(0, 36, 0, 0),
+            Size = UDim2.new(1, -44, 1, 0),
+            Font = Enum.Font.GothamMedium,
+            Text = name,
+            TextColor3 = theme.textDim,
+            TextSize = 13,
+            TextXAlignment = Enum.TextXAlignment.Left
+        })
         
         local page = create("ScrollingFrame", {
             Parent = pages,
+            Name = name,
             BackgroundTransparency = 1,
             BorderSizePixel = 0,
+            Position = UDim2.new(0, 0, 0, 0),
             Size = UDim2.new(1, 0, 1, 0),
             CanvasSize = UDim2.new(0, 0, 0, 0),
-            ScrollBarThickness = 2,
-            ScrollBarImageColor3 = cfg.acc,
-            Visible = false
+            ScrollBarThickness = 3,
+            ScrollBarImageColor3 = theme.accent,
+            ScrollBarImageTransparency = 0.5,
+            Visible = false,
+            ClipsDescendants = true
         })
-        create("UIListLayout", {Parent = page, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 8)})
+        addPadding(page, 15, 15, 10, 10)
+        
+        local pageList = create("UIListLayout", {
+            Parent = page,
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            Padding = UDim.new(0, 12)
+        })
         
         local function updateCanvas()
-            local layout = page:FindFirstChildOfClass("UIListLayout")
-            if layout then
-                page.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
-            end
+            page.CanvasSize = UDim2.new(0, 0, 0, pageList.AbsoluteContentSize.Y + 25)
         end
-        page.ChildAdded:Connect(updateCanvas)
+        pageList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateCanvas)
         
         local function activate()
-            for _, t in pairs(tabs) do
-                tw(t.btn, {BackgroundTransparency = 1, TextColor3 = cfg.txt2}, 0.15)
+            for _, t in pairs(window.tabs) do
+                tw(t.btn, {BackgroundTransparency = 1}, 0.2)
+                tw(t.btn.Indicator, {BackgroundTransparency = 1}, 0.2)
+                tw(t.btn:FindFirstChild("ImageLabel"), {ImageColor3 = theme.textDim}, 0.2)
+                tw(t.btn:FindFirstChild("TextLabel"), {TextColor3 = theme.textDim}, 0.2)
                 t.page.Visible = false
             end
-            tw(tabBtn, {BackgroundTransparency = 0, TextColor3 = cfg.txt}, 0.15)
+            tw(tabBtn, {BackgroundTransparency = 0.9}, 0.2)
+            tw(indicator, {BackgroundTransparency = 0}, 0.2)
+            tw(tabIcon, {ImageColor3 = theme.accent}, 0.2)
+            tw(tabLbl, {TextColor3 = theme.text}, 0.2)
             page.Visible = true
-            activeTab = name
+            window.activeTab = name
         end
         
+        tabBtn.MouseEnter:Connect(function()
+            if window.activeTab ~= name then
+                tw(tabBtn, {BackgroundTransparency = 0.95}, 0.15)
+            end
+        end)
+        tabBtn.MouseLeave:Connect(function()
+            if window.activeTab ~= name then
+                tw(tabBtn, {BackgroundTransparency = 1}, 0.15)
+            end
+        end)
         tabBtn.MouseButton1Click:Connect(function()
-            ripple(tabBtn)
+            ripple(tabBtn, mouse.X, mouse.Y)
             activate()
         end)
         
-        tabs[name] = {btn = tabBtn, page = page}
-        if not activeTab then activate() end
+        window.tabs[name] = {btn = tabBtn, page = page}
+        
+        if not window.activeTab then
+            task.delay(0.1, activate)
+        end
+        
+        tabList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+            tabScroll.CanvasSize = UDim2.new(0, 0, 0, tabList.AbsoluteContentSize.Y + 15)
+        end)
         
         local tab = {}
         
-        function tab:section(name)
+        function tab:section(name, icon)
             local sec = create("Frame", {
                 Parent = page,
-                BackgroundColor3 = cfg.dark,
+                Name = name,
+                BackgroundColor3 = theme.card,
                 BorderSizePixel = 0,
-                Size = UDim2.new(1, 0, 0, 35),
+                Size = UDim2.new(1, 0, 0, 45),
                 ClipsDescendants = true
             })
-            create("UICorner", {Parent = sec, CornerRadius = cfg.round})
+            addCorner(sec, UDim.new(0, 10))
+            addStroke(sec, theme.border, 1, 0.8)
             
             local header = create("Frame", {
                 Parent = sec,
+                Name = "Header",
                 BackgroundTransparency = 1,
-                Size = UDim2.new(1, 0, 0, 35)
+                Size = UDim2.new(1, 0, 0, 45)
             })
             
-            create("ImageLabel", {
+            local secIcon = create("ImageLabel", {
                 Parent = header,
                 BackgroundTransparency = 1,
-                Position = UDim2.new(0, 10, 0.5, -8),
-                Size = UDim2.new(0, 16, 0, 16),
-                Image = icons.star,
-                ImageColor3 = cfg.acc,
-                ImageRectOffset = Vector2.new(44, 244),
-                ImageRectSize = Vector2.new(36, 36)
+                Position = UDim2.new(0, 15, 0.5, -10),
+                Size = UDim2.new(0, 20, 0, 20),
+                Image = icon or "rbxassetid://7072717857",
+                ImageColor3 = theme.accent
             })
             
-            local titleLbl = create("TextLabel", {
+            local secTitle = create("TextLabel", {
                 Parent = header,
                 BackgroundTransparency = 1,
-                Position = UDim2.new(0, 32, 0, 0),
-                Size = UDim2.new(0.5, 0, 1, 0),
-                Font = cfg.font,
+                Position = UDim2.new(0, 45, 0, 0),
+                Size = UDim2.new(0.6, 0, 1, 0),
+                Font = Enum.Font.GothamBold,
                 Text = name,
-                TextColor3 = cfg.txt,
-                TextSize = 13,
+                TextColor3 = theme.text,
+                TextSize = 14,
                 TextXAlignment = Enum.TextXAlignment.Left
             })
             
-            local toggle = create("TextButton", {
+            local expandBtn = create("TextButton", {
                 Parent = header,
                 BackgroundTransparency = 1,
-                Position = UDim2.new(1, -35, 0.5, -8),
-                Size = UDim2.new(0, 16, 0, 16),
-                Font = cfg.font,
-                Text = "▼",
-                TextColor3 = cfg.txt2,
-                TextSize = 10,
-                Rotation = 0
+                Position = UDim2.new(1, -40, 0, 0),
+                Size = UDim2.new(0, 40, 1, 0),
+                Text = "",
+                AutoButtonColor = false
             })
+            
+            local expandIcon = create("ImageLabel", {
+                Parent = expandBtn,
+                BackgroundTransparency = 1,
+                Position = UDim2.new(0.5, -6, 0.5, -6),
+                Size = UDim2.new(0, 12, 0, 12),
+                Image = "rbxassetid://7072706663",
+                ImageColor3 = theme.textDim,
+                Rotation = 90
+            })
+            
+            local toggleFrame = create("Frame", {
+                Parent = header,
+                BackgroundTransparency = 1,
+                Position = UDim2.new(1, -90, 0.5, -10),
+                Size = UDim2.new(0, 40, 0, 20)
+            })
+            
+            local secToggle = create("Frame", {
+                Parent = toggleFrame,
+                BackgroundColor3 = theme.accent,
+                BorderSizePixel = 0,
+                Size = UDim2.new(1, 0, 1, 0)
+            })
+            addCorner(secToggle, UDim.new(1, 0))
+            
+            local toggleDot = create("Frame", {
+                Parent = secToggle,
+                BackgroundColor3 = theme.text,
+                BorderSizePixel = 0,
+                Position = UDim2.new(1, -18, 0.5, -8),
+                Size = UDim2.new(0, 16, 0, 16)
+            })
+            addCorner(toggleDot, UDim.new(1, 0))
             
             local holder = create("Frame", {
                 Parent = sec,
+                Name = "Holder",
                 BackgroundTransparency = 1,
-                Position = UDim2.new(0, 10, 0, 40),
-                Size = UDim2.new(1, -20, 0, 0)
+                Position = UDim2.new(0, 15, 0, 50),
+                Size = UDim2.new(1, -30, 0, 0)
             })
-            local list = create("UIListLayout", {Parent = holder, SortOrder = Enum.SortOrder.LayoutOrder, Padding = UDim.new(0, 8)})
             
-            local open = true
-            local function updateSize()
-                local h = open and (list.AbsoluteContentSize.Y + 50) or 35
-                tw(sec, {Size = UDim2.new(1, 0, 0, h)}, 0.2)
-                tw(toggle, {Rotation = open and 0 or -90}, 0.2)
-                task.delay(0.2, updateCanvas)
+            local holderList = create("UIListLayout", {
+                Parent = holder,
+                SortOrder = Enum.SortOrder.LayoutOrder,
+                Padding = UDim.new(0, 10)
+            })
+            
+            local expanded = true
+            local secEnabled = true
+            
+            local function updateSecSize()
+                local h = expanded and (holderList.AbsoluteContentSize.Y + 65) or 45
+                tw(sec, {Size = UDim2.new(1, 0, 0, h)}, 0.25, Enum.EasingStyle.Quart)
+                tw(expandIcon, {Rotation = expanded and 90 or 0}, 0.25)
+                task.delay(0.25, updateCanvas)
             end
             
-            list:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                if open then updateSize() end
+            holderList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                if expanded then updateSecSize() end
             end)
             
-            toggle.MouseButton1Click:Connect(function()
-                open = not open
-                updateSize()
+            expandBtn.MouseButton1Click:Connect(function()
+                expanded = not expanded
+                updateSecSize()
             end)
             
-            updateSize()
+            local toggleBtn = create("TextButton", {
+                Parent = toggleFrame,
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 1, 0),
+                Text = ""
+            })
+            
+            toggleBtn.MouseButton1Click:Connect(function()
+                secEnabled = not secEnabled
+                tw(secToggle, {BackgroundColor3 = secEnabled and theme.accent or theme.card}, 0.2)
+                tw(toggleDot, {Position = secEnabled and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)}, 0.2, Enum.EasingStyle.Back)
+            end)
+            
+            updateSecSize()
             
             local section = {}
             
             function section:button(name, callback)
                 local btn = create("TextButton", {
                     Parent = holder,
-                    BackgroundColor3 = cfg.sec,
+                    Name = name,
+                    BackgroundColor3 = theme.bg,
                     BorderSizePixel = 0,
-                    Size = UDim2.new(1, 0, 0, 32),
-                    Font = cfg.font,
-                    Text = name,
-                    TextColor3 = cfg.txt,
-                    TextSize = 13,
+                    Size = UDim2.new(1, 0, 0, 38),
+                    Text = "",
+                    AutoButtonColor = false,
                     ClipsDescendants = true
                 })
-                create("UICorner", {Parent = btn, CornerRadius = cfg.round})
+                addCorner(btn, UDim.new(0, 8))
+                addStroke(btn, theme.border, 1, 0.8)
+                
+                local btnLbl = create("TextLabel", {
+                    Parent = btn,
+                    BackgroundTransparency = 1,
+                    Size = UDim2.new(1, 0, 1, 0),
+                    Font = Enum.Font.GothamMedium,
+                    Text = name,
+                    TextColor3 = theme.text,
+                    TextSize = 13
+                })
                 
                 btn.MouseEnter:Connect(function()
-                    tw(btn, {BackgroundColor3 = cfg.acc}, 0.15)
+                    tw(btn, {BackgroundColor3 = theme.accent}, 0.2)
+                    tw(btn:FindFirstChild("UIStroke"), {Transparency = 1}, 0.2)
                 end)
                 btn.MouseLeave:Connect(function()
-                    tw(btn, {BackgroundColor3 = cfg.sec}, 0.15)
+                    tw(btn, {BackgroundColor3 = theme.bg}, 0.2)
+                    tw(btn:FindFirstChild("UIStroke"), {Transparency = 0.8}, 0.2)
                 end)
                 btn.MouseButton1Click:Connect(function()
-                    ripple(btn)
+                    ripple(btn, mouse.X, mouse.Y)
                     if callback then callback() end
                 end)
                 
-                updateSize()
+                updateSecSize()
                 return btn
             end
             
@@ -409,48 +727,53 @@ function lib:new(title)
                 
                 local frame = create("Frame", {
                     Parent = holder,
+                    Name = name,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 28)
+                    Size = UDim2.new(1, 0, 0, 32)
                 })
                 
-                create("TextLabel", {
+                local lbl = create("TextLabel", {
                     Parent = frame,
                     BackgroundTransparency = 1,
+                    Position = UDim2.new(0, 0, 0, 0),
                     Size = UDim2.new(0.7, 0, 1, 0),
-                    Font = cfg.font,
+                    Font = Enum.Font.Gotham,
                     Text = name,
-                    TextColor3 = cfg.txt,
+                    TextColor3 = theme.text,
                     TextSize = 13,
                     TextXAlignment = Enum.TextXAlignment.Left
                 })
                 
                 local box = create("Frame", {
                     Parent = frame,
-                    BackgroundColor3 = val and cfg.acc or cfg.sec,
+                    BackgroundColor3 = val and theme.accent or theme.bg,
                     BorderSizePixel = 0,
-                    Position = UDim2.new(1, -44, 0.5, -10),
-                    Size = UDim2.new(0, 44, 0, 20)
+                    Position = UDim2.new(1, -48, 0.5, -12),
+                    Size = UDim2.new(0, 48, 0, 24)
                 })
-                create("UICorner", {Parent = box, CornerRadius = UDim.new(1, 0)})
+                addCorner(box, UDim.new(1, 0))
+                addStroke(box, val and theme.accent or theme.border, 1, val and 0 or 0.6)
                 
-                local circle = create("Frame", {
+                local dot = create("Frame", {
                     Parent = box,
-                    BackgroundColor3 = cfg.txt,
-                    Position = val and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8),
-                    Size = UDim2.new(0, 16, 0, 16)
+                    BackgroundColor3 = theme.text,
+                    BorderSizePixel = 0,
+                    Position = val and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10),
+                    Size = UDim2.new(0, 20, 0, 20)
                 })
-                create("UICorner", {Parent = circle, CornerRadius = UDim.new(1, 0)})
+                addCorner(dot, UDim.new(1, 0))
                 
                 local btn = create("TextButton", {
-                    Parent = box,
+                    Parent = frame,
                     BackgroundTransparency = 1,
                     Size = UDim2.new(1, 0, 1, 0),
                     Text = ""
                 })
                 
                 local function update()
-                    tw(box, {BackgroundColor3 = val and cfg.acc or cfg.sec}, 0.15)
-                    tw(circle, {Position = val and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)}, 0.15)
+                    tw(box, {BackgroundColor3 = val and theme.accent or theme.bg}, 0.2)
+                    tw(box:FindFirstChild("UIStroke"), {Color = val and theme.accent or theme.border, Transparency = val and 0 or 0.6}, 0.2)
+                    tw(dot, {Position = val and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)}, 0.2, Enum.EasingStyle.Back)
                 end
                 
                 btn.MouseButton1Click:Connect(function()
@@ -459,7 +782,7 @@ function lib:new(title)
                     if callback then callback(val) end
                 end)
                 
-                updateSize()
+                updateSecSize()
                 return {
                     set = function(_, v) val = v update() end,
                     get = function() return val end
@@ -471,8 +794,9 @@ function lib:new(title)
                 
                 local frame = create("Frame", {
                     Parent = holder,
+                    Name = name,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 40)
+                    Size = UDim2.new(1, 0, 0, 50)
                 })
                 
                 local top = create("Frame", {
@@ -481,13 +805,13 @@ function lib:new(title)
                     Size = UDim2.new(1, 0, 0, 20)
                 })
                 
-                create("TextLabel", {
+                local lbl = create("TextLabel", {
                     Parent = top,
                     BackgroundTransparency = 1,
                     Size = UDim2.new(0.5, 0, 1, 0),
-                    Font = cfg.font,
+                    Font = Enum.Font.Gotham,
                     Text = name,
-                    TextColor3 = cfg.txt,
+                    TextColor3 = theme.text,
                     TextSize = 13,
                     TextXAlignment = Enum.TextXAlignment.Left
                 })
@@ -497,38 +821,59 @@ function lib:new(title)
                     BackgroundTransparency = 1,
                     Position = UDim2.new(0.5, 0, 0, 0),
                     Size = UDim2.new(0.5, 0, 1, 0),
-                    Font = cfg.font,
+                    Font = Enum.Font.GothamBold,
                     Text = tostring(math.floor(val)),
-                    TextColor3 = cfg.txt2,
+                    TextColor3 = theme.accent,
                     TextSize = 13,
                     TextXAlignment = Enum.TextXAlignment.Right
                 })
                 
                 local bar = create("Frame", {
                     Parent = frame,
-                    BackgroundColor3 = cfg.sec,
+                    BackgroundColor3 = theme.bg,
                     BorderSizePixel = 0,
-                    Position = UDim2.new(0, 0, 0, 25),
+                    Position = UDim2.new(0, 0, 0, 28),
                     Size = UDim2.new(1, 0, 0, 8)
                 })
-                create("UICorner", {Parent = bar, CornerRadius = UDim.new(1, 0)})
+                addCorner(bar, UDim.new(1, 0))
                 
                 local fill = create("Frame", {
                     Parent = bar,
-                    BackgroundColor3 = cfg.acc,
+                    BackgroundColor3 = theme.accent,
                     BorderSizePixel = 0,
                     Size = UDim2.new((val - min) / (max - min), 0, 1, 0)
                 })
-                create("UICorner", {Parent = fill, CornerRadius = UDim.new(1, 0)})
+                addCorner(fill, UDim.new(1, 0))
+                
+                local fillGlow = create("Frame", {
+                    Parent = fill,
+                    BackgroundColor3 = theme.accent,
+                    BackgroundTransparency = 0.7,
+                    BorderSizePixel = 0,
+                    Position = UDim2.new(1, -6, 0.5, -8),
+                    Size = UDim2.new(0, 16, 0, 16),
+                    AnchorPoint = Vector2.new(0.5, 0)
+                })
+                addCorner(fillGlow, UDim.new(1, 0))
+                
+                local knob = create("Frame", {
+                    Parent = fill,
+                    BackgroundColor3 = theme.text,
+                    BorderSizePixel = 0,
+                    Position = UDim2.new(1, -6, 0.5, -6),
+                    Size = UDim2.new(0, 12, 0, 12),
+                    AnchorPoint = Vector2.new(0.5, 0)
+                })
+                addCorner(knob, UDim.new(1, 0))
                 
                 local minLbl = create("TextLabel", {
                     Parent = frame,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0, 0, 0, 33),
-                    Size = UDim2.new(0.3, 0, 0, 15),
-                    Font = cfg.font,
+                    Position = UDim2.new(0, 0, 0, 38),
+                    Size = UDim2.new(0.3, 0, 0, 14),
+                    Font = Enum.Font.Gotham,
                     Text = tostring(min),
-                    TextColor3 = cfg.txt2,
+                    TextColor3 = theme.textDark,
                     TextSize = 11,
                     TextXAlignment = Enum.TextXAlignment.Left
                 })
@@ -536,11 +881,11 @@ function lib:new(title)
                 local maxLbl = create("TextLabel", {
                     Parent = frame,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0.7, 0, 0, 33),
-                    Size = UDim2.new(0.3, 0, 0, 15),
-                    Font = cfg.font,
+                    Position = UDim2.new(0.7, 0, 0, 38),
+                    Size = UDim2.new(0.3, 0, 0, 14),
+                    Font = Enum.Font.Gotham,
                     Text = tostring(max),
-                    TextColor3 = cfg.txt2,
+                    TextColor3 = theme.textDark,
                     TextSize = 11,
                     TextXAlignment = Enum.TextXAlignment.Right
                 })
@@ -550,12 +895,16 @@ function lib:new(title)
                 bar.InputBegan:Connect(function(inp)
                     if inp.UserInputType == Enum.UserInputType.MouseButton1 then
                         sliding = true
+                        tw(knob, {Size = UDim2.new(0, 16, 0, 16), Position = UDim2.new(1, -8, 0.5, -8)}, 0.15)
+                        tw(fillGlow, {BackgroundTransparency = 0.5}, 0.15)
                     end
                 end)
                 
                 input.InputEnded:Connect(function(inp)
                     if inp.UserInputType == Enum.UserInputType.MouseButton1 then
                         sliding = false
+                        tw(knob, {Size = UDim2.new(0, 12, 0, 12), Position = UDim2.new(1, -6, 0.5, -6)}, 0.15)
+                        tw(fillGlow, {BackgroundTransparency = 0.7}, 0.15)
                     end
                 end)
                 
@@ -563,13 +912,13 @@ function lib:new(title)
                     if sliding and inp.UserInputType == Enum.UserInputType.MouseMovement then
                         local pct = math.clamp((inp.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X, 0, 1)
                         val = math.floor(min + (max - min) * pct)
-                        tw(fill, {Size = UDim2.new(pct, 0, 1, 0)}, 0.05)
+                        fill.Size = UDim2.new(pct, 0, 1, 0)
                         valLbl.Text = tostring(val)
                         if callback then callback(val) end
                     end
                 end)
                 
-                updateSize()
+                updateSecSize()
                 return {
                     set = function(_, v)
                         val = math.clamp(v, min, max)
@@ -584,80 +933,91 @@ function lib:new(title)
             function section:input(name, default, callback)
                 local frame = create("Frame", {
                     Parent = holder,
+                    Name = name,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 28)
+                    Size = UDim2.new(1, 0, 0, 32)
                 })
                 
-                create("TextLabel", {
+                local lbl = create("TextLabel", {
                     Parent = frame,
                     BackgroundTransparency = 1,
                     Size = UDim2.new(0.3, 0, 1, 0),
-                    Font = cfg.font,
+                    Font = Enum.Font.Gotham,
                     Text = name,
-                    TextColor3 = cfg.txt,
+                    TextColor3 = theme.text,
                     TextSize = 13,
                     TextXAlignment = Enum.TextXAlignment.Left
                 })
                 
                 local box = create("Frame", {
                     Parent = frame,
-                    BackgroundColor3 = cfg.sec,
+                    BackgroundColor3 = theme.bg,
                     BorderSizePixel = 0,
-                    Position = UDim2.new(0.35, 0, 0, 0),
-                    Size = UDim2.new(0.65, 0, 1, 0)
+                    Position = UDim2.new(0.32, 0, 0, 0),
+                    Size = UDim2.new(0.68, 0, 1, 0)
                 })
-                create("UICorner", {Parent = box, CornerRadius = cfg.round})
+                addCorner(box, UDim.new(0, 6))
+                addStroke(box, theme.border, 1, 0.7)
                 
                 local inp = create("TextBox", {
                     Parent = box,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0, 8, 0, 0),
-                    Size = UDim2.new(1, -16, 1, 0),
-                    Font = cfg.font,
+                    Position = UDim2.new(0, 12, 0, 0),
+                    Size = UDim2.new(1, -24, 1, 0),
+                    Font = Enum.Font.Gotham,
                     Text = default or "",
-                    TextColor3 = cfg.txt,
-                    TextSize = 13,
-                    ClearTextOnFocus = false
+                    TextColor3 = theme.text,
+                    TextSize = 12,
+                    ClearTextOnFocus = false,
+                    TextXAlignment = Enum.TextXAlignment.Left
                 })
                 
+                inp.Focused:Connect(function()
+                    tw(box:FindFirstChild("UIStroke"), {Color = theme.accent, Transparency = 0.3}, 0.2)
+                end)
                 inp.FocusLost:Connect(function()
+                    tw(box:FindFirstChild("UIStroke"), {Color = theme.border, Transparency = 0.7}, 0.2)
                     if callback then callback(inp.Text) end
                 end)
                 
-                updateSize()
+                updateSecSize()
                 return {
                     set = function(_, v) inp.Text = v end,
                     get = function() return inp.Text end
                 }
             end
             
-            function section:dropdown(name, options, default, callback)
+            function section:dropdown(name, opts, default, callback)
                 local val = default
                 local open = false
                 
                 local frame = create("Frame", {
                     Parent = holder,
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 28),
+                    Name = name,
+                    BackgroundColor3 = theme.bg,
+                    BorderSizePixel = 0,
+                    Size = UDim2.new(1, 0, 0, 36),
                     ClipsDescendants = true
                 })
+                addCorner(frame, UDim.new(0, 8))
+                addStroke(frame, theme.border, 1, 0.7)
                 
-                local header = create("Frame", {
+                local header = create("TextButton", {
                     Parent = frame,
-                    BackgroundColor3 = cfg.sec,
-                    BorderSizePixel = 0,
-                    Size = UDim2.new(1, 0, 0, 28)
+                    BackgroundTransparency = 1,
+                    Size = UDim2.new(1, 0, 0, 36),
+                    Text = "",
+                    AutoButtonColor = false
                 })
-                create("UICorner", {Parent = header, CornerRadius = cfg.round})
                 
-                create("TextLabel", {
+                local lbl = create("TextLabel", {
                     Parent = header,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0, 10, 0, 0),
+                    Position = UDim2.new(0, 12, 0, 0),
                     Size = UDim2.new(0.4, 0, 1, 0),
-                    Font = cfg.font,
+                    Font = Enum.Font.Gotham,
                     Text = name,
-                    TextColor3 = cfg.txt,
+                    TextColor3 = theme.text,
                     TextSize = 13,
                     TextXAlignment = Enum.TextXAlignment.Left
                 })
@@ -666,85 +1026,82 @@ function lib:new(title)
                     Parent = header,
                     BackgroundTransparency = 1,
                     Position = UDim2.new(0.4, 0, 0, 0),
-                    Size = UDim2.new(0.5, -10, 1, 0),
-                    Font = cfg.font,
-                    Text = val or "Select",
-                    TextColor3 = cfg.txt2,
-                    TextSize = 13,
+                    Size = UDim2.new(0.5, -20, 1, 0),
+                    Font = Enum.Font.GothamMedium,
+                    Text = val or "Select...",
+                    TextColor3 = theme.textDim,
+                    TextSize = 12,
                     TextXAlignment = Enum.TextXAlignment.Right
                 })
                 
-                local arrow = create("TextLabel", {
+                local arrow = create("ImageLabel", {
                     Parent = header,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(1, -25, 0, 0),
-                    Size = UDim2.new(0, 20, 1, 0),
-                    Font = cfg.font,
-                    Text = "▼",
-                    TextColor3 = cfg.txt2,
-                    TextSize = 10,
-                    Rotation = 0
+                    Position = UDim2.new(1, -28, 0.5, -6),
+                    Size = UDim2.new(0, 12, 0, 12),
+                    Image = "rbxassetid://7072706663",
+                    ImageColor3 = theme.textDim,
+                    Rotation = 90
                 })
                 
                 local optHolder = create("Frame", {
                     Parent = frame,
-                    BackgroundColor3 = cfg.sec,
-                    BorderSizePixel = 0,
-                    Position = UDim2.new(0, 0, 0, 32),
-                    Size = UDim2.new(1, 0, 0, #options * 25)
+                    BackgroundTransparency = 1,
+                    Position = UDim2.new(0, 8, 0, 40),
+                    Size = UDim2.new(1, -16, 0, #opts * 30)
                 })
-                create("UICorner", {Parent = optHolder, CornerRadius = cfg.round})
-                create("UIListLayout", {Parent = optHolder, SortOrder = Enum.SortOrder.LayoutOrder})
                 
-                for _, opt in ipairs(options) do
+                local optList = create("UIListLayout", {
+                    Parent = optHolder,
+                    SortOrder = Enum.SortOrder.LayoutOrder,
+                    Padding = UDim.new(0, 2)
+                })
+                
+                for i, opt in ipairs(opts) do
                     local optBtn = create("TextButton", {
                         Parent = optHolder,
+                        BackgroundColor3 = theme.card,
                         BackgroundTransparency = 1,
-                        Size = UDim2.new(1, 0, 0, 25),
-                        Font = cfg.font,
+                        BorderSizePixel = 0,
+                        Size = UDim2.new(1, 0, 0, 28),
+                        Font = Enum.Font.Gotham,
                         Text = opt,
-                        TextColor3 = cfg.txt2,
-                        TextSize = 12
+                        TextColor3 = theme.textDim,
+                        TextSize = 12,
+                        AutoButtonColor = false
                     })
+                    addCorner(optBtn, UDim.new(0, 6))
                     
                     optBtn.MouseEnter:Connect(function()
-                        tw(optBtn, {TextColor3 = cfg.acc}, 0.1)
+                        tw(optBtn, {BackgroundTransparency = 0, TextColor3 = theme.text}, 0.15)
                     end)
                     optBtn.MouseLeave:Connect(function()
-                        tw(optBtn, {TextColor3 = cfg.txt2}, 0.1)
+                        tw(optBtn, {BackgroundTransparency = 1, TextColor3 = theme.textDim}, 0.15)
                     end)
                     optBtn.MouseButton1Click:Connect(function()
                         val = opt
                         valLbl.Text = opt
+                        tw(valLbl, {TextColor3 = theme.accent}, 0.15)
+                        task.delay(0.15, function() tw(valLbl, {TextColor3 = theme.textDim}, 0.15) end)
                         open = false
-                        tw(frame, {Size = UDim2.new(1, 0, 0, 28)}, 0.15)
-                        tw(arrow, {Rotation = 0}, 0.15)
-                        task.delay(0.15, updateSize)
+                        tw(frame, {Size = UDim2.new(1, 0, 0, 36)}, 0.2, Enum.EasingStyle.Quart)
+                        tw(arrow, {Rotation = 90}, 0.2)
+                        task.delay(0.2, updateSecSize)
                         if callback then callback(val) end
                     end)
                 end
                 
-                local btn = create("TextButton", {
-                    Parent = header,
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 1, 0),
-                    Text = ""
-                })
-                
-                btn.MouseButton1Click:Connect(function()
+                header.MouseButton1Click:Connect(function()
                     open = not open
-                    local h = open and (32 + #options * 25) or 28
-                    tw(frame, {Size = UDim2.new(1, 0, 0, h)}, 0.15)
-                    tw(arrow, {Rotation = open and 180 or 0}, 0.15)
-                    task.delay(0.15, updateSize)
+                    local h = open and (44 + #opts * 30) or 36
+                    tw(frame, {Size = UDim2.new(1, 0, 0, h)}, 0.2, Enum.EasingStyle.Quart)
+                    tw(arrow, {Rotation = open and 270 or 90}, 0.2)
+                    task.delay(0.2, updateSecSize)
                 end)
                 
-                updateSize()
+                updateSecSize()
                 return {
-                    set = function(_, v)
-                        val = v
-                        valLbl.Text = v
-                    end,
+                    set = function(_, v) val = v valLbl.Text = v end,
                     get = function() return val end
                 }
             end
@@ -756,27 +1113,31 @@ function lib:new(title)
                 
                 local frame = create("Frame", {
                     Parent = holder,
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 28),
+                    Name = name,
+                    BackgroundColor3 = theme.bg,
+                    BorderSizePixel = 0,
+                    Size = UDim2.new(1, 0, 0, 36),
                     ClipsDescendants = true
                 })
+                addCorner(frame, UDim.new(0, 8))
+                addStroke(frame, theme.border, 1, 0.7)
                 
-                local header = create("Frame", {
+                local header = create("TextButton", {
                     Parent = frame,
-                    BackgroundColor3 = cfg.sec,
-                    BorderSizePixel = 0,
-                    Size = UDim2.new(1, 0, 0, 28)
+                    BackgroundTransparency = 1,
+                    Size = UDim2.new(1, 0, 0, 36),
+                    Text = "",
+                    AutoButtonColor = false
                 })
-                create("UICorner", {Parent = header, CornerRadius = cfg.round})
                 
-                create("TextLabel", {
+                local lbl = create("TextLabel", {
                     Parent = header,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0, 10, 0, 0),
-                    Size = UDim2.new(0.6, 0, 1, 0),
-                    Font = cfg.font,
+                    Position = UDim2.new(0, 12, 0, 0),
+                    Size = UDim2.new(0.5, 0, 1, 0),
+                    Font = Enum.Font.Gotham,
                     Text = name,
-                    TextColor3 = cfg.txt,
+                    TextColor3 = theme.text,
                     TextSize = 13,
                     TextXAlignment = Enum.TextXAlignment.Left
                 })
@@ -785,91 +1146,155 @@ function lib:new(title)
                     Parent = header,
                     BackgroundColor3 = val,
                     BorderSizePixel = 0,
-                    Position = UDim2.new(1, -60, 0.5, -10),
-                    Size = UDim2.new(0, 50, 0, 20)
+                    Position = UDim2.new(1, -80, 0.5, -10),
+                    Size = UDim2.new(0, 60, 0, 20)
                 })
-                create("UICorner", {Parent = preview, CornerRadius = cfg.round})
+                addCorner(preview, UDim.new(0, 4))
+                addStroke(preview, theme.border, 1, 0.5)
+                
+                local hexLbl = create("TextLabel", {
+                    Parent = preview,
+                    BackgroundTransparency = 1,
+                    Size = UDim2.new(1, 0, 1, 0),
+                    Font = Enum.Font.GothamBold,
+                    Text = "#" .. val:ToHex():upper(),
+                    TextColor3 = theme.text,
+                    TextSize = 10
+                })
                 
                 local picker = create("Frame", {
                     Parent = frame,
-                    BackgroundColor3 = cfg.dark,
-                    BorderSizePixel = 0,
-                    Position = UDim2.new(0, 0, 0, 32),
-                    Size = UDim2.new(1, 0, 0, 120)
+                    BackgroundTransparency = 1,
+                    Position = UDim2.new(0, 10, 0, 42),
+                    Size = UDim2.new(1, -20, 0, 130)
                 })
-                create("UICorner", {Parent = picker, CornerRadius = cfg.round})
                 
                 local sat = create("ImageLabel", {
                     Parent = picker,
                     BackgroundColor3 = Color3.fromHSV(h, 1, 1),
                     BorderSizePixel = 0,
-                    Position = UDim2.new(0, 10, 0, 10),
-                    Size = UDim2.new(0, 100, 0, 100),
+                    Position = UDim2.new(0, 0, 0, 0),
+                    Size = UDim2.new(0, 130, 0, 100),
                     Image = "rbxassetid://4155801252"
                 })
-                create("UICorner", {Parent = sat, CornerRadius = cfg.round})
+                addCorner(sat, UDim.new(0, 6))
                 
                 local satCursor = create("Frame", {
                     Parent = sat,
-                    BackgroundColor3 = cfg.txt,
+                    BackgroundColor3 = theme.text,
                     BorderSizePixel = 0,
-                    Position = UDim2.new(s, -5, 1 - v, -5),
-                    Size = UDim2.new(0, 10, 0, 10)
+                    Position = UDim2.new(s, -7, 1 - v, -7),
+                    Size = UDim2.new(0, 14, 0, 14)
                 })
-                create("UICorner", {Parent = satCursor, CornerRadius = UDim.new(1, 0)})
-                create("UIStroke", {Parent = satCursor, Color = Color3.new(0, 0, 0), Thickness = 1})
+                addCorner(satCursor, UDim.new(1, 0))
+                addStroke(satCursor, theme.shadow, 2, 0)
                 
-                local hue = create("Frame", {
+                local hueBar = create("Frame", {
                     Parent = picker,
                     BackgroundColor3 = Color3.new(1, 1, 1),
                     BorderSizePixel = 0,
-                    Position = UDim2.new(0, 120, 0, 10),
+                    Position = UDim2.new(0, 140, 0, 0),
                     Size = UDim2.new(0, 20, 0, 100)
                 })
-                create("UICorner", {Parent = hue, CornerRadius = cfg.round})
+                addCorner(hueBar, UDim.new(0, 6))
+                
                 create("UIGradient", {
-                    Parent = hue,
+                    Parent = hueBar,
                     Color = ColorSequence.new({
                         ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
-                        ColorSequenceKeypoint.new(0.17, Color3.fromRGB(255, 255, 0)),
-                        ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 0)),
+                        ColorSequenceKeypoint.new(0.167, Color3.fromRGB(255, 255, 0)),
+                        ColorSequenceKeypoint.new(0.333, Color3.fromRGB(0, 255, 0)),
                         ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
-                        ColorSequenceKeypoint.new(0.67, Color3.fromRGB(0, 0, 255)),
-                        ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255, 0, 255)),
+                        ColorSequenceKeypoint.new(0.667, Color3.fromRGB(0, 0, 255)),
+                        ColorSequenceKeypoint.new(0.833, Color3.fromRGB(255, 0, 255)),
                         ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0))
                     }),
                     Rotation = 90
                 })
                 
                 local hueCursor = create("Frame", {
-                    Parent = hue,
-                    BackgroundColor3 = cfg.txt,
+                    Parent = hueBar,
+                    BackgroundColor3 = theme.text,
                     BorderSizePixel = 0,
-                    Position = UDim2.new(0, -2, h, -3),
-                    Size = UDim2.new(1, 4, 0, 6)
+                    Position = UDim2.new(0, -3, h, -4),
+                    Size = UDim2.new(1, 6, 0, 8)
                 })
-                create("UICorner", {Parent = hueCursor, CornerRadius = cfg.round})
+                addCorner(hueCursor, UDim.new(0, 4))
                 
                 local hexBox = create("TextBox", {
                     Parent = picker,
-                    BackgroundColor3 = cfg.sec,
+                    BackgroundColor3 = theme.card,
                     BorderSizePixel = 0,
-                    Position = UDim2.new(0, 150, 0, 10),
-                    Size = UDim2.new(1, -160, 0, 25),
-                    Font = cfg.font,
+                    Position = UDim2.new(0, 170, 0, 0),
+                    Size = UDim2.new(1, -170, 0, 30),
+                    Font = Enum.Font.GothamMedium,
                     Text = "#" .. val:ToHex():upper(),
-                    TextColor3 = cfg.txt,
-                    TextSize = 12
+                    TextColor3 = theme.text,
+                    TextSize = 12,
+                    ClearTextOnFocus = false
                 })
-                create("UICorner", {Parent = hexBox, CornerRadius = cfg.round})
+                addCorner(hexBox, UDim.new(0, 6))
                 
-                local function update()
+                local rgbHolder = create("Frame", {
+                    Parent = picker,
+                    BackgroundTransparency = 1,
+                    Position = UDim2.new(0, 170, 0, 38),
+                    Size = UDim2.new(1, -170, 0, 60)
+                })
+                
+                local r, g, b = math.floor(val.R * 255), math.floor(val.G * 255), math.floor(val.B * 255)
+                
+                local function createRgbInput(name, value, yPos)
+                    local row = create("Frame", {
+                        Parent = rgbHolder,
+                        BackgroundTransparency = 1,
+                        Position = UDim2.new(0, 0, 0, yPos),
+                        Size = UDim2.new(1, 0, 0, 18)
+                    })
+                    
+                    create("TextLabel", {
+                        Parent = row,
+                        BackgroundTransparency = 1,
+                        Size = UDim2.new(0, 25, 1, 0),
+                        Font = Enum.Font.GothamBold,
+                        Text = name,
+                        TextColor3 = theme.textDim,
+                        TextSize = 11,
+                        TextXAlignment = Enum.TextXAlignment.Left
+                    })
+                    
+                    local rowBox = create("TextBox", {
+                        Parent = row,
+                        BackgroundColor3 = theme.card,
+                        BorderSizePixel = 0,
+                        Position = UDim2.new(0, 30, 0, 0),
+                        Size = UDim2.new(1, -30, 1, 0),
+                        Font = Enum.Font.Gotham,
+                        Text = tostring(value),
+                        TextColor3 = theme.text,
+                        TextSize = 11,
+                        ClearTextOnFocus = false
+                    })
+                    addCorner(rowBox, UDim.new(0, 4))
+                    
+                    return rowBox
+                end
+                
+                local rBox = createRgbInput("R:", r, 0)
+                local gBox = createRgbInput("G:", g, 21)
+                local bBox = createRgbInput("B:", b, 42)
+                
+                local function updateColor()
                     val = Color3.fromHSV(h, s, v)
                     preview.BackgroundColor3 = val
                     sat.BackgroundColor3 = Color3.fromHSV(h, 1, 1)
-                    satCursor.Position = UDim2.new(s, -5, 1 - v, -5)
-                    hueCursor.Position = UDim2.new(0, -2, h, -3)
+                    satCursor.Position = UDim2.new(s, -7, 1 - v, -7)
+                    hueCursor.Position = UDim2.new(0, -3, h, -4)
+                    hexLbl.Text = "#" .. val:ToHex():upper()
                     hexBox.Text = "#" .. val:ToHex():upper()
+                    rBox.Text = tostring(math.floor(val.R * 255))
+                    gBox.Text = tostring(math.floor(val.G * 255))
+                    bBox.Text = tostring(math.floor(val.B * 255))
                     if callback then callback(val) end
                 end
                 
@@ -881,7 +1306,7 @@ function lib:new(title)
                     end
                 end)
                 
-                hue.InputBegan:Connect(function(inp)
+                hueBar.InputBegan:Connect(function(inp)
                     if inp.UserInputType == Enum.UserInputType.MouseButton1 then
                         draggingHue = true
                     end
@@ -899,10 +1324,10 @@ function lib:new(title)
                         if draggingSat then
                             s = math.clamp((inp.Position.X - sat.AbsolutePosition.X) / sat.AbsoluteSize.X, 0, 1)
                             v = 1 - math.clamp((inp.Position.Y - sat.AbsolutePosition.Y) / sat.AbsoluteSize.Y, 0, 1)
-                            update()
+                            updateColor()
                         elseif draggingHue then
-                            h = math.clamp((inp.Position.Y - hue.AbsolutePosition.Y) / hue.AbsoluteSize.Y, 0, 1)
-                            update()
+                            h = math.clamp((inp.Position.Y - hueBar.AbsolutePosition.Y) / hueBar.AbsoluteSize.Y, 0, 1)
+                            updateColor()
                         end
                     end
                 end)
@@ -913,30 +1338,19 @@ function lib:new(title)
                     if ok then
                         val = col
                         h, s, v = val:ToHSV()
-                        update()
+                        updateColor()
                     end
                 end)
                 
-                local btn = create("TextButton", {
-                    Parent = header,
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 1, 0),
-                    Text = ""
-                })
-                
-                btn.MouseButton1Click:Connect(function()
+                header.MouseButton1Click:Connect(function()
                     open = not open
-                    tw(frame, {Size = UDim2.new(1, 0, 0, open and 160 or 28)}, 0.2)
-                    task.delay(0.2, updateSize)
+                    tw(frame, {Size = UDim2.new(1, 0, 0, open and 180 or 36)}, 0.25, Enum.EasingStyle.Quart)
+                    task.delay(0.25, updateSecSize)
                 end)
                 
-                updateSize()
+                updateSecSize()
                 return {
-                    set = function(_, c)
-                        val = c
-                        h, s, v = c:ToHSV()
-                        update()
-                    end,
+                    set = function(_, c) val = c h, s, v = c:ToHSV() updateColor() end,
                     get = function() return val end
                 }
             end
@@ -947,37 +1361,48 @@ function lib:new(title)
                 
                 local frame = create("Frame", {
                     Parent = holder,
+                    Name = name,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 28)
+                    Size = UDim2.new(1, 0, 0, 32)
                 })
                 
-                create("TextLabel", {
+                local lbl = create("TextLabel", {
                     Parent = frame,
                     BackgroundTransparency = 1,
                     Size = UDim2.new(0.6, 0, 1, 0),
-                    Font = cfg.font,
+                    Font = Enum.Font.Gotham,
                     Text = name,
-                    TextColor3 = cfg.txt,
+                    TextColor3 = theme.text,
                     TextSize = 13,
                     TextXAlignment = Enum.TextXAlignment.Left
                 })
                 
                 local btn = create("TextButton", {
                     Parent = frame,
-                    BackgroundColor3 = cfg.sec,
+                    BackgroundColor3 = theme.bg,
                     BorderSizePixel = 0,
-                    Position = UDim2.new(0.6, 0, 0, 0),
-                    Size = UDim2.new(0.4, 0, 1, 0),
-                    Font = cfg.font,
+                    Position = UDim2.new(0.62, 0, 0, 0),
+                    Size = UDim2.new(0.38, 0, 1, 0),
+                    Font = Enum.Font.GothamMedium,
                     Text = key and key.Name or "None",
-                    TextColor3 = cfg.txt2,
-                    TextSize = 12
+                    TextColor3 = theme.textDim,
+                    TextSize = 12,
+                    AutoButtonColor = false
                 })
-                create("UICorner", {Parent = btn, CornerRadius = cfg.round})
+                addCorner(btn, UDim.new(0, 6))
+                addStroke(btn, theme.border, 1, 0.7)
+                
+                btn.MouseEnter:Connect(function()
+                    tw(btn, {BackgroundColor3 = theme.card}, 0.15)
+                end)
+                btn.MouseLeave:Connect(function()
+                    tw(btn, {BackgroundColor3 = theme.bg}, 0.15)
+                end)
                 
                 btn.MouseButton1Click:Connect(function()
                     listening = true
                     btn.Text = "..."
+                    tw(btn:FindFirstChild("UIStroke"), {Color = theme.accent}, 0.15)
                 end)
                 
                 input.InputBegan:Connect(function(inp, gpe)
@@ -985,17 +1410,15 @@ function lib:new(title)
                         key = inp.KeyCode
                         btn.Text = key.Name
                         listening = false
+                        tw(btn:FindFirstChild("UIStroke"), {Color = theme.border}, 0.15)
                     elseif key and inp.KeyCode == key and not gpe then
                         if callback then callback() end
                     end
                 end)
                 
-                updateSize()
+                updateSecSize()
                 return {
-                    set = function(_, k)
-                        key = k
-                        btn.Text = k and k.Name or "None"
-                    end,
+                    set = function(_, k) key = k btn.Text = k and k.Name or "None" end,
                     get = function() return key end
                 }
             end
@@ -1004,18 +1427,16 @@ function lib:new(title)
                 local lbl = create("TextLabel", {
                     Parent = holder,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 20),
-                    Font = cfg.font,
+                    Size = UDim2.new(1, 0, 0, 24),
+                    Font = Enum.Font.Gotham,
                     Text = text,
-                    TextColor3 = cfg.txt2,
+                    TextColor3 = theme.textDim,
                     TextSize = 12,
                     TextXAlignment = Enum.TextXAlignment.Left
                 })
                 
-                updateSize()
-                return {
-                    set = function(_, t) lbl.Text = t end
-                }
+                updateSecSize()
+                return {set = function(_, t) lbl.Text = t end}
             end
             
             return section
@@ -1024,24 +1445,37 @@ function lib:new(title)
         return tab
     end
     
-    function window:notify(title, text, dur)
+    function window:notify(title, text, dur, type)
+        local col = type == "error" and theme.red or type == "warning" and theme.orange or theme.accent
+        
         local notif = create("Frame", {
             Parent = gui,
-            BackgroundColor3 = cfg.dark,
+            Name = "Notification",
+            BackgroundColor3 = theme.card,
             BorderSizePixel = 0,
-            Position = UDim2.new(1, 10, 0.8, 0),
-            Size = UDim2.new(0, 250, 0, 60)
+            Position = UDim2.new(1, 20, 0.85, 0),
+            Size = UDim2.new(0, 280, 0, 70),
+            AnchorPoint = Vector2.new(0, 0.5)
         })
-        create("UICorner", {Parent = notif, CornerRadius = cfg.round})
+        addCorner(notif, UDim.new(0, 10))
+        addShadow(notif, 0.5)
+        
+        local accent = create("Frame", {
+            Parent = notif,
+            BackgroundColor3 = col,
+            BorderSizePixel = 0,
+            Size = UDim2.new(0, 4, 1, 0)
+        })
+        addCorner(accent, UDim.new(0, 10))
         
         create("TextLabel", {
             Parent = notif,
             BackgroundTransparency = 1,
-            Position = UDim2.new(0, 10, 0, 5),
-            Size = UDim2.new(1, -20, 0, 20),
-            Font = cfg.font,
+            Position = UDim2.new(0, 15, 0, 10),
+            Size = UDim2.new(1, -25, 0, 20),
+            Font = Enum.Font.GothamBold,
             Text = title,
-            TextColor3 = cfg.acc,
+            TextColor3 = col,
             TextSize = 14,
             TextXAlignment = Enum.TextXAlignment.Left
         })
@@ -1049,26 +1483,41 @@ function lib:new(title)
         create("TextLabel", {
             Parent = notif,
             BackgroundTransparency = 1,
-            Position = UDim2.new(0, 10, 0, 25),
-            Size = UDim2.new(1, -20, 0, 30),
-            Font = cfg.font,
+            Position = UDim2.new(0, 15, 0, 32),
+            Size = UDim2.new(1, -25, 0, 30),
+            Font = Enum.Font.Gotham,
             Text = text,
-            TextColor3 = cfg.txt2,
+            TextColor3 = theme.textDim,
             TextSize = 12,
             TextXAlignment = Enum.TextXAlignment.Left,
             TextWrapped = true
         })
         
-        tw(notif, {Position = UDim2.new(1, -260, 0.8, 0)}, 0.3)
+        local progress = create("Frame", {
+            Parent = notif,
+            BackgroundColor3 = col,
+            BackgroundTransparency = 0.7,
+            BorderSizePixel = 0,
+            Position = UDim2.new(0, 0, 1, -3),
+            Size = UDim2.new(1, 0, 0, 3)
+        })
+        
+        tw(notif, {Position = UDim2.new(1, -290, 0.85, 0)}, 0.4, Enum.EasingStyle.Quart)
+        tw(progress, {Size = UDim2.new(0, 0, 0, 3)}, dur or 3, Enum.EasingStyle.Linear)
+        
         task.delay(dur or 3, function()
-            tw(notif, {Position = UDim2.new(1, 10, 0.8, 0)}, 0.3)
-            task.delay(0.3, function() notif:Destroy() end)
+            tw(notif, {Position = UDim2.new(1, 20, 0.85, 0)}, 0.3, Enum.EasingStyle.Quart)
+            task.delay(0.35, function() notif:Destroy() end)
         end)
     end
     
     function window:destroy()
-        tw(main, {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 0)}, 0.2)
-        task.delay(0.2, function() gui:Destroy() end)
+        tw(blur, {Size = 0}, 0.3)
+        tw(main, {Size = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 1}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In)
+        task.delay(0.35, function()
+            gui:Destroy()
+            blur:Destroy()
+        end)
     end
     
     return window
