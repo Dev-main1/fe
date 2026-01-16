@@ -411,17 +411,18 @@ function lib:init(title, subtitle)
         BackgroundTransparency = 1,
         Position = UDim2.new(0, 12, 0.5, -8),
         Size = UDim2.new(0, 16, 0, 16),
-        Image = "rbxassetid://7072706663",
-        ImageColor3 = theme.textDim
+        Image = "rbxassetid://10734898355",
+        ImageColor3 = theme.textDim,
+        Visible = false
     })
     
     local searchInput = create("TextBox", {
         Parent = searchBox,
         BackgroundTransparency = 1,
-        Position = UDim2.new(0, 36, 0, 0),
-        Size = UDim2.new(1, -48, 1, 0),
+        Position = UDim2.new(0, 12, 0, 0),
+        Size = UDim2.new(1, -24, 1, 0),
         Font = Enum.Font.Gotham,
-        PlaceholderText = "Search for a module...",
+        PlaceholderText = "Search...",
         PlaceholderColor3 = theme.textDark,
         Text = "",
         TextColor3 = theme.text,
@@ -695,33 +696,33 @@ function lib:init(title, subtitle)
         Parent = openGui,
         Name = "OpenButton",
         BackgroundColor3 = theme.accent,
-        BackgroundTransparency = 0.1,
+        BackgroundTransparency = 0.15,
         BorderSizePixel = 0,
-        Position = UDim2.new(0.5, -25, 0, 15),
-        Size = UDim2.new(0, 50, 0, 50),
+        Position = UDim2.new(0.5, -35, 0, 10),
+        Size = UDim2.new(0, 70, 0, 70),
         Text = "",
         AutoButtonColor = false,
         Visible = false
     })
     addCorner(openBtn, UDim.new(1, 0))
-    addShadow(openBtn, 0.3)
-    addStroke(openBtn, theme.accent, 2, 0.3)
+    addShadow(openBtn, 0.5)
+    addStroke(openBtn, theme.accent, 3, 0.2)
     
     local openIcon = create("ImageLabel", {
         Parent = openBtn,
         BackgroundTransparency = 1,
-        Position = UDim2.new(0.5, -8, 0.5, -8),
-        Size = UDim2.new(0, 16, 0, 16),
+        Position = UDim2.new(0.5, -12, 0.5, -12),
+        Size = UDim2.new(0, 24, 0, 24),
         Image = "rbxassetid://10734923549",
         ImageColor3 = theme.text,
         ScaleType = Enum.ScaleType.Fit
     })
     
     openBtn.MouseEnter:Connect(function()
-        tw(openBtn, {BackgroundTransparency = 0, Size = UDim2.new(0, 55, 0, 55)}, 0.2)
+        tw(openBtn, {BackgroundTransparency = 0, Size = UDim2.new(0, 75, 0, 75)}, 0.2)
     end)
     openBtn.MouseLeave:Connect(function()
-        tw(openBtn, {BackgroundTransparency = 0.1, Size = UDim2.new(0, 50, 0, 50)}, 0.2)
+        tw(openBtn, {BackgroundTransparency = 0.15, Size = UDim2.new(0, 70, 0, 70)}, 0.2)
     end)
     
     task.spawn(function()
@@ -801,7 +802,7 @@ function lib:init(title, subtitle)
     local cfgData = {}
     local elements = {}
     local autoSave = false
-    local autoSaveName = "autosave"
+    local autoSaveName = "default"
     local notifQueue = {}
     
     local window = {
@@ -819,9 +820,17 @@ function lib:init(title, subtitle)
     
     local function saveElement(key, value)
         cfgData[key] = value
-        if autoSave then
+        if autoSave and autoSaveName then
             task.delay(0.5, function()
-                window:saveConfig(autoSaveName, true)
+                pcall(function()
+                    if not writefile or not makefolder or not isfolder then return end
+                    if not isfolder(window.cfgFolder) then
+                        makefolder(window.cfgFolder)
+                    end
+                    local path = window.cfgFolder .. "/" .. autoSaveName .. ".json"
+                    local data = game:GetService("HttpService"):JSONEncode(cfgData)
+                    writefile(path, data)
+                end)
             end)
         end
     end
@@ -2079,16 +2088,14 @@ function lib:init(title, subtitle)
             writefile(path, data)
         end)
         if success then
-            self:notify("Config", "Saved: " .. name, 2)
             if self.onConfigListUpdate then
                 self.onConfigListUpdate()
             end
-        else
-            self:notify("Error", "Failed to save config", 2, "error")
         end
     end
     
     function window:loadConfig(name)
+        autoSaveName = name
         local success, err = pcall(function()
             if not isfile then return end
             local path = self.cfgFolder .. "/" .. name .. ".json"
@@ -2103,32 +2110,21 @@ function lib:init(title, subtitle)
             end
         end)
         if success then
-            self:notify("Config", "Loaded: " .. name, 2)
+            return true
         else
-            self:notify("Error", "Failed to load config", 2, "error")
+            return false
         end
     end
     
     function window:deleteConfig(name)
-        if not isfile or not delfile then
-            self:notify("Error", "File functions not available", 2, "error")
-            return
-        end
+        if not isfile or not delfile then return end
         local path = self.cfgFolder .. "/" .. name .. ".json"
-        if not isfile(path) then
-            self:notify("Error", "Config doesn't exist", 2, "error")
-            return
-        end
+        if not isfile(path) then return end
         local success = pcall(function()
             delfile(path)
         end)
-        if success then
-            self:notify("Config", "Deleted: " .. name, 2)
-            if self.onConfigListUpdate then
-                self.onConfigListUpdate()
-            end
-        else
-            self:notify("Error", "Failed to delete", 2, "error")
+        if success and self.onConfigListUpdate then
+            self.onConfigListUpdate()
         end
     end
     
@@ -2137,11 +2133,18 @@ function lib:init(title, subtitle)
         if not isfolder or not listfiles then return configs end
         if not isfolder(self.cfgFolder) then
             makefolder(self.cfgFolder)
-            return configs
         end
+        local hasDefault = false
         for _, file in pairs(listfiles(self.cfgFolder)) do
             local name = file:match("([^/\\]+)%.json$")
-            if name then table.insert(configs, name) end
+            if name then 
+                table.insert(configs, name)
+                if name == "default" then hasDefault = true end
+            end
+        end
+        if not hasDefault then
+            self:saveConfig("default")
+            table.insert(configs, "default")
         end
         return configs
     end
