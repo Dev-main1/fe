@@ -226,12 +226,12 @@ function lib:init(title, subtitle)
         Parent = gui,
         BackgroundTransparency = 1,
         Size = UDim2.new(1, 0, 1, 0),
-        ZIndex = 1,
+        ZIndex = -10,
         Visible = true
     })
     local bgSnowflakes = {}
-    for i = 1, 80 do
-        local s = math.random(3, 8)
+    for i = 1, 100 do
+        local s = math.random(4, 10)
         local startX = math.random()
         local startY = math.random()
         local snow = create("ImageLabel", {
@@ -240,10 +240,11 @@ function lib:init(title, subtitle)
             Position = UDim2.new(startX, 0, startY, 0),
             Size = UDim2.new(0, s, 0, s),
             Image = "rbxassetid://5028857084",
-            ImageColor3 = Color3.fromRGB(220, 220, 255),
-            ImageTransparency = math.random(10, 40) / 100
+            ImageColor3 = Color3.fromRGB(240, 240, 255),
+            ImageTransparency = 0.1,
+            ZIndex = -10
         })
-        table.insert(bgSnowflakes, {frame = snow, speedY = 0.0001 + math.random() * 0.0002, speedX = (math.random() - 0.5) * 0.0001, x = startX, y = startY, rot = math.random(0, 360)})
+        table.insert(bgSnowflakes, {frame = snow, speedY = 0.0002 + math.random() * 0.0003, speedX = (math.random() - 0.5) * 0.0002, x = startX, y = startY, rot = math.random(0, 360)})
     end
     
     task.spawn(function()
