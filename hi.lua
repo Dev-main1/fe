@@ -61,7 +61,10 @@ local iconMap = {
     crosshair = "crosshair", gamepad = "gamepad-2", cpu = "cpu", code = "code",
     terminal = "terminal", database = "database", cloud = "cloud", wifi = "wifi",
     power = "power", sun = "sun", moon = "moon", clock = "clock",
-    activity = "activity", award = "award", trophy = "trophy", flag = "flag"
+    activity = "activity", award = "award", trophy = "trophy", flag = "flag",
+    ["Save Config"] = "save", ["Load Config"] = "folder-open", ["Delete Config"] = "trash-2",
+    ["Export Config"] = "upload", ["Import Config"] = "download", Showcase = "box",
+    Lorem = "file-text", Ipsum = "layers", ["Config System"] = "folder-cog"
 }
 
 local function tw(obj, props, dur, style, dir)
@@ -1169,14 +1172,16 @@ function lib:init(title, subtitle)
             })
             addCorner(secIcon, UDim.new(0, 6))
             
-            local secDot = create("Frame", {
+            local iconLbl = create("ImageLabel", {
                 Parent = secIcon,
-                BackgroundColor3 = theme.accent,
-                BorderSizePixel = 0,
-                Position = UDim2.new(0.5, -4, 0.5, -4),
-                Size = UDim2.new(0, 8, 0, 8)
+                BackgroundTransparency = 1,
+                Size = UDim2.new(0, 16, 0, 16),
+                Position = UDim2.new(0.5, -8, 0.5, -8),
+                ImageColor3 = theme.accent,
+                ImageTransparency = 0,
+                ScaleType = Enum.ScaleType.Fit,
+                Image = getIcon(name) or ""
             })
-            addCorner(secDot, UDim.new(1, 0))
             
             local secTitle = create("TextLabel", {
                 Parent = header,
@@ -1288,7 +1293,17 @@ function lib:init(title, subtitle)
                 })
                 addCorner(btnIcon, UDim.new(0, 6))
                 
-                local btnArrow = create("TextLabel", {
+                local iconName = iconMap[name] or name:lower()
+                local iconId = getIcon(iconName)
+                local btnArrow = iconId and create("ImageLabel", {
+                    Parent = btnIcon,
+                    BackgroundTransparency = 1,
+                    Size = UDim2.new(0, 14, 0, 14),
+                    Position = UDim2.new(0.5, -7, 0.5, -7),
+                    Image = iconId,
+                    ImageColor3 = theme.accent,
+                    ScaleType = Enum.ScaleType.Fit
+                }) or create("TextLabel", {
                     Parent = btnIcon,
                     BackgroundTransparency = 1,
                     Size = UDim2.new(1, 0, 1, 0),
@@ -1314,14 +1329,22 @@ function lib:init(title, subtitle)
                     tw(btn, {BackgroundColor3 = theme.accent}, 0.2)
                     tw(btn:FindFirstChild("UIStroke"), {Color = theme.accent, Transparency = 0.3}, 0.2)
                     tw(btnIcon, {BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 0.7}, 0.2)
-                    tw(btnArrow, {TextColor3 = Color3.new(1, 1, 1)}, 0.2)
+                    if btnArrow:IsA("ImageLabel") then
+                        tw(btnArrow, {ImageColor3 = Color3.new(1, 1, 1)}, 0.2)
+                    else
+                        tw(btnArrow, {TextColor3 = Color3.new(1, 1, 1)}, 0.2)
+                    end
                     btnGrad.Enabled = false
                 end)
                 btn.MouseLeave:Connect(function()
                     tw(btn, {BackgroundColor3 = Color3.fromRGB(25, 20, 45)}, 0.2)
                     tw(btn:FindFirstChild("UIStroke"), {Color = Color3.fromRGB(80, 60, 120), Transparency = 0.6}, 0.2)
                     tw(btnIcon, {BackgroundColor3 = theme.accent, BackgroundTransparency = 0.8}, 0.2)
-                    tw(btnArrow, {TextColor3 = theme.accent}, 0.2)
+                    if btnArrow:IsA("ImageLabel") then
+                        tw(btnArrow, {ImageColor3 = theme.accent}, 0.2)
+                    else
+                        tw(btnArrow, {TextColor3 = theme.accent}, 0.2)
+                    end
                     btnGrad.Enabled = true
                 end)
                 btn.MouseButton1Click:Connect(function()
@@ -1647,33 +1670,25 @@ function lib:init(title, subtitle)
                 local frame = create("Frame", {
                     Parent = holder,
                     Name = name,
-                    BackgroundColor3 = Color3.fromRGB(20, 16, 32),
-                    BackgroundTransparency = 0.5,
+                    BackgroundColor3 = Color3.fromRGB(16, 13, 28),
+                    BackgroundTransparency = 0.3,
                     Size = UDim2.new(1, 0, 0, 42)
                 })
                 addCorner(frame, UDim.new(0, 10))
+                addStroke(frame, Color3.fromRGB(50, 40, 75), 1, 0.7)
                 
-                local lbl = create("TextLabel", {
+                local frameGrad = create("UIGradient", {
                     Parent = frame,
-                    BackgroundTransparency = 1,
-                    Position = UDim2.new(0, 14, 0, 0),
-                    Size = UDim2.new(0.3, -14, 1, 0),
-                    Font = Enum.Font.GothamBold,
-                    Text = name,
-                    TextColor3 = theme.text,
-                    TextSize = 13,
-                    TextXAlignment = Enum.TextXAlignment.Left
-                })
-                
-                local box = create("Frame", {
-                    Parent = frame,
-                    BackgroundColor3 = Color3.fromRGB(25, 20, 45),
+                    Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Color3.fromRGB(18, 15, 32)),
+                        ColorSequenceKeypoint.new(1, Color3.fromRGB(14, 11, 24))
+                    }),\n                    Rotation = 90\n                })\n                \n                local lbl = create("TextLabel", {\n                    Parent = frame,\n                    BackgroundTransparency = 1,\n                    Position = UDim2.new(0, 14, 0, 0),\n                    Size = UDim2.new(0.3, -14, 1, 0),\n                    Font = Enum.Font.GothamBold,\n                    Text = name,\n                    TextColor3 = theme.text,\n                    TextSize = 13,\n                    TextXAlignment = Enum.TextXAlignment.Left\n                })\n                \n                local box = create("Frame", {\n                    Parent = frame,\n                    BackgroundColor3 = Color3.fromRGB(22, 18, 38),
                     BorderSizePixel = 0,
                     Position = UDim2.new(0.32, 0, 0.5, -15),
                     Size = UDim2.new(0.68, -14, 0, 30)
                 })
-                addCorner(box, UDim.new(0, 8))
-                addStroke(box, Color3.fromRGB(60, 50, 90), 1, 0.6)
+                addCorner(box, UDim.new(0, 6))
+                addStroke(box, Color3.fromRGB(55, 45, 85), 1, 0.7)
                 
                 local inp = create("TextBox", {
                     Parent = box,
@@ -1694,7 +1709,7 @@ function lib:init(title, subtitle)
                     tw(box:FindFirstChild("UIStroke"), {Color = theme.accent, Transparency = 0.3}, 0.2)
                 end)
                 inp.FocusLost:Connect(function()
-                    tw(box:FindFirstChild("UIStroke"), {Color = Color3.fromRGB(60, 50, 90), Transparency = 0.6}, 0.2)
+                    tw(box:FindFirstChild("UIStroke"), {Color = Color3.fromRGB(55, 45, 85), Transparency = 0.7}, 0.2)
                     if callback then callback(inp.Text) end
                 end)
                 
@@ -1714,19 +1729,19 @@ function lib:init(title, subtitle)
                 local frame = create("Frame", {
                     Parent = holder,
                     Name = name,
-                    BackgroundColor3 = Color3.fromRGB(18, 15, 32),
+                    BackgroundColor3 = Color3.fromRGB(16, 13, 28),
                     BorderSizePixel = 0,
                     Size = UDim2.new(1, 0, 0, 44),
                     ClipsDescendants = true
                 })
                 addCorner(frame, UDim.new(0, 10))
-                addStroke(frame, Color3.fromRGB(55, 45, 85), 1, 0.7)
+                addStroke(frame, Color3.fromRGB(50, 40, 75), 1, 0.7)
                 
                 local frameGrad = create("UIGradient", {
                     Parent = frame,
                     Color = ColorSequence.new({
-                        ColorSequenceKeypoint.new(0, Color3.fromRGB(22, 18, 40)),
-                        ColorSequenceKeypoint.new(1, Color3.fromRGB(16, 13, 28))
+                        ColorSequenceKeypoint.new(0, Color3.fromRGB(18, 15, 32)),
+                        ColorSequenceKeypoint.new(1, Color3.fromRGB(14, 11, 24))
                     }),
                     Rotation = 90
                 })
@@ -1753,13 +1768,13 @@ function lib:init(title, subtitle)
                 
                 local valBox = create("Frame", {
                     Parent = header,
-                    BackgroundColor3 = Color3.fromRGB(28, 22, 50),
+                    BackgroundColor3 = Color3.fromRGB(22, 18, 38),
                     BackgroundTransparency = 0,
                     Position = UDim2.new(0.4, 0, 0.5, -14),
                     Size = UDim2.new(0.6, -18, 0, 28)
                 })
                 addCorner(valBox, UDim.new(0, 6))
-                addStroke(valBox, Color3.fromRGB(70, 55, 110), 1, 0.6)
+                addStroke(valBox, Color3.fromRGB(55, 45, 85), 1, 0.7)
                 
                 local valLbl = create("TextLabel", {
                     Parent = valBox,
@@ -1786,7 +1801,7 @@ function lib:init(title, subtitle)
                 
                 local optHolder = create("Frame", {
                     Parent = frame,
-                    BackgroundColor3 = Color3.fromRGB(14, 11, 26),
+                    BackgroundColor3 = Color3.fromRGB(12, 10, 22),
                     BackgroundTransparency = 0,
                     Position = UDim2.new(0, 8, 0, 48),
                     Size = UDim2.new(1, -16, 0, #opts * 32)
@@ -1805,8 +1820,8 @@ function lib:init(title, subtitle)
                     
                     local optBtn = create("TextButton", {
                         Parent = optHolder,
-                        BackgroundColor3 = isSelected and Color3.fromRGB(70, 45, 120) or Color3.fromRGB(22, 18, 40),
-                        BackgroundTransparency = isSelected and 0.2 or 0.3,
+                        BackgroundColor3 = isSelected and Color3.fromRGB(60, 40, 105) or Color3.fromRGB(18, 15, 32),
+                        BackgroundTransparency = isSelected and 0.2 or 0.4,
                         BorderSizePixel = 0,
                         Size = UDim2.new(1, 0, 0, 28),
                         Font = Enum.Font.Gotham,
@@ -1866,7 +1881,7 @@ function lib:init(title, subtitle)
                                     local lbl = child:FindFirstChildOfClass("TextLabel")
                                     local isSel = selected[lbl and lbl.Text or ""]
                                     if lbl then tw(lbl, {TextColor3 = isSel and theme.accent or theme.textDim}, 0.15) end
-                                    tw(child, {BackgroundTransparency = isSel and 0.2 or 0.3, BackgroundColor3 = isSel and Color3.fromRGB(70, 45, 120) or Color3.fromRGB(22, 18, 40)}, 0.15)
+                                    tw(child, {BackgroundTransparency = isSel and 0.2 or 0.4, BackgroundColor3 = isSel and Color3.fromRGB(60, 40, 105) or Color3.fromRGB(18, 15, 32)}, 0.15)
                                 end
                             end
                             if callback then callback(list) end
@@ -1879,7 +1894,7 @@ function lib:init(title, subtitle)
                                     local lbl = child:FindFirstChildOfClass("TextLabel")
                                     local isSel = lbl and lbl.Text == val
                                     if lbl then tw(lbl, {TextColor3 = isSel and theme.accent or theme.textDim}, 0.15) end
-                                    tw(child, {BackgroundTransparency = isSel and 0.2 or 0.3, BackgroundColor3 = isSel and Color3.fromRGB(70, 45, 120) or Color3.fromRGB(22, 18, 40)}, 0.15)
+                                    tw(child, {BackgroundTransparency = isSel and 0.2 or 0.4, BackgroundColor3 = isSel and Color3.fromRGB(60, 40, 105) or Color3.fromRGB(18, 15, 32)}, 0.15)
                                 end
                             end
                             open = false
@@ -1916,8 +1931,8 @@ function lib:init(title, subtitle)
                             local isSel = val == opt
                             local optBtn = create("TextButton", {
                                 Parent = optHolder,
-                                BackgroundColor3 = isSel and Color3.fromRGB(70, 45, 120) or Color3.fromRGB(22, 18, 40),
-                                BackgroundTransparency = isSel and 0.2 or 0.3,
+                                BackgroundColor3 = isSel and Color3.fromRGB(60, 40, 105) or Color3.fromRGB(18, 15, 32),
+                                BackgroundTransparency = isSel and 0.2 or 0.4,
                                 BorderSizePixel = 0,
                                 Size = UDim2.new(1, 0, 0, 28),
                                 Font = Enum.Font.Gotham,
@@ -1939,12 +1954,12 @@ function lib:init(title, subtitle)
                             })
                             
                             optBtn.MouseEnter:Connect(function()
-                                tw(optBtn, {BackgroundTransparency = 0.1, BackgroundColor3 = Color3.fromRGB(80, 55, 140)}, 0.15)
+                                tw(optBtn, {BackgroundTransparency = 0.1, BackgroundColor3 = Color3.fromRGB(70, 50, 125)}, 0.15)
                                 tw(optLbl, {TextColor3 = theme.text}, 0.15)
                             end)
                             optBtn.MouseLeave:Connect(function()
                                 local isSel = val == opt
-                                tw(optBtn, {BackgroundTransparency = isSel and 0.2 or 0.3, BackgroundColor3 = isSel and Color3.fromRGB(70, 45, 120) or Color3.fromRGB(22, 18, 40)}, 0.15)
+                                tw(optBtn, {BackgroundTransparency = isSel and 0.2 or 0.4, BackgroundColor3 = isSel and Color3.fromRGB(60, 40, 105) or Color3.fromRGB(18, 15, 32)}, 0.15)
                                 tw(optLbl, {TextColor3 = isSel and theme.accent or theme.textDim}, 0.15)
                             end)
                             optBtn.MouseButton1Click:Connect(function()
@@ -1956,7 +1971,7 @@ function lib:init(title, subtitle)
                                         local lbl = child:FindFirstChildOfClass("TextLabel")
                                         local isSel = lbl and lbl.Text == val
                                         if lbl then tw(lbl, {TextColor3 = isSel and theme.accent or theme.textDim}, 0.15) end
-                                        tw(child, {BackgroundTransparency = isSel and 0.2 or 0.3, BackgroundColor3 = isSel and Color3.fromRGB(70, 45, 120) or Color3.fromRGB(22, 18, 40)}, 0.15)
+                                        tw(child, {BackgroundTransparency = isSel and 0.2 or 0.4, BackgroundColor3 = isSel and Color3.fromRGB(60, 40, 105) or Color3.fromRGB(18, 15, 32)}, 0.15)
                                     end
                                 end
                                 open = false
@@ -1979,13 +1994,22 @@ function lib:init(title, subtitle)
                 local frame = create("Frame", {
                     Parent = holder,
                     Name = name,
-                    BackgroundColor3 = Color3.fromRGB(22, 18, 38),
+                    BackgroundColor3 = Color3.fromRGB(16, 13, 28),
                     BorderSizePixel = 0,
                     Size = UDim2.new(1, 0, 0, 44),
                     ClipsDescendants = true
                 })
                 addCorner(frame, UDim.new(0, 10))
-                addStroke(frame, Color3.fromRGB(60, 50, 90), 1, 0.6)
+                addStroke(frame, Color3.fromRGB(50, 40, 75), 1, 0.7)
+                
+                local frameGrad = create("UIGradient", {
+                    Parent = frame,
+                    Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Color3.fromRGB(18, 15, 32)),
+                        ColorSequenceKeypoint.new(1, Color3.fromRGB(14, 11, 24))
+                    }),
+                    Rotation = 90
+                })
                 
                 local header = create("TextButton", {
                     Parent = frame,
@@ -2014,8 +2038,8 @@ function lib:init(title, subtitle)
                     Position = UDim2.new(1, -80, 0.5, -12),
                     Size = UDim2.new(0, 65, 0, 24)
                 })
-                addCorner(preview, UDim.new(0, 8))
-                addStroke(preview, Color3.fromRGB(80, 70, 110), 1, 0.5)
+                addCorner(preview, UDim.new(0, 6))
+                addStroke(preview, Color3.fromRGB(theme.accent.R * 255 * 0.7, theme.accent.G * 255 * 0.7, theme.accent.B * 255 * 0.7), 1.5, 0.6)
                 
                 local hexLbl = create("TextLabel", {
                     Parent = preview,
@@ -2466,9 +2490,12 @@ function lib:init(title, subtitle)
             writefile(path, data)
         end)
         if success then
+            self:notify("Success", "Saved: " .. name, 2)
             if self.onConfigListUpdate then
                 self.onConfigListUpdate()
             end
+        else
+            self:notify("Error", "Save failed", 2, "error")
         end
     end
     
@@ -2488,8 +2515,10 @@ function lib:init(title, subtitle)
             end
         end)
         if success then
+            self:notify("Success", "Loaded: " .. name, 2)
             return true
         else
+            self:notify("Error", "Load failed", 2, "error")
             return false
         end
     end
@@ -2497,12 +2526,20 @@ function lib:init(title, subtitle)
     function window:deleteConfig(name)
         if not isfile or not delfile then return end
         local path = self.cfgFolder .. "/" .. name .. ".json"
-        if not isfile(path) then return end
+        if not isfile(path) then 
+            self:notify("Error", "Config not found", 2, "error")
+            return 
+        end
         local success = pcall(function()
             delfile(path)
         end)
-        if success and self.onConfigListUpdate then
-            self.onConfigListUpdate()
+        if success then
+            self:notify("Success", "Deleted: " .. name, 2)
+            if self.onConfigListUpdate then
+                self.onConfigListUpdate()
+            end
+        else
+            self:notify("Error", "Delete failed", 2, "error")
         end
     end
     
