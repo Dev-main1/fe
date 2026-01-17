@@ -21,11 +21,36 @@ end)
 local function getIcon(name)
     if Icons then
         local ok, result = pcall(function()
-            return Icons.GetIcon(name:lower())
+            return Icons.Icon(name:lower(), nil, true)
         end)
-        if ok and result then return result end
+        if ok and result then 
+            -- result is {spritesheetUrl, {ImageRectSize, ImageRectPosition}}
+            if type(result) == "table" and result[1] then
+                return result[1], result[2]
+            elseif type(result) == "string" then
+                return result, nil
+            end
+        end
     end
-    return nil
+    return nil, nil
+end
+
+local function applyIcon(imageLabel, iconName, fallback)
+    local img, rect = getIcon(iconName)
+    if img then
+        imageLabel.Image = img
+        if rect then
+            imageLabel.ImageRectSize = rect.ImageRectSize or Vector2.new(0, 0)
+            imageLabel.ImageRectOffset = rect.ImageRectPosition or Vector2.new(0, 0)
+        else
+            imageLabel.ImageRectSize = Vector2.new(0, 0)
+            imageLabel.ImageRectOffset = Vector2.new(0, 0)
+        end
+    elseif fallback then
+        imageLabel.Image = fallback
+        imageLabel.ImageRectSize = Vector2.new(0, 0)
+        imageLabel.ImageRectOffset = Vector2.new(0, 0)
+    end
 end
 
 local theme = {
@@ -177,22 +202,27 @@ function lib:init(title, subtitle)
     tw(blur, {Size = 6}, 0.5)
     
     -- Snowflakes on background
+    local bgSnowHolder = create("Frame", {
+        Parent = gui,
+        BackgroundTransparency = 1,
+        Size = UDim2.new(1, 0, 1, 0),
+        ZIndex = 0
+    })
     local bgSnowflakes = {}
-    for i = 1, 40 do
-        local s = math.random(3, 6)
+    for i = 1, 60 do
+        local s = math.random(2, 5)
         local startX = math.random()
         local startY = math.random()
-        local snow = create("Frame", {
-            Parent = gui,
-            BackgroundColor3 = Color3.fromRGB(240, 240, 255),
-            BorderSizePixel = 0,
+        local snow = create("ImageLabel", {
+            Parent = bgSnowHolder,
+            BackgroundTransparency = 1,
             Position = UDim2.new(startX, 0, startY, 0),
             Size = UDim2.new(0, s, 0, s),
-            BackgroundTransparency = math.random(30, 60) / 100,
-            ZIndex = 0
+            Image = "rbxassetid://5028857084",
+            ImageColor3 = Color3.fromRGB(200, 200, 255),
+            ImageTransparency = math.random(20, 50) / 100
         })
-        addCorner(snow, UDim.new(1, 0))
-        table.insert(bgSnowflakes, {frame = snow, speedY = 0.0001 + math.random() * 0.0002, speedX = (math.random() - 0.5) * 0.00008, x = startX, y = startY})
+        table.insert(bgSnowflakes, {frame = snow, speedY = 0.00008 + math.random() * 0.00015, speedX = (math.random() - 0.5) * 0.00005, x = startX, y = startY, rot = math.random(0, 360)})
     end
     
     task.spawn(function()
@@ -201,11 +231,13 @@ function lib:init(title, subtitle)
                 if data.frame and data.frame.Parent then
                     data.y = data.y + data.speedY
                     data.x = data.x + data.speedX
+                    data.rot = data.rot + 0.5
                     if data.y > 1.1 then
                         data.y = -0.05
                         data.x = math.random()
                     end
                     data.frame.Position = UDim2.new(data.x, 0, data.y, 0)
+                    data.frame.Rotation = data.rot
                 end
             end
             task.wait(0.016)
@@ -726,6 +758,10 @@ function lib:init(title, subtitle)
     end)
     
     local minimized = false
+    local visible = true
+    local toggleKey = Enum.KeyCode.Insert
+    local toggleCooldown = false
+    
     minimizeBtn.MouseButton1Click:Connect(function()
         minimized = not minimized
         resizeHandle.Visible = not minimized
@@ -797,10 +833,11 @@ function lib:init(title, subtitle)
         BackgroundTransparency = 1,
         Position = UDim2.new(0.5, -14, 0.5, -14),
         Size = UDim2.new(0, 28, 0, 28),
-        Image = getIcon("rocket") or "rbxassetid://7072719338",
+        Image = "rbxassetid://7072719338",
         ImageColor3 = theme.text,
         Rotation = -45
     })
+    applyIcon(openBtnIcon, "rocket", "rbxassetid://7072719338")
     
     -- Glow effect for open button icon
     local openBtnGlow = create("ImageLabel", {
@@ -849,18 +886,22 @@ function lib:init(title, subtitle)
         minimized = false
         resizeHandle.Visible = true
         searchBox.Visible = true
+        timeLabel.Visible = false
         openBtn.Visible = false
         main.Visible = true
+        bgSnowHolder.Visible = true
         main.Size = UDim2.new(0, 0, 0, 0)
         sidebar.Size = UDim2.new(0, 145, 1, 0)
         content.Position = UDim2.new(0, 145, 0, 0)
         content.Size = UDim2.new(1, -145, 1, 0)
+        content.BackgroundTransparency = 0.1
         tw(main, {Size = UDim2.new(0, savedSize.w, 0, savedSize.h)}, 0.4, Enum.EasingStyle.Back)
         tw(blur, {Size = 6}, 0.4)
     end)
     
     closeBtn.MouseButton1Click:Connect(function()
         visible = false
+        bgSnowHolder.Visible = false
         tw(blur, {Size = 0}, 0.3)
         tw(main, {Size = UDim2.new(0, 0, 0, 0)}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In)
         task.delay(0.35, function()
@@ -868,10 +909,6 @@ function lib:init(title, subtitle)
             openBtn.Visible = true
         end)
     end)
-    
-    local visible = true
-    local toggleKey = Enum.KeyCode.Insert
-    local toggleCooldown = false
     
     input.InputBegan:Connect(function(key, gpe)
         if gpe then return end
@@ -883,15 +920,19 @@ function lib:init(title, subtitle)
                 minimized = false
                 resizeHandle.Visible = true
                 searchBox.Visible = true
+                timeLabel.Visible = false
                 openBtn.Visible = false
                 main.Visible = true
+                bgSnowHolder.Visible = true
                 main.Size = UDim2.new(0, 0, 0, 0)
                 sidebar.Size = UDim2.new(0, 145, 1, 0)
                 content.Position = UDim2.new(0, 145, 0, 0)
                 content.Size = UDim2.new(1, -145, 1, 0)
+                content.BackgroundTransparency = 0.1
                 tw(main, {Size = UDim2.new(0, savedSize.w, 0, savedSize.h)}, 0.4, Enum.EasingStyle.Back)
                 tw(blur, {Size = 6}, 0.4)
             else
+                bgSnowHolder.Visible = false
                 tw(blur, {Size = 0}, 0.3)
                 tw(main, {Size = UDim2.new(0, 0, 0, 0)}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In)
                 task.delay(0.35, function()
@@ -1004,8 +1045,8 @@ function lib:init(title, subtitle)
         local iconSize = 18
         -- Get icon from API or fallback
         local iconName = iconMap[name] or iconMap[icon] or name:lower()
-        local iconId = icon or getIcon(iconName)
-        local hasIcon = iconId ~= nil
+        local img, rect = getIcon(iconName)
+        local hasIcon = img ~= nil or icon ~= nil
         
         local tabIcon
         if hasIcon then
@@ -1014,9 +1055,15 @@ function lib:init(title, subtitle)
                 BackgroundTransparency = 1,
                 Position = UDim2.new(0, 12, 0.5, -iconSize/2),
                 Size = UDim2.new(0, iconSize, 0, iconSize),
-                Image = iconId,
+                Image = "",
                 ImageColor3 = theme.textDim
             })
+            
+            if icon then
+                tabIcon.Image = icon
+            else
+                applyIcon(tabIcon, iconName)
+            end
         end
         
         local tabLbl = create("TextLabel", {
@@ -1186,8 +1233,9 @@ function lib:init(title, subtitle)
                 ImageColor3 = theme.accent,
                 ImageTransparency = 0,
                 ScaleType = Enum.ScaleType.Fit,
-                Image = getIcon(name) or ""
+                Image = ""
             })
+            applyIcon(iconLbl, name)
             
             local secTitle = create("TextLabel", {
                 Parent = header,
@@ -1300,13 +1348,13 @@ function lib:init(title, subtitle)
                 addCorner(btnIcon, UDim.new(0, 6))
                 
                 local iconName = iconMap[name] or name:lower()
-                local iconId = getIcon(iconName)
-                local btnArrow = iconId and create("ImageLabel", {
+                local img, rect = getIcon(iconName)
+                local btnArrow = img and create("ImageLabel", {
                     Parent = btnIcon,
                     BackgroundTransparency = 1,
                     Size = UDim2.new(0, 14, 0, 14),
                     Position = UDim2.new(0.5, -7, 0.5, -7),
-                    Image = iconId,
+                    Image = "",
                     ImageColor3 = theme.accent,
                     ScaleType = Enum.ScaleType.Fit
                 }) or create("TextLabel", {
@@ -1318,6 +1366,10 @@ function lib:init(title, subtitle)
                     TextColor3 = theme.accent,
                     TextSize = 14
                 })
+                
+                if img and btnArrow:IsA("ImageLabel") then
+                    applyIcon(btnArrow, iconName)
+                end
                 
                 local btnLbl = create("TextLabel", {
                     Parent = btn,
@@ -1480,7 +1532,8 @@ function lib:init(title, subtitle)
                 updateSecSize()
                 elements[name] = {
                     set = function(_, v) val = v update() end,
-                    get = function() return val end
+                    get = function() return val end,
+                    default = default or false
                 }
                 return elements[name]
             end
@@ -1667,7 +1720,8 @@ function lib:init(title, subtitle)
                         knob.Position = UDim2.new(pct, -10, 0.5, -10)
                         valLbl.Text = tostring(math.floor(val))
                     end,
-                    get = function() return val end
+                    get = function() return val end,
+                    default = default or min
                 }
                 return elements[name]
             end
@@ -2276,11 +2330,13 @@ function lib:init(title, subtitle)
                 
                 hexBox.FocusLost:Connect(function()
                     local hex = hexBox.Text:gsub("#", "")
-                    local ok, col = pcall(function() return Color3.fromHex(hex) end)
-                    if ok then
-                        val = col
-                        h, s, v = val:ToHSV()
-                        updateColor()
+                    if #hex == 6 then
+                        local ok, col = pcall(function() return Color3.fromHex(hex) end)
+                        if ok and col then
+                            val = col
+                            h, s, v = val:ToHSV()
+                            updateColor()
+                        end
                     end
                 end)
                 
@@ -2307,8 +2363,8 @@ function lib:init(title, subtitle)
                 local frame = create("Frame", {
                     Parent = holder,
                     Name = name,
-                    BackgroundColor3 = Color3.fromRGB(25, 20, 38),
-                    BackgroundTransparency = 0.5,
+                    BackgroundColor3 = Color3.fromRGB(22, 18, 34),
+                    BackgroundTransparency = 0.4,
                     Size = UDim2.new(1, 0, 0, 40)
                 })
                 addCorner(frame, UDim.new(0, 10))
@@ -2552,12 +2608,14 @@ function lib:init(title, subtitle)
     
     function window:loadConfig(name)
         autoSaveName = name
+        autoSave = true
         local success, err = pcall(function()
             if not isfile then return end
             local path = self.cfgFolder .. "/" .. name .. ".json"
             if isfile(path) then
                 local data = readfile(path)
                 self.cfgData = game:GetService("HttpService"):JSONDecode(data)
+                cfgData = self.cfgData
                 for k, v in pairs(self.cfgData) do
                     if self.elements and self.elements[k] then
                         self.elements[k]:set(v)
@@ -2566,11 +2624,31 @@ function lib:init(title, subtitle)
             end
         end)
         if success then
-            self:notify("Success", "Loaded: " .. name, 2)
+            self:notify("Config", "Loaded: " .. name .. " (AutoSave ON)", 2)
+            if self.onConfigLoad then
+                self.onConfigLoad(name)
+            end
             return true
         else
             self:notify("Error", "Load failed", 2, "error")
             return false
+        end
+    end
+    
+    function window:createConfig(name)
+        for k, el in pairs(self.elements) do
+            if el.default ~= nil then
+                el:set(el.default)
+            end
+        end
+        self.cfgData = {}
+        cfgData = {}
+        autoSaveName = name
+        autoSave = true
+        self:saveConfig(name)
+        self:notify("Config", "Created: " .. name, 2)
+        if self.onConfigLoad then
+            self.onConfigLoad(name)
         end
     end
     
@@ -2616,7 +2694,6 @@ function lib:init(title, subtitle)
     end
     
     function window:exportConfig(name)
-        self:saveConfig(name)
         local success, result = pcall(function()
             if not isfile then return "" end
             local path = self.cfgFolder .. "/" .. name .. ".json"
