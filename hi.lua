@@ -11,11 +11,28 @@ local env = getgenv and getgenv() or _G
 if env.BioLibLoaded then return env.BioLib end
 env.BioLibLoaded = true
 
+-- Load Icons API
+local Icons = nil
+pcall(function()
+    Icons = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/Footagesus/Icons/main/Main-v2.lua"))()
+    Icons.SetIconsType("lucide")
+end)
+
+local function getIcon(name)
+    if Icons then
+        local ok, result = pcall(function()
+            return Icons.GetIcon(name:lower())
+        end)
+        if ok and result then return result end
+    end
+    return nil
+end
+
 local theme = {
     bg = Color3.fromRGB(12, 10, 18),
     sidebar = Color3.fromRGB(8, 6, 14),
     card = Color3.fromRGB(18, 15, 28),
-    cardHover = Color3.fromRGB(28, 24, 42),
+    cardHover = Color3.fromRGB(35, 25, 55),
     accent = Color3.fromRGB(138, 90, 255),
     accentDark = Color3.fromRGB(98, 60, 200),
     text = Color3.fromRGB(245, 245, 250),
@@ -27,119 +44,24 @@ local theme = {
     shadow = Color3.fromRGB(0, 0, 0)
 }
 
-local icons = {
-    home = "rbxassetid://10723434711",
-    settings = "rbxassetid://10734950309",
-    combat = "rbxassetid://10723407389",
-    user = "rbxassetid://7072721559",
-    shield = "rbxassetid://7072720555",
-    target = "rbxassetid://7072720979",
-    zap = "rbxassetid://7072722026",
-    star = "rbxassetid://7072720812",
-    heart = "rbxassetid://7072719338",
-    folder = "rbxassetid://7072719005",
-    file = "rbxassetid://7072718774",
-    save = "rbxassetid://7072720445",
-    download = "rbxassetid://7072718532",
-    upload = "rbxassetid://7072721475",
-    search = "rbxassetid://7072706663",
-    eye = "rbxassetid://7072718656",
-    lock = "rbxassetid://7072719841",
-    unlock = "rbxassetid://7072721392",
-    play = "rbxassetid://7072720175",
-    pause = "rbxassetid://7072720070",
-    stop = "rbxassetid://7072720896",
-    skip = "rbxassetid://7072720727",
-    volume = "rbxassetid://7072721643",
-    mute = "rbxassetid://7072719927",
-    bell = "rbxassetid://7072717766",
-    message = "rbxassetid://7072719927",
-    send = "rbxassetid://7072720537",
-    trash = "rbxassetid://7072721226",
-    edit = "rbxassetid://7072718607",
-    plus = "rbxassetid://7072720274",
-    minus = "rbxassetid://7072719887",
-    check = "rbxassetid://7072717988",
-    x = "rbxassetid://7072721893",
-    menu = "rbxassetid://7072719887",
-    grid = "rbxassetid://7072719173",
-    list = "rbxassetid://7072719756",
-    layers = "rbxassetid://7072719587",
-    box = "rbxassetid://7072717848",
-    package = "rbxassetid://7072720008",
-    gift = "rbxassetid://7072719090",
-    crown = "rbxassetid://7072718360",
-    flame = "rbxassetid://7072718856",
-    bolt = "rbxassetid://7072717807",
-    rocket = "rbxassetid://7072720359",
-    globe = "rbxassetid://7072719130",
-    map = "rbxassetid://7072719887",
-    compass = "rbxassetid://7072718193",
-    crosshair = "rbxassetid://7072718318",
-    gamepad = "rbxassetid://7072719047",
-    cpu = "rbxassetid://7072718277",
-    code = "rbxassetid://7072718110",
-    terminal = "rbxassetid://7072721060",
-    database = "rbxassetid://7072718443",
-    cloud = "rbxassetid://7072718068",
-    wifi = "rbxassetid://7072721810",
-    bluetooth = "rbxassetid://7072717807",
-    battery = "rbxassetid://7072717725",
-    power = "rbxassetid://7072720274",
-    sun = "rbxassetid://7072720896",
-    moon = "rbxassetid://7072719968",
-    clock = "rbxassetid://7072718027",
-    calendar = "rbxassetid://7072717889",
-    alarm = "rbxassetid://7072717643",
-    timer = "rbxassetid://7072721143",
-    activity = "rbxassetid://7072717602",
-    trending = "rbxassetid://7072721309",
-    chart = "rbxassetid://7072717930",
-    pie = "rbxassetid://7072720109",
-    award = "rbxassetid://7072717684",
-    trophy = "rbxassetid://7072721351",
-    medal = "rbxassetid://7072719841",
-    flag = "rbxassetid://7072718898",
-    bookmark = "rbxassetid://7072717807",
-    tag = "rbxassetid://7072720937",
-    hash = "rbxassetid://7072719256",
-    at = "rbxassetid://7072717684",
-    link = "rbxassetid://7072719714",
-    paperclip = "rbxassetid://7072720008",
-    scissors = "rbxassetid://7072720488",
-    copy = "rbxassetid://7072718235",
-    clipboard = "rbxassetid://7072718027",
-    printer = "rbxassetid://7072720274",
-    camera = "rbxassetid://7072717889",
-    image = "rbxassetid://7072719463",
-    film = "rbxassetid://7072718816",
-    music = "rbxassetid://7072719968",
-    headphones = "rbxassetid://7072719298",
-    mic = "rbxassetid://7072719887",
-    speaker = "rbxassetid://7072720770",
-    radio = "rbxassetid://7072720318",
-    tv = "rbxassetid://7072721392",
-    monitor = "rbxassetid://7072719927",
-    phone = "rbxassetid://7072720149",
-    tablet = "rbxassetid://7072720937",
-    watch = "rbxassetid://7072721726",
-    airplay = "rbxassetid://7072717643",
-    cast = "rbxassetid://7072717930",
-    Main = "rbxassetid://10723434711",
-    Combat = "rbxassetid://10723407389",
-    Configs = "rbxassetid://10723424838",
-    Settings = "rbxassetid://7072720642",
-    Player = "rbxassetid://7072721559",
-    Visual = "rbxassetid://7072718656",
-    Misc = "rbxassetid://7072720812",
-    ESP = "rbxassetid://7072718656",
-    Aimbot = "rbxassetid://7072718318",
-    Movement = "rbxassetid://7072720359",
-    World = "rbxassetid://7072719130",
-    Teleport = "rbxassetid://7072721309",
-    Scripts = "rbxassetid://7072718110",
-    Credits = "rbxassetid://7072719338",
-    Info = "rbxassetid://7072717766"
+local iconMap = {
+    Main = "home", Combat = "swords", Configs = "folder-cog", Settings = "settings",
+    Player = "user", Visual = "eye", Misc = "sparkles", ESP = "scan-eye",
+    Aimbot = "crosshair", Movement = "footprints", World = "globe", Teleport = "map-pin",
+    Scripts = "code", Credits = "heart", Info = "info", home = "home",
+    settings = "settings", combat = "swords", user = "user", shield = "shield",
+    target = "target", zap = "zap", star = "star", heart = "heart",
+    folder = "folder", file = "file", save = "save", download = "download",
+    upload = "upload", search = "search", eye = "eye", lock = "lock",
+    unlock = "unlock", play = "play", pause = "pause", stop = "square",
+    bell = "bell", trash = "trash-2", edit = "pencil", plus = "plus",
+    minus = "minus", check = "check", x = "x", menu = "menu",
+    grid = "grid", layers = "layers", box = "box", gift = "gift",
+    crown = "crown", flame = "flame", rocket = "rocket", globe = "globe",
+    crosshair = "crosshair", gamepad = "gamepad-2", cpu = "cpu", code = "code",
+    terminal = "terminal", database = "database", cloud = "cloud", wifi = "wifi",
+    power = "power", sun = "sun", moon = "moon", clock = "clock",
+    activity = "activity", award = "award", trophy = "trophy", flag = "flag"
 }
 
 local function tw(obj, props, dur, style, dir)
@@ -251,61 +173,93 @@ function lib:init(title, subtitle)
     })
     tw(blur, {Size = 6}, 0.5)
     
+    -- Save window size
+    local savedSize = {w = 680, h = 450}
+    
     local main = create("Frame", {
         Parent = gui,
         Name = "Main",
-        BackgroundColor3 = Color3.fromRGB(6, 4, 14),
+        BackgroundColor3 = Color3.fromRGB(10, 8, 18),
         BorderSizePixel = 0,
         Position = UDim2.new(0.5, 0, 0.5, 0),
         Size = UDim2.new(0, 0, 0, 0),
         AnchorPoint = Vector2.new(0.5, 0.5),
         ClipsDescendants = true
     })
-    addCorner(main, UDim.new(0, 16))
-    addShadow(main, 0.4)
-    addStroke(main, Color3.fromRGB(100, 70, 150), 2, 0.4)
+    addCorner(main, UDim.new(0, 14))
+    addShadow(main, 0.5)
     
-    -- Create starry background
-    for i = 1, 200 do
-        local s = math.random(1, 5)
-        local brightness = math.random(180, 255)
+    local mainStroke = create("UIStroke", {
+        Parent = main,
+        Color = theme.accent,
+        Thickness = 1.5,
+        Transparency = 0.5
+    })
+    
+    -- Animated stars that MOVE
+    local stars = {}
+    for i = 1, 120 do
+        local s = math.random(2, 4)
+        local startX = math.random() * 1.1 - 0.05
+        local startY = math.random()
         local star = create("Frame", {
             Parent = main,
-            BackgroundColor3 = Color3.fromRGB(brightness, brightness - 20, 255),
+            BackgroundColor3 = Color3.fromRGB(200 + math.random(0, 55), 180 + math.random(0, 75), 255),
             BorderSizePixel = 0,
-            Position = UDim2.new(math.random() * 0.98, 0, math.random() * 0.98, 0),
+            Position = UDim2.new(startX, 0, startY, 0),
             Size = UDim2.new(0, s, 0, s),
-            BackgroundTransparency = math.random(10, 50) / 100,
+            BackgroundTransparency = math.random(20, 60) / 100,
             ZIndex = 1
         })
         addCorner(star, UDim.new(1, 0))
+        table.insert(stars, {frame = star, speed = 0.0001 + math.random() * 0.0003, x = startX})
+    end
+    
+    -- Star movement animation
+    task.spawn(function()
+        while main and main.Parent do
+            for _, data in ipairs(stars) do
+                if data.frame and data.frame.Parent then
+                    data.x = data.x - data.speed
+                    if data.x < -0.05 then
+                        data.x = 1.05
+                        data.frame.Position = UDim2.new(data.x, 0, math.random(), 0)
+                    else
+                        data.frame.Position = UDim2.new(data.x, 0, data.frame.Position.Y.Scale, 0)
+                    end
+                end
+            end
+            task.wait(0.016)
+        end
+    end)
+    
+    -- Star twinkle animation
+    for _, data in ipairs(stars) do
         task.spawn(function()
-            local delay = math.random() * 4
-            task.wait(delay)
-            while star and star.Parent do
-                local dur = 0.8 + math.random() * 1.2
-                tw(star, {BackgroundTransparency = 0.7 + math.random() * 0.25}, dur)
-                task.wait(dur)
-                tw(star, {BackgroundTransparency = math.random(5, 35) / 100}, dur)
-                task.wait(dur)
+            task.wait(math.random() * 2)
+            while data.frame and data.frame.Parent do
+                tw(data.frame, {BackgroundTransparency = 0.8}, 0.5 + math.random() * 0.5)
+                task.wait(0.6 + math.random() * 0.6)
+                tw(data.frame, {BackgroundTransparency = math.random(15, 45) / 100}, 0.5 + math.random() * 0.5)
+                task.wait(0.6 + math.random() * 0.6)
             end
         end)
     end
     
-    tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.4, Enum.EasingStyle.Back)
+    tw(main, {Size = UDim2.new(0, savedSize.w, 0, savedSize.h)}, 0.4, Enum.EasingStyle.Back)
     
     local sidebar = create("Frame", {
         Parent = main,
         Name = "Sidebar",
-        BackgroundColor3 = Color3.fromRGB(12, 10, 22),
+        BackgroundColor3 = Color3.fromRGB(14, 11, 24),
+        BackgroundTransparency = 0.15,
         BorderSizePixel = 0,
-        Position = UDim2.new(0, 8, 0, 8),
-        Size = UDim2.new(0, 135, 1, -16),
+        Position = UDim2.new(0, 0, 0, 0),
+        Size = UDim2.new(0, 145, 1, 0),
         ClipsDescendants = true,
         ZIndex = 2
     })
-    addCorner(sidebar, UDim.new(0, 12))
-    addStroke(sidebar, Color3.fromRGB(60, 50, 90), 1, 0.6)
+    addCorner(sidebar, UDim.new(0, 14))
     
     local sidebarGrad = create("UIGradient", {
         Parent = sidebar,
@@ -389,14 +343,14 @@ function lib:init(title, subtitle)
         Parent = main,
         Name = "Content",
         BackgroundColor3 = Color3.fromRGB(14, 12, 24),
+        BackgroundTransparency = 0.1,
         BorderSizePixel = 0,
-        Position = UDim2.new(0, 151, 0, 8),
-        Size = UDim2.new(1, -159, 1, -16),
+        Position = UDim2.new(0, 145, 0, 0),
+        Size = UDim2.new(1, -145, 1, 0),
         ClipsDescendants = true,
         ZIndex = 2
     })
-    addCorner(content, UDim.new(0, 12))
-    addStroke(content, Color3.fromRGB(60, 50, 90), 1, 0.6)
+    addCorner(content, UDim.new(0, 14))
     
     local contentGrad = create("UIGradient", {
         Parent = content,
@@ -511,7 +465,7 @@ function lib:init(title, subtitle)
     
     local minimizeBtn = create("TextButton", {
         Parent = btnHolder,
-        BackgroundColor3 = theme.card,
+        BackgroundColor3 = Color3.fromRGB(35, 25, 55),
         BorderSizePixel = 0,
         Position = UDim2.new(0, 0, 0, 0),
         Size = UDim2.new(0, 30, 0, 30),
@@ -522,7 +476,7 @@ function lib:init(title, subtitle)
     
     local minIcon = create("Frame", {
         Parent = minimizeBtn,
-        BackgroundColor3 = theme.orange,
+        BackgroundColor3 = theme.accent,
         BorderSizePixel = 0,
         Position = UDim2.new(0.5, -6, 0.5, -1),
         Size = UDim2.new(0, 12, 0, 2)
@@ -530,17 +484,17 @@ function lib:init(title, subtitle)
     addCorner(minIcon, UDim.new(1, 0))
     
     minimizeBtn.MouseEnter:Connect(function()
-        tw(minimizeBtn, {BackgroundColor3 = theme.cardHover}, 0.15)
+        tw(minimizeBtn, {BackgroundColor3 = theme.accent}, 0.15)
         tw(minIcon, {BackgroundColor3 = theme.text}, 0.15)
     end)
     minimizeBtn.MouseLeave:Connect(function()
-        tw(minimizeBtn, {BackgroundColor3 = theme.card}, 0.15)
-        tw(minIcon, {BackgroundColor3 = theme.orange}, 0.15)
+        tw(minimizeBtn, {BackgroundColor3 = Color3.fromRGB(35, 25, 55)}, 0.15)
+        tw(minIcon, {BackgroundColor3 = theme.accent}, 0.15)
     end)
     
     local closeBtn = create("TextButton", {
         Parent = btnHolder,
-        BackgroundColor3 = theme.card,
+        BackgroundColor3 = Color3.fromRGB(35, 25, 55),
         BorderSizePixel = 0,
         Position = UDim2.new(0, 40, 0, 0),
         Size = UDim2.new(0, 30, 0, 30),
@@ -555,17 +509,17 @@ function lib:init(title, subtitle)
         Size = UDim2.new(1, 0, 1, 0),
         Font = Enum.Font.GothamBold,
         Text = "×",
-        TextColor3 = theme.red,
+        TextColor3 = theme.accent,
         TextSize = 20
     })
     
     closeBtn.MouseEnter:Connect(function()
-        tw(closeBtn, {BackgroundColor3 = theme.red}, 0.15)
+        tw(closeBtn, {BackgroundColor3 = theme.accent}, 0.15)
         tw(closeIcon, {TextColor3 = theme.text}, 0.15)
     end)
     closeBtn.MouseLeave:Connect(function()
-        tw(closeBtn, {BackgroundColor3 = theme.card}, 0.15)
-        tw(closeIcon, {TextColor3 = theme.red}, 0.15)
+        tw(closeBtn, {BackgroundColor3 = Color3.fromRGB(35, 25, 55)}, 0.15)
+        tw(closeIcon, {TextColor3 = theme.accent}, 0.15)
     end)
     
     local pages = create("Frame", {
@@ -647,11 +601,14 @@ function lib:init(title, subtitle)
             local newW = math.clamp(startSize.X.Offset + delta.X, 500, 1000)
             local newH = math.clamp(startSize.Y.Offset + delta.Y, 300, 700)
             main.Size = UDim2.new(0, newW, 0, newH)
+            savedSize.w = newW
+            savedSize.h = newH
         end
     end)
     
     local dragging, dragStart, startPos
     
+    -- Drag from topbar
     topbar.InputBegan:Connect(function(inp)
         if inp.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
@@ -661,6 +618,36 @@ function lib:init(title, subtitle)
     end)
     
     topbar.InputEnded:Connect(function(inp)
+        if inp.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    
+    -- Drag from logo area (sidebar header)
+    logo.InputBegan:Connect(function(inp)
+        if inp.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = inp.Position
+            startPos = main.Position
+        end
+    end)
+    
+    logo.InputEnded:Connect(function(inp)
+        if inp.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    
+    -- Drag from sidebar (empty space)
+    sidebar.InputBegan:Connect(function(inp)
+        if inp.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            dragStart = inp.Position
+            startPos = main.Position
+        end
+    end)
+    
+    sidebar.InputEnded:Connect(function(inp)
         if inp.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = false
         end
@@ -685,9 +672,9 @@ function lib:init(title, subtitle)
             tw(main, {Size = UDim2.new(0, 400, 0, 55)}, 0.3, Enum.EasingStyle.Quart)
             tw(blur, {Size = 0}, 0.25)
         else
-            tw(sidebar, {Size = UDim2.new(0, 135, 1, -16)}, 0.3, Enum.EasingStyle.Quart)
-            tw(content, {Position = UDim2.new(0, 151, 0, 8), Size = UDim2.new(1, -159, 1, -16)}, 0.3, Enum.EasingStyle.Quart)
-            tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.3, Enum.EasingStyle.Quart)
+            tw(sidebar, {Size = UDim2.new(0, 145, 1, 0)}, 0.3, Enum.EasingStyle.Quart)
+            tw(content, {Position = UDim2.new(0, 145, 0, 0), Size = UDim2.new(1, -145, 1, 0)}, 0.3, Enum.EasingStyle.Quart)
+            tw(main, {Size = UDim2.new(0, savedSize.w, 0, savedSize.h)}, 0.3, Enum.EasingStyle.Quart)
             tw(blur, {Size = 6}, 0.25)
         end
     end)
@@ -728,6 +715,16 @@ function lib:init(title, subtitle)
     addShadow(openBtn, 0.3)
     addStroke(openBtn, theme.accent, 2, 0.4)
     
+    -- Add icon to open button
+    local openBtnIcon = create("ImageLabel", {
+        Parent = openBtn,
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0.5, -16, 0.5, -16),
+        Size = UDim2.new(0, 32, 0, 32),
+        Image = getIcon("menu") or "rbxassetid://7072719887",
+        ImageColor3 = theme.text
+    })
+    
     openBtn.MouseEnter:Connect(function()
         tw(openBtn, {BackgroundTransparency = 0, Size = UDim2.new(0, 75, 0, 75)}, 0.2)
     end)
@@ -759,10 +756,10 @@ function lib:init(title, subtitle)
         openBtn.Visible = false
         main.Visible = true
         main.Size = UDim2.new(0, 0, 0, 0)
-        sidebar.Size = UDim2.new(0, 135, 1, -16)
-        content.Position = UDim2.new(0, 151, 0, 8)
-        content.Size = UDim2.new(1, -159, 1, -16)
-        tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.4, Enum.EasingStyle.Back)
+        sidebar.Size = UDim2.new(0, 145, 1, 0)
+        content.Position = UDim2.new(0, 145, 0, 0)
+        content.Size = UDim2.new(1, -145, 1, 0)
+        tw(main, {Size = UDim2.new(0, savedSize.w, 0, savedSize.h)}, 0.4, Enum.EasingStyle.Back)
         tw(blur, {Size = 6}, 0.4)
     end)
     
@@ -793,10 +790,10 @@ function lib:init(title, subtitle)
                 openBtn.Visible = false
                 main.Visible = true
                 main.Size = UDim2.new(0, 0, 0, 0)
-                sidebar.Size = UDim2.new(0, 135, 1, -16)
-                content.Position = UDim2.new(0, 151, 0, 8)
-                content.Size = UDim2.new(1, -159, 1, -16)
-                tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.4, Enum.EasingStyle.Back)
+                sidebar.Size = UDim2.new(0, 145, 1, 0)
+                content.Position = UDim2.new(0, 145, 0, 0)
+                content.Size = UDim2.new(1, -145, 1, 0)
+                tw(main, {Size = UDim2.new(0, savedSize.w, 0, savedSize.h)}, 0.4, Enum.EasingStyle.Back)
                 tw(blur, {Size = 6}, 0.4)
             else
                 tw(blur, {Size = 0}, 0.3)
@@ -885,8 +882,10 @@ function lib:init(title, subtitle)
         addCorner(indicator, UDim.new(1, 0))
         
         local iconSize = 18
-        local hasIcon = icon ~= nil or icons[name] ~= nil
-        local iconId = icon or icons[name]
+        -- Get icon from API or fallback
+        local iconName = iconMap[name] or iconMap[icon] or name:lower()
+        local iconId = icon or getIcon(iconName)
+        local hasIcon = iconId ~= nil
         
         local tabIcon
         if hasIcon then
@@ -1431,11 +1430,12 @@ function lib:init(title, subtitle)
                     end
                 end)
                 
+                local pct = (val - min) / (max - min)
                 local knob = create("Frame", {
                     Parent = bar,
                     BackgroundColor3 = Color3.new(1, 1, 1),
                     BorderSizePixel = 0,
-                    Position = UDim2.new((val - min) / (max - min), -10, 0.5, -10),
+                    Position = UDim2.new(pct, -10, 0.5, -10),
                     Size = UDim2.new(0, 20, 0, 20),
                     ZIndex = 3
                 })
@@ -1455,20 +1455,10 @@ function lib:init(title, subtitle)
                     ZIndex = 2
                 })
                 
-                local knob = create("Frame", {
-                    Parent = fill,
-                    BackgroundColor3 = theme.text,
-                    BorderSizePixel = 0,
-                    Position = UDim2.new(1, -6, 0.5, -6),
-                    Size = UDim2.new(0, 12, 0, 12),
-                    AnchorPoint = Vector2.new(0.5, 0)
-                })
-                addCorner(knob, UDim.new(1, 0))
-                
                 local minLbl = create("TextLabel", {
                     Parent = frame,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0, 0, 0, 48),
+                    Position = UDim2.new(0, 14, 0, 52),
                     Size = UDim2.new(0.3, 0, 0, 14),
                     Font = Enum.Font.Gotham,
                     Text = tostring(min),
@@ -1480,7 +1470,7 @@ function lib:init(title, subtitle)
                 local maxLbl = create("TextLabel", {
                     Parent = frame,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0.7, 0, 0, 48),
+                    Position = UDim2.new(0.7, -14, 0, 52),
                     Size = UDim2.new(0.3, 0, 0, 14),
                     Font = Enum.Font.Gotham,
                     Text = tostring(max),
@@ -1494,25 +1484,32 @@ function lib:init(title, subtitle)
                 bar.InputBegan:Connect(function(inp)
                     if inp.UserInputType == Enum.UserInputType.MouseButton1 then
                         sliding = true
-                        tw(knob, {Size = UDim2.new(0, 24, 0, 24), Position = UDim2.new((val - min) / (max - min), -12, 0.5, -12)}, 0.15)
-                        tw(knobGlow, {ImageTransparency = 0.3, Size = UDim2.new(1, 20, 1, 20)}, 0.15)
+                        local newPct = math.clamp((inp.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X, 0, 1)
+                        val = math.floor(min + (max - min) * newPct)
+                        fill.Size = UDim2.new(newPct, 0, 1, 0)
+                        knob.Position = UDim2.new(newPct, -12, 0.5, -12)
+                        knob.Size = UDim2.new(0, 24, 0, 24)
+                        valLbl.Text = tostring(val)
+                        saveElement(name, val)
+                        if callback then callback(val) end
                     end
                 end)
                 
                 input.InputEnded:Connect(function(inp)
-                    if inp.UserInputType == Enum.UserInputType.MouseButton1 then
+                    if inp.UserInputType == Enum.UserInputType.MouseButton1 and sliding then
                         sliding = false
-                        tw(knob, {Size = UDim2.new(0, 20, 0, 20), Position = UDim2.new((val - min) / (max - min), -10, 0.5, -10)}, 0.15)
+                        local currPct = (val - min) / (max - min)
+                        tw(knob, {Size = UDim2.new(0, 20, 0, 20), Position = UDim2.new(currPct, -10, 0.5, -10)}, 0.15)
                         tw(knobGlow, {ImageTransparency = 0.5, Size = UDim2.new(1, 16, 1, 16)}, 0.15)
                     end
                 end)
                 
                 input.InputChanged:Connect(function(inp)
                     if sliding and inp.UserInputType == Enum.UserInputType.MouseMovement then
-                        local pct = math.clamp((inp.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X, 0, 1)
-                        val = math.floor(min + (max - min) * pct)
-                        fill.Size = UDim2.new(pct, 0, 1, 0)
-                        knob.Position = UDim2.new(pct, sliding and -12 or -10, 0.5, sliding and -12 or -10)
+                        local newPct = math.clamp((inp.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X, 0, 1)
+                        val = math.floor(min + (max - min) * newPct)
+                        fill.Size = UDim2.new(newPct, 0, 1, 0)
+                        knob.Position = UDim2.new(newPct, -12, 0.5, -12)
                         valLbl.Text = tostring(val)
                         saveElement(name, val)
                         if callback then callback(val) end
@@ -1635,12 +1632,13 @@ function lib:init(title, subtitle)
                 
                 local valBox = create("Frame", {
                     Parent = header,
-                    BackgroundColor3 = Color3.fromRGB(30, 25, 55),
-                    BackgroundTransparency = 0.5,
+                    BackgroundColor3 = Color3.fromRGB(25, 20, 45),
+                    BackgroundTransparency = 0.3,
                     Position = UDim2.new(0.4, 0, 0.5, -14),
                     Size = UDim2.new(0.6, -18, 0, 28)
                 })
                 addCorner(valBox, UDim.new(0, 8))
+                addStroke(valBox, Color3.fromRGB(80, 60, 120), 1, 0.7)
                 
                 local valLbl = create("TextLabel", {
                     Parent = valBox,
@@ -1681,8 +1679,8 @@ function lib:init(title, subtitle)
                 for i, opt in ipairs(opts) do
                     local optBtn = create("TextButton", {
                         Parent = optHolder,
-                        BackgroundColor3 = Color3.fromRGB(35, 30, 60),
-                        BackgroundTransparency = 0.7,
+                        BackgroundColor3 = Color3.fromRGB(30, 25, 55),
+                        BackgroundTransparency = 0.5,
                         BorderSizePixel = 0,
                         Size = UDim2.new(1, 0, 0, 30),
                         Font = Enum.Font.Gotham,
@@ -1711,17 +1709,20 @@ function lib:init(title, subtitle)
                             isSelected = val == opt
                         end
                         optLbl.TextColor3 = isSelected and theme.accent or theme.textDim
-                        optBtn.BackgroundTransparency = isSelected and 0.5 or 0.7
+                        optBtn.BackgroundTransparency = isSelected and 0.3 or 0.5
+                        optBtn.BackgroundColor3 = isSelected and Color3.fromRGB(80, 50, 140) or Color3.fromRGB(30, 25, 55)
                     end
                     
                     updateOptColor()
                     
                     optBtn.MouseEnter:Connect(function()
-                        tw(optBtn, {BackgroundTransparency = 0.3, BackgroundColor3 = Color3.fromRGB(50, 40, 85)}, 0.15)
+                        tw(optBtn, {BackgroundTransparency = 0.2, BackgroundColor3 = Color3.fromRGB(70, 45, 130)}, 0.15)
+                        tw(optLbl, {TextColor3 = theme.text}, 0.15)
                     end)
                     optBtn.MouseLeave:Connect(function()
                         local isSelected = multi and (selected and selected[opt]) or (val == opt)
-                        tw(optBtn, {BackgroundTransparency = isSelected and 0.5 or 0.7, BackgroundColor3 = Color3.fromRGB(35, 30, 60)}, 0.15)
+                        tw(optBtn, {BackgroundTransparency = isSelected and 0.3 or 0.5, BackgroundColor3 = isSelected and Color3.fromRGB(80, 50, 140) or Color3.fromRGB(30, 25, 55)}, 0.15)
+                        tw(optLbl, {TextColor3 = isSelected and theme.accent or theme.textDim}, 0.15)
                     end)
                     optBtn.MouseButton1Click:Connect(function()
                         if multi then
@@ -1738,7 +1739,7 @@ function lib:init(title, subtitle)
                                     local lbl = child:FindFirstChildOfClass("TextLabel")
                                     local isSelected = selected[lbl and lbl.Text or ""]
                                     if lbl then tw(lbl, {TextColor3 = isSelected and theme.accent or theme.textDim}, 0.15) end
-                                    tw(child, {BackgroundTransparency = isSelected and 0.5 or 0.7}, 0.15)
+                                    tw(child, {BackgroundTransparency = isSelected and 0.3 or 0.5, BackgroundColor3 = isSelected and Color3.fromRGB(80, 50, 140) or Color3.fromRGB(30, 25, 55)}, 0.15)
                                 end
                             end
                             if callback then callback(list) end
@@ -1751,7 +1752,7 @@ function lib:init(title, subtitle)
                                     local lbl = child:FindFirstChildOfClass("TextLabel")
                                     local isSelected = lbl and lbl.Text == val
                                     if lbl then tw(lbl, {TextColor3 = isSelected and theme.accent or theme.textDim}, 0.15) end
-                                    tw(child, {BackgroundTransparency = isSelected and 0.5 or 0.7}, 0.15)
+                                    tw(child, {BackgroundTransparency = isSelected and 0.3 or 0.5, BackgroundColor3 = isSelected and Color3.fromRGB(80, 50, 140) or Color3.fromRGB(30, 25, 55)}, 0.15)
                                 end
                             end
                             open = false
@@ -1786,22 +1787,36 @@ function lib:init(title, subtitle)
                         for i, opt in ipairs(opts) do
                             local optBtn = create("TextButton", {
                                 Parent = optHolder,
-                                BackgroundColor3 = theme.card,
-                                BackgroundTransparency = 1,
+                                BackgroundColor3 = Color3.fromRGB(30, 25, 55),
+                                BackgroundTransparency = 0.5,
                                 BorderSizePixel = 0,
-                                Size = UDim2.new(1, 0, 0, 28),
+                                Size = UDim2.new(1, 0, 0, 30),
+                                Font = Enum.Font.Gotham,
+                                Text = "",
+                                AutoButtonColor = false
+                            })
+                            addCorner(optBtn, UDim.new(0, 8))
+                            
+                            local optLbl = create("TextLabel", {
+                                Parent = optBtn,
+                                BackgroundTransparency = 1,
+                                Position = UDim2.new(0, 12, 0, 0),
+                                Size = UDim2.new(1, -24, 1, 0),
                                 Font = Enum.Font.Gotham,
                                 Text = opt,
                                 TextColor3 = theme.textDim,
                                 TextSize = 12,
-                                AutoButtonColor = false
+                                TextXAlignment = Enum.TextXAlignment.Left
                             })
-                            addCorner(optBtn, UDim.new(0, 6))
+                            
                             optBtn.MouseEnter:Connect(function()
-                                tw(optBtn, {BackgroundTransparency = 0, BackgroundColor3 = theme.card}, 0.15)
+                                tw(optBtn, {BackgroundTransparency = 0.2, BackgroundColor3 = Color3.fromRGB(70, 45, 130)}, 0.15)
+                                tw(optLbl, {TextColor3 = theme.text}, 0.15)
                             end)
                             optBtn.MouseLeave:Connect(function()
-                                tw(optBtn, {BackgroundTransparency = 1}, 0.15)
+                                local isSelected = val == opt
+                                tw(optBtn, {BackgroundTransparency = isSelected and 0.3 or 0.5, BackgroundColor3 = isSelected and Color3.fromRGB(80, 50, 140) or Color3.fromRGB(30, 25, 55)}, 0.15)
+                                tw(optLbl, {TextColor3 = isSelected and theme.accent or theme.textDim}, 0.15)
                             end)
                             optBtn.MouseButton1Click:Connect(function()
                                 val = opt
@@ -1809,17 +1824,20 @@ function lib:init(title, subtitle)
                                 valLbl.TextColor3 = theme.accent
                                 for _, child in pairs(optHolder:GetChildren()) do
                                     if child:IsA("TextButton") then
-                                        tw(child, {TextColor3 = child.Text == val and theme.accent or theme.textDim}, 0.15)
+                                        local lbl = child:FindFirstChildOfClass("TextLabel")
+                                        local isSelected = lbl and lbl.Text == val
+                                        if lbl then tw(lbl, {TextColor3 = isSelected and theme.accent or theme.textDim}, 0.15) end
+                                        tw(child, {BackgroundTransparency = isSelected and 0.3 or 0.5, BackgroundColor3 = isSelected and Color3.fromRGB(80, 50, 140) or Color3.fromRGB(30, 25, 55)}, 0.15)
                                     end
                                 end
                                 open = false
-                                tw(frame, {Size = UDim2.new(1, 0, 0, 36)}, 0.2, Enum.EasingStyle.Quart)
+                                tw(frame, {Size = UDim2.new(1, 0, 0, 44)}, 0.2, Enum.EasingStyle.Quart)
                                 tw(arrow, {Rotation = 0}, 0.2)
                                 task.delay(0.2, updateSecSize)
                                 if callback then callback(val) end
                             end)
                         end
-                        optHolder.Size = UDim2.new(1, -16, 0, #opts * 30)
+                        optHolder.Size = UDim2.new(1, -20, 0, #opts * 34)
                     end
                 }
             end
@@ -2119,10 +2137,10 @@ function lib:init(title, subtitle)
                 addStroke(btn, theme.accent, 1, 0.5)
                 
                 btn.MouseEnter:Connect(function()
-                    tw(btn, {BackgroundColor3 = theme.card}, 0.15)
+                    tw(btn, {BackgroundColor3 = Color3.fromRGB(50, 40, 90)}, 0.15)
                 end)
                 btn.MouseLeave:Connect(function()
-                    tw(btn, {BackgroundColor3 = theme.bg}, 0.15)
+                    tw(btn, {BackgroundColor3 = Color3.fromRGB(30, 25, 55)}, 0.15)
                 end)
                 
                 btn.MouseButton1Click:Connect(function()
