@@ -1363,7 +1363,7 @@ function lib:init(title, subtitle)
                 local frame = create("Frame", {
                     Parent = holder,
                     Name = name,
-                    BackgroundColor3 = Color3.fromRGB(20, 16, 32),
+                    BackgroundColor3 = Color3.fromRGB(25, 20, 38),
                     BackgroundTransparency = 0.5,
                     Size = UDim2.new(1, 0, 0, 40)
                 })
@@ -1485,7 +1485,7 @@ function lib:init(title, subtitle)
                 local frame = create("Frame", {
                     Parent = holder,
                     Name = name,
-                    BackgroundColor3 = Color3.fromRGB(20, 16, 32),
+                    BackgroundColor3 = Color3.fromRGB(25, 20, 38),
                     BackgroundTransparency = 0.5,
                     Size = UDim2.new(1, 0, 0, 68)
                 })
@@ -1670,7 +1670,7 @@ function lib:init(title, subtitle)
                 local frame = create("Frame", {
                     Parent = holder,
                     Name = name,
-                    BackgroundColor3 = Color3.fromRGB(16, 13, 28),
+                    BackgroundColor3 = Color3.fromRGB(22, 18, 34),
                     BackgroundTransparency = 0.3,
                     Size = UDim2.new(1, 0, 0, 42)
                 })
@@ -1747,7 +1747,7 @@ function lib:init(title, subtitle)
                 local frame = create("Frame", {
                     Parent = holder,
                     Name = name,
-                    BackgroundColor3 = Color3.fromRGB(16, 13, 28),
+                    BackgroundColor3 = Color3.fromRGB(22, 18, 34),
                     BorderSizePixel = 0,
                     Size = UDim2.new(1, 0, 0, 44),
                     ClipsDescendants = true
@@ -2012,7 +2012,7 @@ function lib:init(title, subtitle)
                 local frame = create("Frame", {
                     Parent = holder,
                     Name = name,
-                    BackgroundColor3 = Color3.fromRGB(16, 13, 28),
+                    BackgroundColor3 = Color3.fromRGB(22, 18, 34),
                     BorderSizePixel = 0,
                     Size = UDim2.new(1, 0, 0, 44),
                     ClipsDescendants = true
@@ -2207,6 +2207,33 @@ function lib:init(title, subtitle)
                     if callback then callback(val) end
                 end
                 
+                rBox.FocusLost:Connect(function()
+                    local num = tonumber(rBox.Text)
+                    if num then
+                        val = Color3.fromRGB(math.clamp(num, 0, 255), val.G * 255, val.B * 255)
+                        h, s, v = val:ToHSV()
+                        updateColor()
+                    end
+                end)
+                
+                gBox.FocusLost:Connect(function()
+                    local num = tonumber(gBox.Text)
+                    if num then
+                        val = Color3.fromRGB(val.R * 255, math.clamp(num, 0, 255), val.B * 255)
+                        h, s, v = val:ToHSV()
+                        updateColor()
+                    end
+                end)
+                
+                bBox.FocusLost:Connect(function()
+                    local num = tonumber(bBox.Text)
+                    if num then
+                        val = Color3.fromRGB(val.R * 255, val.G * 255, math.clamp(num, 0, 255))
+                        h, s, v = val:ToHSV()
+                        updateColor()
+                    end
+                end)
+                
                 local draggingSat, draggingHue = false, false
                 
                 sat.InputBegan:Connect(function(inp)
@@ -2274,7 +2301,7 @@ function lib:init(title, subtitle)
                 local frame = create("Frame", {
                     Parent = holder,
                     Name = name,
-                    BackgroundColor3 = Color3.fromRGB(20, 16, 32),
+                    BackgroundColor3 = Color3.fromRGB(25, 20, 38),
                     BackgroundTransparency = 0.5,
                     Size = UDim2.new(1, 0, 0, 40)
                 })
@@ -2583,6 +2610,7 @@ function lib:init(title, subtitle)
     end
     
     function window:exportConfig(name)
+        self:saveConfig(name)
         local success, result = pcall(function()
             if not isfile then return "" end
             local path = self.cfgFolder .. "/" .. name .. ".json"
