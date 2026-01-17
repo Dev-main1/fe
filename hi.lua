@@ -1682,7 +1682,25 @@ function lib:init(title, subtitle)
                     Color = ColorSequence.new({
                         ColorSequenceKeypoint.new(0, Color3.fromRGB(18, 15, 32)),
                         ColorSequenceKeypoint.new(1, Color3.fromRGB(14, 11, 24))
-                    }),\n                    Rotation = 90\n                })\n                \n                local lbl = create("TextLabel", {\n                    Parent = frame,\n                    BackgroundTransparency = 1,\n                    Position = UDim2.new(0, 14, 0, 0),\n                    Size = UDim2.new(0.3, -14, 1, 0),\n                    Font = Enum.Font.GothamBold,\n                    Text = name,\n                    TextColor3 = theme.text,\n                    TextSize = 13,\n                    TextXAlignment = Enum.TextXAlignment.Left\n                })\n                \n                local box = create("Frame", {\n                    Parent = frame,\n                    BackgroundColor3 = Color3.fromRGB(22, 18, 38),
+                    }),
+                    Rotation = 90
+                })
+                
+                local lbl = create("TextLabel", {
+                    Parent = frame,
+                    BackgroundTransparency = 1,
+                    Position = UDim2.new(0, 14, 0, 0),
+                    Size = UDim2.new(0.3, -14, 1, 0),
+                    Font = Enum.Font.GothamBold,
+                    Text = name,
+                    TextColor3 = theme.text,
+                    TextSize = 13,
+                    TextXAlignment = Enum.TextXAlignment.Left
+                })
+                
+                local box = create("Frame", {
+                    Parent = frame,
+                    BackgroundColor3 = Color3.fromRGB(22, 18, 38),
                     BorderSizePixel = 0,
                     Position = UDim2.new(0.32, 0, 0.5, -15),
                     Size = UDim2.new(0.68, -14, 0, 30)
