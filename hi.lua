@@ -14,7 +14,7 @@ env.BioLibLoaded = true
 -- Load Icons API
 local Icons = nil
 pcall(function()
-    Icons = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/Footagesus/Icons/main/Main-v2.lua"))()
+    Icons = loadstring(game:HttpGet("https://raw.githubusercontent.com/Footagesus/Icons/main/Main-v2.lua"))()
     Icons.SetIconsType("lucide")
 end)
 
@@ -145,7 +145,7 @@ local function ripple(parent, x, y)
     task.delay(0.4, function() rip:Destroy() end)
 end
 
-lib.icons = icons
+lib.icons = iconMap
 
 function lib:init(title, subtitle)
     local gui = create("ScreenGui", {
