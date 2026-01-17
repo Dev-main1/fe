@@ -226,7 +226,7 @@ function lib:init(title, subtitle)
         Parent = gui,
         BackgroundTransparency = 1,
         Size = UDim2.new(1, 0, 1, 0),
-        ZIndex = -10,
+        ZIndex = 0,
         Visible = true
     })
     local bgSnowflakes = {}
@@ -242,24 +242,26 @@ function lib:init(title, subtitle)
             Image = "rbxassetid://5028857084",
             ImageColor3 = Color3.fromRGB(240, 240, 255),
             ImageTransparency = 0.1,
-            ZIndex = -10
+            ZIndex = 0
         })
         table.insert(bgSnowflakes, {frame = snow, speedY = 0.0002 + math.random() * 0.0003, speedX = (math.random() - 0.5) * 0.0002, x = startX, y = startY, rot = math.random(0, 360)})
     end
     
     task.spawn(function()
-        while gui and gui.Parent do
-            for _, data in ipairs(bgSnowflakes) do
-                if data.frame and data.frame.Parent then
-                    data.y = data.y + data.speedY
-                    data.x = data.x + data.speedX
-                    data.rot = data.rot + 0.5
-                    if data.y > 1.1 then
-                        data.y = -0.05
-                        data.x = math.random()
+        while gui and gui.Parent and bgSnowHolder do
+            if bgSnowHolder.Visible then
+                for _, data in ipairs(bgSnowflakes) do
+                    if data.frame and data.frame.Parent then
+                        data.y = data.y + data.speedY
+                        data.x = data.x + data.speedX
+                        data.rot = data.rot + 0.5
+                        if data.y > 1.1 then
+                            data.y = -0.05
+                            data.x = math.random()
+                        end
+                        data.frame.Position = UDim2.new(data.x, 0, data.y, 0)
+                        data.frame.Rotation = data.rot
                     end
-                    data.frame.Position = UDim2.new(data.x, 0, data.y, 0)
-                    data.frame.Rotation = data.rot
                 end
             end
             task.wait(0.016)
