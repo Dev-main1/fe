@@ -176,6 +176,42 @@ function lib:init(title, subtitle)
     })
     tw(blur, {Size = 6}, 0.5)
     
+    -- Snowflakes on background
+    local bgSnowflakes = {}
+    for i = 1, 40 do
+        local s = math.random(3, 6)
+        local startX = math.random()
+        local startY = math.random()
+        local snow = create("Frame", {
+            Parent = gui,
+            BackgroundColor3 = Color3.fromRGB(240, 240, 255),
+            BorderSizePixel = 0,
+            Position = UDim2.new(startX, 0, startY, 0),
+            Size = UDim2.new(0, s, 0, s),
+            BackgroundTransparency = math.random(30, 60) / 100,
+            ZIndex = 0
+        })
+        addCorner(snow, UDim.new(1, 0))
+        table.insert(bgSnowflakes, {frame = snow, speedY = 0.0001 + math.random() * 0.0002, speedX = (math.random() - 0.5) * 0.00008, x = startX, y = startY})
+    end
+    
+    task.spawn(function()
+        while gui and gui.Parent do
+            for _, data in ipairs(bgSnowflakes) do
+                if data.frame and data.frame.Parent then
+                    data.y = data.y + data.speedY
+                    data.x = data.x + data.speedX
+                    if data.y > 1.1 then
+                        data.y = -0.05
+                        data.x = math.random()
+                    end
+                    data.frame.Position = UDim2.new(data.x, 0, data.y, 0)
+                end
+            end
+            task.wait(0.016)
+        end
+    end)
+    
     -- Save window size
     local savedSize = {w = 680, h = 450}
     
@@ -244,26 +280,7 @@ function lib:init(title, subtitle)
         table.insert(stars, {frame = star, speed = 0.00015 + math.random() * 0.0004, x = startX})
     end
     
-    -- Snowflakes falling slowly
-    local snowflakes = {}
-    for i = 1, 25 do
-        local s = math.random(2, 4)
-        local startX = math.random()
-        local startY = math.random() * -0.1
-        local snow = create("Frame", {
-            Parent = main,
-            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-            BorderSizePixel = 0,
-            Position = UDim2.new(startX, 0, startY, 0),
-            Size = UDim2.new(0, s, 0, s),
-            BackgroundTransparency = math.random(50, 80) / 100,
-            ZIndex = 1
-        })
-        addCorner(snow, UDim.new(1, 0))
-        table.insert(snowflakes, {frame = snow, speedY = 0.0002 + math.random() * 0.0003, speedX = (math.random() - 0.5) * 0.0001, x = startX, y = startY})
-    end
-    
-    -- Star and snow movement animation
+    -- Star movement animation
     task.spawn(function()
         while main and main.Parent do
             for _, data in ipairs(stars) do
@@ -275,17 +292,6 @@ function lib:init(title, subtitle)
                     else
                         data.frame.Position = UDim2.new(data.x, 0, data.frame.Position.Y.Scale, 0)
                     end
-                end
-            end
-            for _, data in ipairs(snowflakes) do
-                if data.frame and data.frame.Parent then
-                    data.y = data.y + data.speedY
-                    data.x = data.x + data.speedX
-                    if data.y > 1.1 then
-                        data.y = -0.05
-                        data.x = math.random()
-                    end
-                    data.frame.Position = UDim2.new(data.x, 0, data.y, 0)
                 end
             end
             task.wait(0.016)
