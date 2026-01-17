@@ -254,40 +254,40 @@ function lib:init(title, subtitle)
     local main = create("Frame", {
         Parent = gui,
         Name = "Main",
-        BackgroundColor3 = theme.bg,
+        BackgroundColor3 = Color3.fromRGB(6, 4, 14),
         BorderSizePixel = 0,
         Position = UDim2.new(0.5, 0, 0.5, 0),
         Size = UDim2.new(0, 0, 0, 0),
         AnchorPoint = Vector2.new(0.5, 0.5),
         ClipsDescendants = true
     })
-    addCorner(main, UDim.new(0, 12))
-    addShadow(main, 0.3)
-    addStroke(main, theme.border, 1, 0.7)
+    addCorner(main, UDim.new(0, 16))
+    addShadow(main, 0.4)
+    addStroke(main, Color3.fromRGB(100, 70, 150), 2, 0.4)
     
-    local bgOverlay = create("Frame", {
-        Parent = main,
-        BackgroundColor3 = theme.bg,
-        BackgroundTransparency = 0.3,
-        Size = UDim2.new(1, 0, 1, 0),
-        ZIndex = 1
-    })
-    
-    for i = 1, 100 do
+    -- Create starry background
+    for i = 1, 200 do
+        local s = math.random(1, 5)
+        local brightness = math.random(180, 255)
         local star = create("Frame", {
             Parent = main,
-            BackgroundColor3 = Color3.fromRGB(200, 180, 255),
+            BackgroundColor3 = Color3.fromRGB(brightness, brightness - 20, 255),
             BorderSizePixel = 0,
-            Position = UDim2.new(math.random(), 0, math.random(), 0),
-            Size = UDim2.new(0, math.random(1, 3), 0, math.random(1, 3)),
-            BackgroundTransparency = math.random(20, 80) / 100,
-            ZIndex = 0
+            Position = UDim2.new(math.random() * 0.98, 0, math.random() * 0.98, 0),
+            Size = UDim2.new(0, s, 0, s),
+            BackgroundTransparency = math.random(10, 50) / 100,
+            ZIndex = 1
         })
         addCorner(star, UDim.new(1, 0))
         task.spawn(function()
+            local delay = math.random() * 4
+            task.wait(delay)
             while star and star.Parent do
-                tw(star, {BackgroundTransparency = math.random(0, 90) / 100}, math.random(5, 25) / 10)
-                task.wait(math.random(5, 25) / 10)
+                local dur = 0.8 + math.random() * 1.2
+                tw(star, {BackgroundTransparency = 0.7 + math.random() * 0.25}, dur)
+                task.wait(dur)
+                tw(star, {BackgroundTransparency = math.random(5, 35) / 100}, dur)
+                task.wait(dur)
             end
         end)
     end
@@ -297,14 +297,24 @@ function lib:init(title, subtitle)
     local sidebar = create("Frame", {
         Parent = main,
         Name = "Sidebar",
-        BackgroundColor3 = theme.sidebar,
+        BackgroundColor3 = Color3.fromRGB(12, 10, 22),
         BorderSizePixel = 0,
-        Position = UDim2.new(0, 0, 0, 0),
-        Size = UDim2.new(0, 140, 1, 0),
+        Position = UDim2.new(0, 8, 0, 8),
+        Size = UDim2.new(0, 135, 1, -16),
         ClipsDescendants = true,
         ZIndex = 2
     })
     addCorner(sidebar, UDim.new(0, 12))
+    addStroke(sidebar, Color3.fromRGB(60, 50, 90), 1, 0.6)
+    
+    local sidebarGrad = create("UIGradient", {
+        Parent = sidebar,
+        Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 15, 35)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 6, 16))
+        }),
+        Rotation = 180
+    })
     
     local logo = create("Frame", {
         Parent = sidebar,
@@ -378,14 +388,24 @@ function lib:init(title, subtitle)
     local content = create("Frame", {
         Parent = main,
         Name = "Content",
-        BackgroundColor3 = theme.bg,
+        BackgroundColor3 = Color3.fromRGB(14, 12, 24),
         BorderSizePixel = 0,
-        Position = UDim2.new(0, 140, 0, 0),
-        Size = UDim2.new(1, -140, 1, 0),
+        Position = UDim2.new(0, 151, 0, 8),
+        Size = UDim2.new(1, -159, 1, -16),
         ClipsDescendants = true,
         ZIndex = 2
     })
     addCorner(content, UDim.new(0, 12))
+    addStroke(content, Color3.fromRGB(60, 50, 90), 1, 0.6)
+    
+    local contentGrad = create("UIGradient", {
+        Parent = content,
+        Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(18, 14, 30)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 8, 18))
+        }),
+        Rotation = 180
+    })
     
     local topbar = create("Frame", {
         Parent = content,
@@ -665,8 +685,8 @@ function lib:init(title, subtitle)
             tw(main, {Size = UDim2.new(0, 400, 0, 55)}, 0.3, Enum.EasingStyle.Quart)
             tw(blur, {Size = 0}, 0.25)
         else
-            tw(sidebar, {Size = UDim2.new(0, 140, 1, 0)}, 0.3, Enum.EasingStyle.Quart)
-            tw(content, {Position = UDim2.new(0, 140, 0, 0), Size = UDim2.new(1, -140, 1, 0)}, 0.3, Enum.EasingStyle.Quart)
+            tw(sidebar, {Size = UDim2.new(0, 135, 1, -16)}, 0.3, Enum.EasingStyle.Quart)
+            tw(content, {Position = UDim2.new(0, 151, 0, 8), Size = UDim2.new(1, -159, 1, -16)}, 0.3, Enum.EasingStyle.Quart)
             tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.3, Enum.EasingStyle.Quart)
             tw(blur, {Size = 6}, 0.25)
         end
@@ -739,9 +759,9 @@ function lib:init(title, subtitle)
         openBtn.Visible = false
         main.Visible = true
         main.Size = UDim2.new(0, 0, 0, 0)
-        sidebar.Size = UDim2.new(0, 140, 1, 0)
-        content.Position = UDim2.new(0, 140, 0, 0)
-        content.Size = UDim2.new(1, -140, 1, 0)
+        sidebar.Size = UDim2.new(0, 135, 1, -16)
+        content.Position = UDim2.new(0, 151, 0, 8)
+        content.Size = UDim2.new(1, -159, 1, -16)
         tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.4, Enum.EasingStyle.Back)
         tw(blur, {Size = 6}, 0.4)
     end)
@@ -773,9 +793,9 @@ function lib:init(title, subtitle)
                 openBtn.Visible = false
                 main.Visible = true
                 main.Size = UDim2.new(0, 0, 0, 0)
-                sidebar.Size = UDim2.new(0, 140, 1, 0)
-                content.Position = UDim2.new(0, 140, 0, 0)
-                content.Size = UDim2.new(1, -140, 1, 0)
+                sidebar.Size = UDim2.new(0, 135, 1, -16)
+                content.Position = UDim2.new(0, 151, 0, 8)
+                content.Size = UDim2.new(1, -159, 1, -16)
                 tw(main, {Size = UDim2.new(0, 680, 0, 450)}, 0.4, Enum.EasingStyle.Back)
                 tw(blur, {Size = 6}, 0.4)
             else
@@ -829,14 +849,29 @@ function lib:init(title, subtitle)
         local tabBtn = create("TextButton", {
             Parent = tabScroll,
             Name = name,
-            BackgroundColor3 = theme.card,
+            BackgroundColor3 = Color3.fromRGB(138, 90, 255),
             BackgroundTransparency = 1,
             BorderSizePixel = 0,
-            Size = UDim2.new(1, 0, 0, 36),
+            Size = UDim2.new(1, 0, 0, 40),
             Text = "",
             AutoButtonColor = false
         })
-        addCorner(tabBtn, UDim.new(0, 8))
+        addCorner(tabBtn, UDim.new(0, 10))
+        
+        local tabGlow = create("ImageLabel", {
+            Parent = tabBtn,
+            Name = "Glow",
+            BackgroundTransparency = 1,
+            Position = UDim2.new(0.5, 0, 0.5, 0),
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Size = UDim2.new(1, 20, 1, 20),
+            Image = "rbxassetid://5028857084",
+            ImageColor3 = theme.accent,
+            ImageTransparency = 1,
+            ScaleType = Enum.ScaleType.Slice,
+            SliceCenter = Rect.new(24, 24, 276, 276),
+            ZIndex = 0
+        })
         
         local indicator = create("Frame", {
             Parent = tabBtn,
@@ -849,11 +884,27 @@ function lib:init(title, subtitle)
         })
         addCorner(indicator, UDim.new(1, 0))
         
+        local iconSize = 18
+        local hasIcon = icon ~= nil or icons[name] ~= nil
+        local iconId = icon or icons[name]
+        
+        local tabIcon
+        if hasIcon then
+            tabIcon = create("ImageLabel", {
+                Parent = tabBtn,
+                BackgroundTransparency = 1,
+                Position = UDim2.new(0, 12, 0.5, -iconSize/2),
+                Size = UDim2.new(0, iconSize, 0, iconSize),
+                Image = iconId,
+                ImageColor3 = theme.textDim
+            })
+        end
+        
         local tabLbl = create("TextLabel", {
             Parent = tabBtn,
             BackgroundTransparency = 1,
-            Position = UDim2.new(0, 12, 0, 0),
-            Size = UDim2.new(1, -20, 1, 0),
+            Position = UDim2.new(0, hasIcon and 36 or 12, 0, 0),
+            Size = UDim2.new(1, hasIcon and -44 or -20, 1, 0),
             Font = Enum.Font.GothamBold,
             Text = name,
             TextColor3 = theme.textDim,
@@ -892,17 +943,23 @@ function lib:init(title, subtitle)
             if window.activeTab == name then return end
             
             for _, t in pairs(window.tabs) do
-                tw(t.btn, {BackgroundTransparency = 1}, 0.2)
-                tw(t.btn.Indicator, {BackgroundTransparency = 1}, 0.2)
+                tw(t.btn, {BackgroundTransparency = 1}, 0.25)
+                tw(t.btn.Indicator, {BackgroundTransparency = 1}, 0.25)
+                local glow = t.btn:FindFirstChild("Glow")
+                if glow then tw(glow, {ImageTransparency = 1}, 0.25) end
                 local txt = t.btn:FindFirstChild("TextLabel")
-                if txt then tw(txt, {TextColor3 = theme.textDim}, 0.2) end
+                if txt then tw(txt, {TextColor3 = theme.textDim}, 0.25) end
+                local ico = t.btn:FindFirstChild("ImageLabel")
+                if ico then tw(ico, {ImageColor3 = theme.textDim}, 0.25) end
                 if t.page ~= page and t.page.Visible then
                     t.page.Visible = false
                 end
             end
-            tw(tabBtn, {BackgroundTransparency = 0.9}, 0.2)
-            tw(indicator, {BackgroundTransparency = 0}, 0.2)
-            tw(tabLbl, {TextColor3 = theme.text}, 0.2)
+            tw(tabBtn, {BackgroundTransparency = 0.85}, 0.25)
+            tw(indicator, {BackgroundTransparency = 0}, 0.25)
+            tw(tabGlow, {ImageTransparency = 0.7}, 0.25)
+            tw(tabLbl, {TextColor3 = theme.text}, 0.25)
+            if tabIcon then tw(tabIcon, {ImageColor3 = theme.accent}, 0.25) end
             
             page.Visible = true
             
@@ -912,12 +969,14 @@ function lib:init(title, subtitle)
         
         tabBtn.MouseEnter:Connect(function()
             if window.activeTab ~= name then
-                tw(tabBtn, {BackgroundTransparency = 0.95}, 0.15)
+                tw(tabBtn, {BackgroundTransparency = 0.92}, 0.15)
+                tw(tabGlow, {ImageTransparency = 0.85}, 0.15)
             end
         end)
         tabBtn.MouseLeave:Connect(function()
             if window.activeTab ~= name then
                 tw(tabBtn, {BackgroundTransparency = 1}, 0.15)
+                tw(tabGlow, {ImageTransparency = 1}, 0.15)
             end
         end)
         tabBtn.MouseButton1Click:Connect(function()
@@ -927,9 +986,11 @@ function lib:init(title, subtitle)
         window.tabs[name] = {btn = tabBtn, page = page}
         
         if not window.activeTab then
-            tw(tabBtn, {BackgroundTransparency = 0.9}, 0.2)
+            tw(tabBtn, {BackgroundTransparency = 0.85}, 0.2)
             tw(indicator, {BackgroundTransparency = 0}, 0.2)
+            tw(tabGlow, {ImageTransparency = 0.7}, 0.2)
             tw(tabLbl, {TextColor3 = theme.text}, 0.2)
+            if tabIcon then tw(tabIcon, {ImageColor3 = theme.accent}, 0.2) end
             page.Visible = true
             window.activeTab = name
             activeTabName = name
@@ -946,13 +1007,32 @@ function lib:init(title, subtitle)
             local sec = create("Frame", {
                 Parent = page,
                 Name = name,
-                BackgroundColor3 = theme.card,
+                BackgroundColor3 = Color3.fromRGB(18, 15, 30),
                 BorderSizePixel = 0,
                 Size = UDim2.new(1, 0, 0, 45),
                 ClipsDescendants = true
             })
-            addCorner(sec, UDim.new(0, 10))
-            addStroke(sec, theme.border, 1, 0.8)
+            addCorner(sec, UDim.new(0, 12))
+            addStroke(sec, Color3.fromRGB(70, 55, 100), 1, 0.7)
+            
+            local secGrad = create("UIGradient", {
+                Parent = sec,
+                Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Color3.fromRGB(22, 18, 38)),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(14, 12, 24))
+                }),
+                Rotation = 135
+            })
+            
+            local headerLine = create("Frame", {
+                Parent = sec,
+                Name = "HeaderLine",
+                BackgroundColor3 = theme.accent,
+                BackgroundTransparency = 0.7,
+                BorderSizePixel = 0,
+                Position = UDim2.new(0, 15, 0, 44),
+                Size = UDim2.new(1, -30, 0, 1)
+            })
             
             local header = create("Frame", {
                 Parent = sec,
@@ -961,11 +1041,31 @@ function lib:init(title, subtitle)
                 Size = UDim2.new(1, 0, 0, 45)
             })
             
+            local secIcon = create("Frame", {
+                Parent = header,
+                Name = "SecIcon",
+                BackgroundColor3 = theme.accent,
+                BackgroundTransparency = 0.85,
+                BorderSizePixel = 0,
+                Position = UDim2.new(0, 12, 0.5, -12),
+                Size = UDim2.new(0, 24, 0, 24)
+            })
+            addCorner(secIcon, UDim.new(0, 6))
+            
+            local secDot = create("Frame", {
+                Parent = secIcon,
+                BackgroundColor3 = theme.accent,
+                BorderSizePixel = 0,
+                Position = UDim2.new(0.5, -4, 0.5, -4),
+                Size = UDim2.new(0, 8, 0, 8)
+            })
+            addCorner(secDot, UDim.new(1, 0))
+            
             local secTitle = create("TextLabel", {
                 Parent = header,
                 BackgroundTransparency = 1,
-                Position = UDim2.new(0, 15, 0, 0),
-                Size = UDim2.new(0.7, 0, 1, 0),
+                Position = UDim2.new(0, 44, 0, 0),
+                Size = UDim2.new(0.7, -44, 1, 0),
                 Font = Enum.Font.GothamBlack,
                 Text = name,
                 TextColor3 = theme.text,
@@ -975,12 +1075,14 @@ function lib:init(title, subtitle)
             
             local expandBtn = create("TextButton", {
                 Parent = header,
-                BackgroundTransparency = 1,
-                Position = UDim2.new(1, -35, 0, 0),
-                Size = UDim2.new(0, 35, 1, 0),
+                BackgroundColor3 = theme.accent,
+                BackgroundTransparency = 0.9,
+                Position = UDim2.new(1, -40, 0.5, -14),
+                Size = UDim2.new(0, 28, 0, 28),
                 Text = "",
                 AutoButtonColor = false
             })
+            addCorner(expandBtn, UDim.new(0, 8))
             
             local expandIcon = create("ImageLabel", {
                 Parent = expandBtn,
@@ -988,30 +1090,38 @@ function lib:init(title, subtitle)
                 Position = UDim2.new(0.5, -6, 0.5, -6),
                 Size = UDim2.new(0, 12, 0, 12),
                 Image = "rbxassetid://6031091004",
-                ImageColor3 = theme.textDim,
+                ImageColor3 = theme.accent,
                 Rotation = 0
             })
+            
+            expandBtn.MouseEnter:Connect(function()
+                tw(expandBtn, {BackgroundTransparency = 0.8}, 0.15)
+            end)
+            expandBtn.MouseLeave:Connect(function()
+                tw(expandBtn, {BackgroundTransparency = 0.9}, 0.15)
+            end)
             
             local holder = create("Frame", {
                 Parent = sec,
                 Name = "Holder",
                 BackgroundTransparency = 1,
-                Position = UDim2.new(0, 15, 0, 50),
+                Position = UDim2.new(0, 15, 0, 54),
                 Size = UDim2.new(1, -30, 0, 0)
             })
             
             local holderList = create("UIListLayout", {
                 Parent = holder,
                 SortOrder = Enum.SortOrder.LayoutOrder,
-                Padding = UDim.new(0, 10)
+                Padding = UDim.new(0, 12)
             })
             
             local expanded = true
             
             local function updateSecSize()
-                local h = expanded and (holderList.AbsoluteContentSize.Y + 65) or 45
+                local h = expanded and (holderList.AbsoluteContentSize.Y + 72) or 45
                 tw(sec, {Size = UDim2.new(1, 0, 0, h)}, 0.25, Enum.EasingStyle.Quart)
                 tw(expandIcon, {Rotation = expanded and 180 or 0}, 0.25)
+                tw(headerLine, {BackgroundTransparency = expanded and 0.7 or 1}, 0.25)
                 task.delay(0.25, updateCanvas)
             end
             
@@ -1032,33 +1142,76 @@ function lib:init(title, subtitle)
                 local btn = create("TextButton", {
                     Parent = holder,
                     Name = name,
-                    BackgroundColor3 = theme.bg,
+                    BackgroundColor3 = Color3.fromRGB(25, 20, 45),
                     BorderSizePixel = 0,
-                    Size = UDim2.new(1, 0, 0, 38),
+                    Size = UDim2.new(1, 0, 0, 42),
                     Text = "",
                     AutoButtonColor = false,
                     ClipsDescendants = true
                 })
-                addCorner(btn, UDim.new(0, 8))
-                addStroke(btn, theme.border, 1, 0.8)
+                addCorner(btn, UDim.new(0, 10))
+                addStroke(btn, Color3.fromRGB(80, 60, 120), 1, 0.6)
+                
+                local btnGrad = create("UIGradient", {
+                    Parent = btn,
+                    Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 25, 55)),
+                        ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 16, 36))
+                    }),
+                    Rotation = 90
+                })
+                
+                local btnIcon = create("Frame", {
+                    Parent = btn,
+                    BackgroundColor3 = theme.accent,
+                    BackgroundTransparency = 0.8,
+                    BorderSizePixel = 0,
+                    Position = UDim2.new(0, 12, 0.5, -10),
+                    Size = UDim2.new(0, 20, 0, 20)
+                })
+                addCorner(btnIcon, UDim.new(0, 6))
+                
+                local btnArrow = create("TextLabel", {
+                    Parent = btnIcon,
+                    BackgroundTransparency = 1,
+                    Size = UDim2.new(1, 0, 1, 0),
+                    Font = Enum.Font.GothamBold,
+                    Text = "→",
+                    TextColor3 = theme.accent,
+                    TextSize = 14
+                })
                 
                 local btnLbl = create("TextLabel", {
                     Parent = btn,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 1, 0),
-                    Font = Enum.Font.GothamBlack,
+                    Position = UDim2.new(0, 40, 0, 0),
+                    Size = UDim2.new(1, -50, 1, 0),
+                    Font = Enum.Font.GothamBold,
                     Text = name,
                     TextColor3 = theme.text,
-                    TextSize = 13
+                    TextSize = 13,
+                    TextXAlignment = Enum.TextXAlignment.Left
                 })
                 
                 btn.MouseEnter:Connect(function()
                     tw(btn, {BackgroundColor3 = theme.accent}, 0.2)
-                    tw(btn:FindFirstChild("UIStroke"), {Transparency = 1}, 0.2)
+                    tw(btn:FindFirstChild("UIStroke"), {Color = theme.accent, Transparency = 0.3}, 0.2)
+                    tw(btnIcon, {BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = 0.7}, 0.2)
+                    tw(btnArrow, {TextColor3 = Color3.new(1, 1, 1)}, 0.2)
+                    tw(btnGrad, {Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Color3.fromRGB(138, 90, 255)),
+                        ColorSequenceKeypoint.new(1, Color3.fromRGB(100, 60, 200))
+                    })}, 0.2)
                 end)
                 btn.MouseLeave:Connect(function()
-                    tw(btn, {BackgroundColor3 = theme.bg}, 0.2)
-                    tw(btn:FindFirstChild("UIStroke"), {Transparency = 0.8}, 0.2)
+                    tw(btn, {BackgroundColor3 = Color3.fromRGB(25, 20, 45)}, 0.2)
+                    tw(btn:FindFirstChild("UIStroke"), {Color = Color3.fromRGB(80, 60, 120), Transparency = 0.6}, 0.2)
+                    tw(btnIcon, {BackgroundColor3 = theme.accent, BackgroundTransparency = 0.8}, 0.2)
+                    tw(btnArrow, {TextColor3 = theme.accent}, 0.2)
+                    tw(btnGrad, {Color = ColorSequence.new({
+                        ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 25, 55)),
+                        ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 16, 36))
+                    })}, 0.2)
                 end)
                 btn.MouseButton1Click:Connect(function()
                     ripple(btn, mouse.X, mouse.Y)
@@ -1076,15 +1229,17 @@ function lib:init(title, subtitle)
                 local frame = create("Frame", {
                     Parent = holder,
                     Name = name,
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 32)
+                    BackgroundColor3 = Color3.fromRGB(20, 16, 32),
+                    BackgroundTransparency = 0.5,
+                    Size = UDim2.new(1, 0, 0, 40)
                 })
+                addCorner(frame, UDim.new(0, 10))
                 
                 local lbl = create("TextLabel", {
                     Parent = frame,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0, 0, 0, 0),
-                    Size = UDim2.new(0.7, 0, 1, 0),
+                    Position = UDim2.new(0, 14, 0, 0),
+                    Size = UDim2.new(0.65, 0, 1, 0),
                     Font = Enum.Font.GothamBold,
                     Text = name,
                     TextColor3 = theme.text,
@@ -1094,13 +1249,13 @@ function lib:init(title, subtitle)
                 
                 local box = create("Frame", {
                     Parent = frame,
-                    BackgroundColor3 = val and theme.accent or theme.bg,
+                    BackgroundColor3 = val and theme.accent or Color3.fromRGB(30, 25, 50),
                     BorderSizePixel = 0,
-                    Position = UDim2.new(1, -48, 0.5, -12),
-                    Size = UDim2.new(0, 48, 0, 24)
+                    Position = UDim2.new(1, -60, 0.5, -13),
+                    Size = UDim2.new(0, 52, 0, 26)
                 })
                 addCorner(box, UDim.new(1, 0))
-                addStroke(box, val and theme.accent or theme.border, 1, val and 0 or 0.6)
+                addStroke(box, val and theme.accent or Color3.fromRGB(60, 50, 90), 1.5, val and 0.3 or 0.5)
                 
                 local boxGrad = create("UIGradient", {
                     Parent = box,
@@ -1128,12 +1283,26 @@ function lib:init(title, subtitle)
                 
                 local dot = create("Frame", {
                     Parent = box,
-                    BackgroundColor3 = theme.text,
+                    BackgroundColor3 = Color3.new(1, 1, 1),
                     BorderSizePixel = 0,
-                    Position = val and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10),
+                    Position = val and UDim2.new(1, -24, 0.5, -10) or UDim2.new(0, 3, 0.5, -10),
                     Size = UDim2.new(0, 20, 0, 20)
                 })
                 addCorner(dot, UDim.new(1, 0))
+                
+                local dotShadow = create("ImageLabel", {
+                    Parent = dot,
+                    BackgroundTransparency = 1,
+                    Position = UDim2.new(0.5, 0, 0.5, 2),
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    Size = UDim2.new(1, 10, 1, 10),
+                    Image = "rbxassetid://5028857084",
+                    ImageColor3 = Color3.new(0, 0, 0),
+                    ImageTransparency = 0.6,
+                    ScaleType = Enum.ScaleType.Slice,
+                    SliceCenter = Rect.new(24, 24, 276, 276),
+                    ZIndex = 0
+                })
                 
                 local btn = create("TextButton", {
                     Parent = frame,
@@ -1143,9 +1312,9 @@ function lib:init(title, subtitle)
                 })
                 
                 local function update()
-                    tw(box, {BackgroundColor3 = val and theme.accent or theme.bg}, 0.2)
-                    tw(box:FindFirstChild("UIStroke"), {Color = val and theme.accent or theme.border, Transparency = val and 0 or 0.6}, 0.2)
-                    tw(dot, {Position = val and UDim2.new(1, -22, 0.5, -10) or UDim2.new(0, 2, 0.5, -10)}, 0.2, Enum.EasingStyle.Back)
+                    tw(box, {BackgroundColor3 = val and theme.accent or Color3.fromRGB(30, 25, 50)}, 0.25)
+                    tw(box:FindFirstChild("UIStroke"), {Color = val and theme.accent or Color3.fromRGB(60, 50, 90), Transparency = val and 0.3 or 0.5}, 0.25)
+                    tw(dot, {Position = val and UDim2.new(1, -24, 0.5, -10) or UDim2.new(0, 3, 0.5, -10)}, 0.25, Enum.EasingStyle.Back)
                     boxGrad.Enabled = val
                     if val then
                         task.spawn(function()
@@ -1182,14 +1351,17 @@ function lib:init(title, subtitle)
                 local frame = create("Frame", {
                     Parent = holder,
                     Name = name,
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 50)
+                    BackgroundColor3 = Color3.fromRGB(20, 16, 32),
+                    BackgroundTransparency = 0.5,
+                    Size = UDim2.new(1, 0, 0, 68)
                 })
+                addCorner(frame, UDim.new(0, 10))
                 
                 local top = create("Frame", {
                     Parent = frame,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 20)
+                    Position = UDim2.new(0, 14, 0, 0),
+                    Size = UDim2.new(1, -28, 0, 28)
                 })
                 
                 local lbl = create("TextLabel", {
@@ -1203,26 +1375,34 @@ function lib:init(title, subtitle)
                     TextXAlignment = Enum.TextXAlignment.Left
                 })
                 
-                local valLbl = create("TextLabel", {
+                local valBox = create("Frame", {
                     Parent = top,
+                    BackgroundColor3 = theme.accent,
+                    BackgroundTransparency = 0.85,
+                    Position = UDim2.new(1, -50, 0.5, -10),
+                    Size = UDim2.new(0, 50, 0, 20)
+                })
+                addCorner(valBox, UDim.new(0, 6))
+                
+                local valLbl = create("TextLabel", {
+                    Parent = valBox,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0.5, 0, 0, 0),
-                    Size = UDim2.new(0.5, 0, 1, 0),
+                    Size = UDim2.new(1, 0, 1, 0),
                     Font = Enum.Font.GothamBold,
                     Text = tostring(math.floor(val)),
                     TextColor3 = theme.accent,
-                    TextSize = 13,
-                    TextXAlignment = Enum.TextXAlignment.Right
+                    TextSize = 13
                 })
                 
                 local bar = create("Frame", {
                     Parent = frame,
-                    BackgroundColor3 = theme.bg,
+                    BackgroundColor3 = Color3.fromRGB(30, 25, 50),
                     BorderSizePixel = 0,
-                    Position = UDim2.new(0, 0, 0, 28),
-                    Size = UDim2.new(1, 0, 0, 8)
+                    Position = UDim2.new(0, 14, 0, 35),
+                    Size = UDim2.new(1, -28, 0, 12)
                 })
                 addCorner(bar, UDim.new(1, 0))
+                addStroke(bar, Color3.fromRGB(50, 40, 80), 1, 0.6)
                 
                 local fill = create("Frame", {
                     Parent = bar,
@@ -1251,16 +1431,29 @@ function lib:init(title, subtitle)
                     end
                 end)
                 
-                local fillGlow = create("Frame", {
-                    Parent = fill,
-                    BackgroundColor3 = theme.accent,
-                    BackgroundTransparency = 0.7,
+                local knob = create("Frame", {
+                    Parent = bar,
+                    BackgroundColor3 = Color3.new(1, 1, 1),
                     BorderSizePixel = 0,
-                    Position = UDim2.new(1, -6, 0.5, -8),
-                    Size = UDim2.new(0, 16, 0, 16),
-                    AnchorPoint = Vector2.new(0.5, 0)
+                    Position = UDim2.new((val - min) / (max - min), -10, 0.5, -10),
+                    Size = UDim2.new(0, 20, 0, 20),
+                    ZIndex = 3
                 })
-                addCorner(fillGlow, UDim.new(1, 0))
+                addCorner(knob, UDim.new(1, 0))
+                
+                local knobGlow = create("ImageLabel", {
+                    Parent = knob,
+                    BackgroundTransparency = 1,
+                    Position = UDim2.new(0.5, 0, 0.5, 0),
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    Size = UDim2.new(1, 16, 1, 16),
+                    Image = "rbxassetid://5028857084",
+                    ImageColor3 = theme.accent,
+                    ImageTransparency = 0.5,
+                    ScaleType = Enum.ScaleType.Slice,
+                    SliceCenter = Rect.new(24, 24, 276, 276),
+                    ZIndex = 2
+                })
                 
                 local knob = create("Frame", {
                     Parent = fill,
@@ -1275,7 +1468,7 @@ function lib:init(title, subtitle)
                 local minLbl = create("TextLabel", {
                     Parent = frame,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0, 0, 0, 38),
+                    Position = UDim2.new(0, 0, 0, 48),
                     Size = UDim2.new(0.3, 0, 0, 14),
                     Font = Enum.Font.Gotham,
                     Text = tostring(min),
@@ -1287,7 +1480,7 @@ function lib:init(title, subtitle)
                 local maxLbl = create("TextLabel", {
                     Parent = frame,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0.7, 0, 0, 38),
+                    Position = UDim2.new(0.7, 0, 0, 48),
                     Size = UDim2.new(0.3, 0, 0, 14),
                     Font = Enum.Font.Gotham,
                     Text = tostring(max),
@@ -1301,16 +1494,16 @@ function lib:init(title, subtitle)
                 bar.InputBegan:Connect(function(inp)
                     if inp.UserInputType == Enum.UserInputType.MouseButton1 then
                         sliding = true
-                        tw(knob, {Size = UDim2.new(0, 16, 0, 16), Position = UDim2.new(1, -8, 0.5, -8)}, 0.15)
-                        tw(fillGlow, {BackgroundTransparency = 0.5}, 0.15)
+                        tw(knob, {Size = UDim2.new(0, 24, 0, 24), Position = UDim2.new((val - min) / (max - min), -12, 0.5, -12)}, 0.15)
+                        tw(knobGlow, {ImageTransparency = 0.3, Size = UDim2.new(1, 20, 1, 20)}, 0.15)
                     end
                 end)
                 
                 input.InputEnded:Connect(function(inp)
                     if inp.UserInputType == Enum.UserInputType.MouseButton1 then
                         sliding = false
-                        tw(knob, {Size = UDim2.new(0, 12, 0, 12), Position = UDim2.new(1, -6, 0.5, -6)}, 0.15)
-                        tw(fillGlow, {BackgroundTransparency = 0.7}, 0.15)
+                        tw(knob, {Size = UDim2.new(0, 20, 0, 20), Position = UDim2.new((val - min) / (max - min), -10, 0.5, -10)}, 0.15)
+                        tw(knobGlow, {ImageTransparency = 0.5, Size = UDim2.new(1, 16, 1, 16)}, 0.15)
                     end
                 end)
                 
@@ -1319,6 +1512,7 @@ function lib:init(title, subtitle)
                         local pct = math.clamp((inp.Position.X - bar.AbsolutePosition.X) / bar.AbsoluteSize.X, 0, 1)
                         val = math.floor(min + (max - min) * pct)
                         fill.Size = UDim2.new(pct, 0, 1, 0)
+                        knob.Position = UDim2.new(pct, sliding and -12 or -10, 0.5, sliding and -12 or -10)
                         valLbl.Text = tostring(val)
                         saveElement(name, val)
                         if callback then callback(val) end
@@ -1332,6 +1526,7 @@ function lib:init(title, subtitle)
                         val = math.clamp(v, min, max)
                         local pct = (val - min) / (max - min)
                         fill.Size = UDim2.new(pct, 0, 1, 0)
+                        knob.Position = UDim2.new(pct, -10, 0.5, -10)
                         valLbl.Text = tostring(math.floor(val))
                     end,
                     get = function() return val end
@@ -1343,14 +1538,17 @@ function lib:init(title, subtitle)
                 local frame = create("Frame", {
                     Parent = holder,
                     Name = name,
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 32)
+                    BackgroundColor3 = Color3.fromRGB(20, 16, 32),
+                    BackgroundTransparency = 0.5,
+                    Size = UDim2.new(1, 0, 0, 42)
                 })
+                addCorner(frame, UDim.new(0, 10))
                 
                 local lbl = create("TextLabel", {
                     Parent = frame,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(0.3, 0, 1, 0),
+                    Position = UDim2.new(0, 14, 0, 0),
+                    Size = UDim2.new(0.3, -14, 1, 0),
                     Font = Enum.Font.GothamBold,
                     Text = name,
                     TextColor3 = theme.text,
@@ -1360,13 +1558,13 @@ function lib:init(title, subtitle)
                 
                 local box = create("Frame", {
                     Parent = frame,
-                    BackgroundColor3 = theme.bg,
+                    BackgroundColor3 = Color3.fromRGB(25, 20, 45),
                     BorderSizePixel = 0,
-                    Position = UDim2.new(0.32, 0, 0, 0),
-                    Size = UDim2.new(0.68, 0, 1, 0)
+                    Position = UDim2.new(0.32, 0, 0.5, -15),
+                    Size = UDim2.new(0.68, -14, 0, 30)
                 })
-                addCorner(box, UDim.new(0, 6))
-                addStroke(box, theme.border, 1, 0.7)
+                addCorner(box, UDim.new(0, 8))
+                addStroke(box, Color3.fromRGB(60, 50, 90), 1, 0.6)
                 
                 local inp = create("TextBox", {
                     Parent = box,
@@ -1387,7 +1585,7 @@ function lib:init(title, subtitle)
                     tw(box:FindFirstChild("UIStroke"), {Color = theme.accent, Transparency = 0.3}, 0.2)
                 end)
                 inp.FocusLost:Connect(function()
-                    tw(box:FindFirstChild("UIStroke"), {Color = theme.border, Transparency = 0.7}, 0.2)
+                    tw(box:FindFirstChild("UIStroke"), {Color = Color3.fromRGB(60, 50, 90), Transparency = 0.6}, 0.2)
                     if callback then callback(inp.Text) end
                 end)
                 
@@ -1407,18 +1605,18 @@ function lib:init(title, subtitle)
                 local frame = create("Frame", {
                     Parent = holder,
                     Name = name,
-                    BackgroundColor3 = theme.bg,
+                    BackgroundColor3 = Color3.fromRGB(22, 18, 38),
                     BorderSizePixel = 0,
-                    Size = UDim2.new(1, 0, 0, 36),
+                    Size = UDim2.new(1, 0, 0, 44),
                     ClipsDescendants = true
                 })
-                addCorner(frame, UDim.new(0, 8))
-                addStroke(frame, theme.border, 1, 0.7)
+                addCorner(frame, UDim.new(0, 10))
+                addStroke(frame, Color3.fromRGB(60, 50, 90), 1, 0.6)
                 
                 local header = create("TextButton", {
                     Parent = frame,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 36),
+                    Size = UDim2.new(1, 0, 0, 44),
                     Text = "",
                     AutoButtonColor = false
                 })
@@ -1426,8 +1624,8 @@ function lib:init(title, subtitle)
                 local lbl = create("TextLabel", {
                     Parent = header,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0, 12, 0, 0),
-                    Size = UDim2.new(0.4, 0, 1, 0),
+                    Position = UDim2.new(0, 14, 0, 0),
+                    Size = UDim2.new(0.4, -14, 1, 0),
                     Font = Enum.Font.GothamBold,
                     Text = name,
                     TextColor3 = theme.text,
@@ -1435,55 +1633,75 @@ function lib:init(title, subtitle)
                     TextXAlignment = Enum.TextXAlignment.Left
                 })
                 
-                local valLbl = create("TextLabel", {
+                local valBox = create("Frame", {
                     Parent = header,
+                    BackgroundColor3 = Color3.fromRGB(30, 25, 55),
+                    BackgroundTransparency = 0.5,
+                    Position = UDim2.new(0.4, 0, 0.5, -14),
+                    Size = UDim2.new(0.6, -18, 0, 28)
+                })
+                addCorner(valBox, UDim.new(0, 8))
+                
+                local valLbl = create("TextLabel", {
+                    Parent = valBox,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0.4, 0, 0, 0),
-                    Size = UDim2.new(0.5, -20, 1, 0),
+                    Position = UDim2.new(0, 10, 0, 0),
+                    Size = UDim2.new(1, -36, 1, 0),
                     Font = Enum.Font.GothamMedium,
                     Text = val or "Select...",
                     TextColor3 = val and theme.accent or theme.textDim,
                     TextSize = 12,
-                    TextXAlignment = Enum.TextXAlignment.Right
+                    TextXAlignment = Enum.TextXAlignment.Left,
+                    TextTruncate = Enum.TextTruncate.AtEnd
                 })
                 
                 local arrow = create("ImageLabel", {
-                    Parent = header,
+                    Parent = valBox,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(1, -28, 0.5, -6),
+                    Position = UDim2.new(1, -22, 0.5, -6),
                     Size = UDim2.new(0, 12, 0, 12),
                     Image = "rbxassetid://6031091004",
-                    ImageColor3 = theme.textDim,
+                    ImageColor3 = theme.accent,
                     Rotation = 0
                 })
                 
                 local optHolder = create("Frame", {
                     Parent = frame,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0, 8, 0, 40),
-                    Size = UDim2.new(1, -16, 0, #opts * 30)
+                    Position = UDim2.new(0, 10, 0, 50),
+                    Size = UDim2.new(1, -20, 0, #opts * 32)
                 })
                 
                 local optList = create("UIListLayout", {
                     Parent = optHolder,
                     SortOrder = Enum.SortOrder.LayoutOrder,
-                    Padding = UDim.new(0, 2)
+                    Padding = UDim.new(0, 4)
                 })
                 
                 for i, opt in ipairs(opts) do
                     local optBtn = create("TextButton", {
                         Parent = optHolder,
-                        BackgroundColor3 = theme.card,
-                        BackgroundTransparency = 1,
+                        BackgroundColor3 = Color3.fromRGB(35, 30, 60),
+                        BackgroundTransparency = 0.7,
                         BorderSizePixel = 0,
-                        Size = UDim2.new(1, 0, 0, 28),
+                        Size = UDim2.new(1, 0, 0, 30),
+                        Font = Enum.Font.Gotham,
+                        Text = "",
+                        AutoButtonColor = false
+                    })
+                    addCorner(optBtn, UDim.new(0, 8))
+                    
+                    local optLbl = create("TextLabel", {
+                        Parent = optBtn,
+                        BackgroundTransparency = 1,
+                        Position = UDim2.new(0, 12, 0, 0),
+                        Size = UDim2.new(1, -24, 1, 0),
                         Font = Enum.Font.Gotham,
                         Text = opt,
                         TextColor3 = theme.textDim,
                         TextSize = 12,
-                        AutoButtonColor = false
+                        TextXAlignment = Enum.TextXAlignment.Left
                     })
-                    addCorner(optBtn, UDim.new(0, 6))
                     
                     local function updateOptColor()
                         local isSelected = false
@@ -1492,16 +1710,18 @@ function lib:init(title, subtitle)
                         else
                             isSelected = val == opt
                         end
-                        optBtn.TextColor3 = isSelected and theme.accent or theme.textDim
+                        optLbl.TextColor3 = isSelected and theme.accent or theme.textDim
+                        optBtn.BackgroundTransparency = isSelected and 0.5 or 0.7
                     end
                     
                     updateOptColor()
                     
                     optBtn.MouseEnter:Connect(function()
-                        tw(optBtn, {BackgroundTransparency = 0, BackgroundColor3 = theme.card}, 0.15)
+                        tw(optBtn, {BackgroundTransparency = 0.3, BackgroundColor3 = Color3.fromRGB(50, 40, 85)}, 0.15)
                     end)
                     optBtn.MouseLeave:Connect(function()
-                        tw(optBtn, {BackgroundTransparency = 1}, 0.15)
+                        local isSelected = multi and (selected and selected[opt]) or (val == opt)
+                        tw(optBtn, {BackgroundTransparency = isSelected and 0.5 or 0.7, BackgroundColor3 = Color3.fromRGB(35, 30, 60)}, 0.15)
                     end)
                     optBtn.MouseButton1Click:Connect(function()
                         if multi then
@@ -1515,8 +1735,10 @@ function lib:init(title, subtitle)
                             valLbl.TextColor3 = #list > 0 and theme.accent or theme.textDim
                             for _, child in pairs(optHolder:GetChildren()) do
                                 if child:IsA("TextButton") then
-                                    local isSelected = selected[child.Text]
-                                    tw(child, {TextColor3 = isSelected and theme.accent or theme.textDim}, 0.15)
+                                    local lbl = child:FindFirstChildOfClass("TextLabel")
+                                    local isSelected = selected[lbl and lbl.Text or ""]
+                                    if lbl then tw(lbl, {TextColor3 = isSelected and theme.accent or theme.textDim}, 0.15) end
+                                    tw(child, {BackgroundTransparency = isSelected and 0.5 or 0.7}, 0.15)
                                 end
                             end
                             if callback then callback(list) end
@@ -1526,11 +1748,14 @@ function lib:init(title, subtitle)
                             valLbl.TextColor3 = theme.accent
                             for _, child in pairs(optHolder:GetChildren()) do
                                 if child:IsA("TextButton") then
-                                    tw(child, {TextColor3 = child.Text == val and theme.accent or theme.textDim}, 0.15)
+                                    local lbl = child:FindFirstChildOfClass("TextLabel")
+                                    local isSelected = lbl and lbl.Text == val
+                                    if lbl then tw(lbl, {TextColor3 = isSelected and theme.accent or theme.textDim}, 0.15) end
+                                    tw(child, {BackgroundTransparency = isSelected and 0.5 or 0.7}, 0.15)
                                 end
                             end
                             open = false
-                            tw(frame, {Size = UDim2.new(1, 0, 0, 36)}, 0.2, Enum.EasingStyle.Quart)
+                            tw(frame, {Size = UDim2.new(1, 0, 0, 44)}, 0.2, Enum.EasingStyle.Quart)
                             tw(arrow, {Rotation = 0}, 0.2)
                             task.delay(0.2, updateSecSize)
                             if callback then callback(val) end
@@ -1540,7 +1765,7 @@ function lib:init(title, subtitle)
                 
                 header.MouseButton1Click:Connect(function()
                     open = not open
-                    local h = open and (44 + #opts * 30) or 36
+                    local h = open and (56 + #opts * 34) or 44
                     tw(frame, {Size = UDim2.new(1, 0, 0, h)}, 0.2, Enum.EasingStyle.Quart)
                     tw(arrow, {Rotation = open and 180 or 0}, 0.2)
                     task.delay(0.2, updateSecSize)
@@ -1607,18 +1832,18 @@ function lib:init(title, subtitle)
                 local frame = create("Frame", {
                     Parent = holder,
                     Name = name,
-                    BackgroundColor3 = theme.bg,
+                    BackgroundColor3 = Color3.fromRGB(22, 18, 38),
                     BorderSizePixel = 0,
-                    Size = UDim2.new(1, 0, 0, 36),
+                    Size = UDim2.new(1, 0, 0, 44),
                     ClipsDescendants = true
                 })
-                addCorner(frame, UDim.new(0, 8))
-                addStroke(frame, theme.border, 1, 0.7)
+                addCorner(frame, UDim.new(0, 10))
+                addStroke(frame, Color3.fromRGB(60, 50, 90), 1, 0.6)
                 
                 local header = create("TextButton", {
                     Parent = frame,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 36),
+                    Size = UDim2.new(1, 0, 0, 44),
                     Text = "",
                     AutoButtonColor = false
                 })
@@ -1626,8 +1851,8 @@ function lib:init(title, subtitle)
                 local lbl = create("TextLabel", {
                     Parent = header,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0, 12, 0, 0),
-                    Size = UDim2.new(0.5, 0, 1, 0),
+                    Position = UDim2.new(0, 14, 0, 0),
+                    Size = UDim2.new(0.5, -14, 1, 0),
                     Font = Enum.Font.GothamBold,
                     Text = name,
                     TextColor3 = theme.text,
@@ -1639,11 +1864,11 @@ function lib:init(title, subtitle)
                     Parent = header,
                     BackgroundColor3 = val,
                     BorderSizePixel = 0,
-                    Position = UDim2.new(1, -80, 0.5, -10),
-                    Size = UDim2.new(0, 60, 0, 20)
+                    Position = UDim2.new(1, -80, 0.5, -12),
+                    Size = UDim2.new(0, 65, 0, 24)
                 })
-                addCorner(preview, UDim.new(0, 4))
-                addStroke(preview, theme.border, 1, 0.5)
+                addCorner(preview, UDim.new(0, 8))
+                addStroke(preview, Color3.fromRGB(80, 70, 110), 1, 0.5)
                 
                 local hexLbl = create("TextLabel", {
                     Parent = preview,
@@ -1652,14 +1877,14 @@ function lib:init(title, subtitle)
                     Font = Enum.Font.GothamBold,
                     Text = "#" .. val:ToHex():upper(),
                     TextColor3 = theme.text,
-                    TextSize = 10
+                    TextSize = 11
                 })
                 
                 local picker = create("Frame", {
                     Parent = frame,
                     BackgroundTransparency = 1,
-                    Position = UDim2.new(0, 10, 0, 42),
-                    Size = UDim2.new(1, -20, 0, 130),
+                    Position = UDim2.new(0, 14, 0, 50),
+                    Size = UDim2.new(1, -28, 0, 130),
                     Visible = false
                 })
                 
@@ -1841,7 +2066,7 @@ function lib:init(title, subtitle)
                     open = not open
                     picker.Visible = open
                     satCursor.Visible = open
-                    tw(frame, {Size = UDim2.new(1, 0, 0, open and 180 or 36)}, 0.25, Enum.EasingStyle.Quart)
+                    tw(frame, {Size = UDim2.new(1, 0, 0, open and 190 or 44)}, 0.25, Enum.EasingStyle.Quart)
                     task.delay(0.25, updateSecSize)
                 end)
                 
@@ -1860,14 +2085,17 @@ function lib:init(title, subtitle)
                 local frame = create("Frame", {
                     Parent = holder,
                     Name = name,
-                    BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 32)
+                    BackgroundColor3 = Color3.fromRGB(20, 16, 32),
+                    BackgroundTransparency = 0.5,
+                    Size = UDim2.new(1, 0, 0, 40)
                 })
+                addCorner(frame, UDim.new(0, 10))
                 
                 local lbl = create("TextLabel", {
                     Parent = frame,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(0.6, 0, 1, 0),
+                    Position = UDim2.new(0, 14, 0, 0),
+                    Size = UDim2.new(0.5, -14, 1, 0),
                     Font = Enum.Font.GothamBold,
                     Text = name,
                     TextColor3 = theme.text,
@@ -1877,17 +2105,17 @@ function lib:init(title, subtitle)
                 
                 local btn = create("TextButton", {
                     Parent = frame,
-                    BackgroundColor3 = theme.bg,
+                    BackgroundColor3 = Color3.fromRGB(30, 25, 55),
                     BorderSizePixel = 0,
-                    Position = UDim2.new(0.62, 0, 0, 0),
-                    Size = UDim2.new(0.38, 0, 1, 0),
+                    Position = UDim2.new(0.55, 0, 0.5, -14),
+                    Size = UDim2.new(0.45, -14, 0, 28),
                     Font = Enum.Font.GothamBold,
                     Text = key and key.Name or "None",
                     TextColor3 = theme.accent,
                     TextSize = 12,
                     AutoButtonColor = false
                 })
-                addCorner(btn, UDim.new(0, 6))
+                addCorner(btn, UDim.new(0, 8))
                 addStroke(btn, theme.accent, 1, 0.5)
                 
                 btn.MouseEnter:Connect(function()
@@ -1923,18 +2151,27 @@ function lib:init(title, subtitle)
             end
             
             function section:label(text)
-                local lbl = create("TextLabel", {
+                local lblFrame = create("Frame", {
                     Parent = holder,
+                    BackgroundColor3 = theme.accent,
+                    BackgroundTransparency = 0.92,
+                    Size = UDim2.new(1, 0, 0, 28)
+                })
+                addCorner(lblFrame, UDim.new(0, 8))
+                
+                local lbl = create("TextLabel", {
+                    Parent = lblFrame,
                     BackgroundTransparency = 1,
-                    Size = UDim2.new(1, 0, 0, 24),
-                    Font = Enum.Font.Gotham,
+                    Position = UDim2.new(0, 12, 0, 0),
+                    Size = UDim2.new(1, -24, 1, 0),
+                    Font = Enum.Font.GothamMedium,
                     Text = text,
                     TextColor3 = theme.textDim,
                     TextSize = 12,
                     TextXAlignment = Enum.TextXAlignment.Left
                 })
                 
-                table.insert(allElements, {name = text, frame = lbl, tab = tab.name})
+                table.insert(allElements, {name = text, frame = lblFrame, tab = tab.name})
                 updateSecSize()
                 return {set = function(_, t) lbl.Text = t end}
             end
@@ -1959,22 +2196,41 @@ function lib:init(title, subtitle)
         local notif = create("Frame", {
             Parent = gui,
             Name = "Notification",
-            BackgroundColor3 = theme.card,
+            BackgroundColor3 = Color3.fromRGB(18, 14, 30),
             BorderSizePixel = 0,
             Position = UDim2.new(1, 20, ypos, 0),
-            Size = UDim2.new(0, 300, 0, 75),
+            Size = UDim2.new(0, 320, 0, 80),
             AnchorPoint = Vector2.new(0, 0.5),
             ZIndex = 100
         })
-        addCorner(notif, UDim.new(0, 12))
+        addCorner(notif, UDim.new(0, 14))
         addShadow(notif, 0.4)
-        addStroke(notif, col, 1.5, 0.5)
+        addStroke(notif, col, 2, 0.4)
+        
+        local notifIcon = create("Frame", {
+            Parent = notif,
+            BackgroundColor3 = col,
+            BackgroundTransparency = 0.85,
+            Position = UDim2.new(0, 14, 0.5, -18),
+            Size = UDim2.new(0, 36, 0, 36)
+        })
+        addCorner(notifIcon, UDim.new(0, 10))
+        
+        local iconSymbol = create("TextLabel", {
+            Parent = notifIcon,
+            BackgroundTransparency = 1,
+            Size = UDim2.new(1, 0, 1, 0),
+            Font = Enum.Font.GothamBlack,
+            Text = type == "error" and "!" or type == "warning" and "⚠" or "✓",
+            TextColor3 = col,
+            TextSize = 18
+        })
         
         create("TextLabel", {
             Parent = notif,
             BackgroundTransparency = 1,
-            Position = UDim2.new(0, 15, 0, 12),
-            Size = UDim2.new(1, -25, 0, 22),
+            Position = UDim2.new(0, 60, 0, 14),
+            Size = UDim2.new(1, -75, 0, 22),
             Font = Enum.Font.GothamBlack,
             Text = title,
             TextColor3 = col,
@@ -1985,8 +2241,8 @@ function lib:init(title, subtitle)
         create("TextLabel", {
             Parent = notif,
             BackgroundTransparency = 1,
-            Position = UDim2.new(0, 15, 0, 36),
-            Size = UDim2.new(1, -25, 0, 28),
+            Position = UDim2.new(0, 60, 0, 38),
+            Size = UDim2.new(1, -75, 0, 28),
             Font = Enum.Font.Gotham,
             Text = text,
             TextColor3 = theme.textDim,
@@ -2007,7 +2263,7 @@ function lib:init(title, subtitle)
         
         table.insert(notifQueue, notif)
         
-        tw(notif, {Position = UDim2.new(1, -310, ypos, 0)}, 0.4, Enum.EasingStyle.Back)
+        tw(notif, {Position = UDim2.new(1, -330, ypos, 0)}, 0.4, Enum.EasingStyle.Back)
         tw(progress, {Size = UDim2.new(0, 0, 0, 4)}, dur, Enum.EasingStyle.Linear)
         
         task.delay(dur, function()
