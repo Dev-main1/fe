@@ -704,19 +704,9 @@ function lib:init(title, subtitle)
         AutoButtonColor = false,
         Visible = false
     })
-    addCorner(openBtn, UDim.new(1, 0))
-    addShadow(openBtn, 0.5)
-    addStroke(openBtn, theme.accent, 3, 0.2)
-    
-    local openIcon = create("ImageLabel", {
-        Parent = openBtn,
-        BackgroundTransparency = 1,
-        Position = UDim2.new(0.5, -12, 0.5, -12),
-        Size = UDim2.new(0, 24, 0, 24),
-        Image = "rbxassetid://10734923549",
-        ImageColor3 = theme.text,
-        ScaleType = Enum.ScaleType.Fit
-    })
+    addCorner(openBtn, UDim.new(0, 12))
+    addShadow(openBtn, 0.3)
+    addStroke(openBtn, theme.accent, 2, 0.4)
     
     openBtn.MouseEnter:Connect(function()
         tw(openBtn, {BackgroundTransparency = 0, Size = UDim2.new(0, 75, 0, 75)}, 0.2)
@@ -859,22 +849,11 @@ function lib:init(title, subtitle)
         })
         addCorner(indicator, UDim.new(1, 0))
         
-        local iconId = (icon and icons[icon]) or icons[name] or "rbxassetid://7072717807"
-        local tabIcon = create("ImageLabel", {
-            Parent = tabBtn,
-            BackgroundTransparency = 1,
-            Position = UDim2.new(0, 12, 0.5, -8),
-            Size = UDim2.new(0, 16, 0, 16),
-            Image = iconId,
-            ImageColor3 = theme.textDim,
-            ScaleType = Enum.ScaleType.Fit
-        })
-        
         local tabLbl = create("TextLabel", {
             Parent = tabBtn,
             BackgroundTransparency = 1,
-            Position = UDim2.new(0, 34, 0, 0),
-            Size = UDim2.new(1, -40, 1, 0),
+            Position = UDim2.new(0, 12, 0, 0),
+            Size = UDim2.new(1, -20, 1, 0),
             Font = Enum.Font.GothamBold,
             Text = name,
             TextColor3 = theme.textDim,
@@ -916,9 +895,7 @@ function lib:init(title, subtitle)
                 tw(t.btn, {BackgroundTransparency = 1}, 0.2)
                 tw(t.btn.Indicator, {BackgroundTransparency = 1}, 0.2)
                 local txt = t.btn:FindFirstChild("TextLabel")
-                local img = t.btn:FindFirstChildOfClass("ImageLabel")
                 if txt then tw(txt, {TextColor3 = theme.textDim}, 0.2) end
-                if img then tw(img, {ImageColor3 = theme.textDim}, 0.2) end
                 if t.page ~= page and t.page.Visible then
                     t.page.Visible = false
                 end
@@ -926,7 +903,6 @@ function lib:init(title, subtitle)
             tw(tabBtn, {BackgroundTransparency = 0.9}, 0.2)
             tw(indicator, {BackgroundTransparency = 0}, 0.2)
             tw(tabLbl, {TextColor3 = theme.text}, 0.2)
-            tw(tabIcon, {ImageColor3 = theme.accent}, 0.2)
             
             page.Visible = true
             
@@ -954,7 +930,6 @@ function lib:init(title, subtitle)
             tw(tabBtn, {BackgroundTransparency = 0.9}, 0.2)
             tw(indicator, {BackgroundTransparency = 0}, 0.2)
             tw(tabLbl, {TextColor3 = theme.text}, 0.2)
-            tw(tabIcon, {ImageColor3 = theme.accent}, 0.2)
             page.Visible = true
             window.activeTab = name
             activeTabName = name
