@@ -230,21 +230,21 @@ function lib:init(title, subtitle)
         Visible = true
     })
     local bgSnowflakes = {}
-    for i = 1, 100 do
-        local s = math.random(4, 10)
+    for i = 1, 120 do
+        local s = math.random(3, 7)
         local startX = math.random()
         local startY = math.random()
-        local snow = create("ImageLabel", {
+        local snow = create("Frame", {
             Parent = bgSnowHolder,
-            BackgroundTransparency = 1,
+            BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+            BorderSizePixel = 0,
             Position = UDim2.new(startX, 0, startY, 0),
             Size = UDim2.new(0, s, 0, s),
-            Image = "rbxassetid://5028857084",
-            ImageColor3 = Color3.fromRGB(240, 240, 255),
-            ImageTransparency = 0.1,
+            BackgroundTransparency = math.random(20, 50) / 100,
             ZIndex = 0
         })
-        table.insert(bgSnowflakes, {frame = snow, speedY = 0.0002 + math.random() * 0.0003, speedX = (math.random() - 0.5) * 0.0002, x = startX, y = startY, rot = math.random(0, 360)})
+        addCorner(snow, UDim.new(1, 0))
+        table.insert(bgSnowflakes, {frame = snow, speedY = 0.0003 + math.random() * 0.0004, speedX = (math.random() - 0.5) * 0.0002, x = startX, y = startY, rot = math.random(0, 360)})
     end
     
     task.spawn(function()
