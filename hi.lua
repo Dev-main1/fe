@@ -405,7 +405,7 @@ function lib:init(title, sub)
     end
     task.spawn(function()
         while gui and gui.Parent and snowholder do
-            if snowholder.vis then
+            if snowholder.Visible then
                 for _, data in ipairs(snowflakes) do
                     if data.frame and data.frame.Parent then
                         data.y = data.y + data.speedY
@@ -662,18 +662,18 @@ function lib:init(title, sub)
         local q = searchinput.Text:lower()
         if q ~= "" then
             for _, t in pairs(windowtabs) do
-                if t.page then t.page.vis = true end
+                if t.page then t.page.Visible = true end
             end
             for _, el in pairs(elems) do
                 local match = el.name:lower():find(q, 1, true)
-                el.frame.vis = match
+                el.frame.Visible = match
             end
         else
             for _, t in pairs(windowtabs) do
-                if t.page then t.page.vis = (t == windowtabs[activetab]) end
+                if t.page then t.page.Visible = (t == windowtabs[activetab]) end
             end
             for _, el in pairs(elems) do
-                el.frame.vis = true
+                el.frame.Visible = true
             end
         end
     end)
@@ -696,7 +696,7 @@ function lib:init(title, sub)
     })
     task.spawn(function()
         while timelbl and timelbl.Parent do
-            if timelbl.vis then
+            if timelbl.Visible then
                 timelbl.Text = os.date("%H:%M:%S")
             end
             task.wait(1)
@@ -879,9 +879,9 @@ function lib:init(title, sub)
     local cool = false
     minbtn.click:Connect(function()
         minim = not minim
-        resize.vis = not minim
-        search.vis = not minim
-        timelbl.vis = minim
+        resize.Visible = not minim
+        search.Visible = not minim
+        timelbl.Visible = minim
         if minim then
             tween(sidebar, {Size = UDim2.new(0, 0, 1, 0)}, 0.3, Enum.EasingStyle.Quart)
             tween(content, {Position = UDim2.new(0, 0, 0, 0), Size = UDim2.new(1, 0, 0, 55), bgt = 0.5}, 0.3, Enum.EasingStyle.Quart)
@@ -970,7 +970,7 @@ function lib:init(title, sub)
     end)
     task.spawn(function()
         while openGui and openGui.Parent do
-            if openbtn.vis then
+            if openbtn.Visible then
                 local stroke = openbtn:find("UIStroke")
                 if stroke then
                     tween(stroke, {Transparency = 0}, 0.8)
@@ -986,12 +986,12 @@ function lib:init(title, sub)
     openbtn.click:Connect(function()
         vis = true
         minim = false
-        resize.vis = true
-        search.vis = true
-        timelbl.vis = false
-        openbtn.vis = false
-        main.vis = true
-        snowholder.vis = true
+        resize.Visible = true
+        search.Visible = true
+        timelbl.Visible = false
+        openbtn.Visible = false
+        main.Visible = true
+        snowholder.Visible = true
         main.Size = UDim2.new(0, 0, 0, 0)
         sidebar.Size = UDim2.new(0, 145, 1, 0)
         content.Position = UDim2.new(0, 145, 0, 0)
@@ -1002,12 +1002,12 @@ function lib:init(title, sub)
     end)
     closebtn.click:Connect(function()
         vis = false
-        snowholder.vis = false
+        snowholder.Visible = false
         tween(blur, {Size = 0}, 0.3)
         tween(main, {Size = UDim2.new(0, 0, 0, 0)}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In)
         task.delay(0.35, function()
-            main.vis = false
-            openbtn.vis = true
+            main.Visible = false
+            openbtn.Visible = true
         end)
     end)
     input.began:Connect(function(key, gpe)
@@ -1018,12 +1018,12 @@ function lib:init(title, sub)
             vis = not vis
             if vis then
                 minim = false
-                resize.vis = true
-                search.vis = true
-                timelbl.vis = false
-                openbtn.vis = false
-                main.vis = true
-                snowholder.vis = true
+                resize.Visible = true
+                search.Visible = true
+                timelbl.Visible = false
+                openbtn.Visible = false
+                main.Visible = true
+                snowholder.Visible = true
                 main.Size = UDim2.new(0, 0, 0, 0)
                 sidebar.Size = UDim2.new(0, 145, 1, 0)
                 content.Position = UDim2.new(0, 145, 0, 0)
@@ -1032,12 +1032,12 @@ function lib:init(title, sub)
                 tween(main, {Size = UDim2.new(0, size.w, 0, size.h)}, 0.4, Enum.EasingStyle.Back)
                 tween(blur, {Size = 6}, 0.4)
             else
-                snowholder.vis = false
+                snowholder.Visible = false
                 tween(blur, {Size = 0}, 0.3)
                 tween(main, {Size = UDim2.new(0, 0, 0, 0)}, 0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In)
                 task.delay(0.35, function()
-                    main.vis = false
-                    openbtn.vis = true
+                    main.Visible = false
+                    openbtn.Visible = true
                 end)
             end
         end
@@ -1201,8 +1201,8 @@ function lib:init(title, sub)
                 if txt then tween(txt, {tc = theme.textDim}, 0.25) end
                 local ico = t.btn:find("ImageLabel")
                 if ico and ico.Name ~= "Glow" then tween(ico, {ImageColor3 = theme.textDim}, 0.25) end
-                if t.page ~= page and t.page.vis then
-                    t.page.vis = false
+                if t.page ~= page and t.page.Visible then
+                    t.page.Visible = false
                 end
             end
             tween(tabbtn, {bgt = 0.85}, 0.25)
@@ -1211,7 +1211,7 @@ function lib:init(title, sub)
             tween(tabglow, {it = 0.7}, 0.25)
             tween(tablbl, {tc = theme.text}, 0.25)
             if tabicon then tween(tabicon, {ImageColor3 = theme.accent}, 0.25) end
-            page.vis = true
+            page.Visible = true
             window.activeTab = name
             activetab = name
         end
@@ -1238,7 +1238,7 @@ function lib:init(title, sub)
             tween(tabglow, {it = 0.7}, 0.2)
             tween(tablbl, {tc = theme.text}, 0.2)
             if tabicon then tween(tabicon, {ImageColor3 = theme.accent}, 0.2) end
-            page.vis = true
+            page.Visible = true
             window.activeTab = name
             activetab = name
         end
@@ -2289,8 +2289,8 @@ function lib:init(title, sub)
                 end)
                 header.click:Connect(function()
                     open = not open
-                    pick.vis = open
-                    satc.vis = open
+                    pick.Visible = open
+                    satc.Visible = open
                     tween(frame, {Size = UDim2.new(1, 0, 0, open and 190 or 44)}, 0.25, Enum.EasingStyle.Quart)
                     task.delay(0.25, upsecsize)
                 end)
@@ -2669,7 +2669,7 @@ function lib:init(title, sub)
         key = key
     end
     function window:showOpenButton(show)
-        openbtn.vis = show
+        openbtn.Visible = show
     end
     return window
 end
