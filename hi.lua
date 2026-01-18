@@ -690,14 +690,14 @@ function lib:init(title, sub)
         Size = UDim2.new(0, 12, 0, 2)
     })
     corner(minIcon, UDim.new(1, 0))
+    hover(minbtn, "bgc", 1.2)
     minbtn.enter:Connect(function()
-        tween(minbtn, {bgc = theme.accent}, 0.15)
         tween(minIcon, {bgc = theme.text}, 0.15)
     end)
     minbtn.leave:Connect(function()
-        tween(minbtn, {bgc = Color3.fromRGB(35, 25, 55)}, 0.15)
         tween(minIcon, {bgc = theme.accent}, 0.15)
     end)
+    click(minbtn, "bgc", 1.3)
     local closebtn = create("TextButton", {
         Parent = btns,
         bgc = Color3.fromRGB(35, 25, 55),
@@ -717,14 +717,14 @@ function lib:init(title, sub)
         tc = theme.accent,
         ts = 20
     })
+    hover(closebtn, "bgc", 1.2)
     closebtn.enter:Connect(function()
-        tween(closebtn, {bgc = theme.accent}, 0.15)
         tween(closeIcon, {tc = theme.text}, 0.15)
     end)
     closebtn.leave:Connect(function()
-        tween(closebtn, {bgc = Color3.fromRGB(35, 25, 55)}, 0.15)
         tween(closeIcon, {tc = theme.accent}, 0.15)
     end)
+    click(closebtn, "bgc", 1.3)
     local pages = create("Frame", {
         Parent = content,
         Name = "Pages",
@@ -1398,8 +1398,8 @@ function lib:init(title, sub)
                     ts = 13,
                     xa = Enum.xa.Left
                 })
+                hover(btn, "bgc", 1.15)
                 btn.enter:Connect(function()
-                    tween(btn, {bgc = theme.accent}, 0.2)
                     tween(btn:find("UIStroke"), {Color = theme.accent, Transparency = 0.3}, 0.2)
                     tween(btnicon, {bgc = Color3.new(1, 1, 1), bgt = 0.7}, 0.2)
                     if btnarrow:IsA("ImageLabel") then
@@ -1410,7 +1410,6 @@ function lib:init(title, sub)
                     btngrad.Enabled = false
                 end)
                 btn.leave:Connect(function()
-                    tween(btn, {bgc = Color3.fromRGB(25, 20, 45)}, 0.2)
                     tween(btn:find("UIStroke"), {Color = Color3.fromRGB(80, 60, 120), Transparency = 0.6}, 0.2)
                     tween(btnicon, {bgc = theme.accent, bgt = 0.8}, 0.2)
                     if btnarrow:IsA("ImageLabel") then
@@ -1420,6 +1419,7 @@ function lib:init(title, sub)
                     end
                     btngrad.Enabled = true
                 end)
+                click(btn, "bgc", 1.2)
                 btn.click:Connect(function()
                     ripple(btn, mouse.X, mouse.Y)
                     if cb then cb() end
@@ -2356,6 +2356,23 @@ function lib:init(title, sub)
                 table.insert(elems, {name = text, frame = lblframe, tab = tab.name})
                 upsecsize()
                 return {set = function(_, t) lbl.Text = t end}
+            end
+            function section:divider()
+                local div = create("Frame", {
+                    Parent = holder,
+                    bgc = theme.border,
+                    bgt = 0.4,
+                    bsp = 0,
+                    Size = UDim2.new(1, -40, 0, 1)
+                })
+                local divpad = create("Frame", {
+                    Parent = holder,
+                    bgt = 1,
+                    Size = UDim2.new(1, 0, 0, 8)
+                })
+                div.Parent = divpad
+                div.Position = UDim2.new(0, 20, 0.5, 0)
+                upsecsize()
             end
             return section
         end
