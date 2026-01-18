@@ -103,8 +103,29 @@ local iconmap = {
     Lorem = "file-text", Ipsum = "layers", ["Config System"] = "folder-cog"
 }
 local function tween(obj, props, dur, style, dir)
+    local map = {
+        bgc = "BackgroundColor3",
+        bgt = "BackgroundTransparency",
+        bsp = "BorderSizePixel",
+        tc = "TextColor3",
+        ts = "TextSize",
+        xa = "TextXAlignment",
+        ya = "TextYAlignment",
+        it = "ImageTransparency",
+        sz = "AbsoluteSize",
+        pos = "AbsolutePosition",
+        anchor = "AnchorPoint",
+        clips = "ClipsDescendants",
+        vis = "Visible",
+        itype = "UserInputType"
+    }
+    local mapped = {}
+    for k, v in pairs(props) do
+        local prop = map[k] or k
+        mapped[prop] = v
+    end
     local info = TweenInfo.new(dur or 0.25, style or Enum.EasingStyle.Quart, dir or Enum.EasingDirection.Out)
-    local t = tw:Create(obj, info, props)
+    local t = tw:Create(obj, info, mapped)
     t:Play()
     return t
 end
