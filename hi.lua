@@ -395,11 +395,137 @@ function lib:init(title, sub)
         gui.Parent = player:wait("PlayerGui")
     end
     local blur = create("BlurEffect", {
-        Parent = lighting,
+        Parent = light,
         Name = "libBlur",
         Size = 0
     })
-    tween(blur, {Size = 6}, 0.5)
+    local loader = create("Frame", {
+        Parent = gui,
+        bgc = Color3.fromRGB(10, 8, 18),
+        bgt = 0,
+        bsp = 0,
+        Size = UDim2.new(1, 0, 1, 0),
+        ZIndex = 1000
+    })
+    local loaderlogo = create("Frame", {
+        Parent = loader,
+        bgt = 1,
+        Position = UDim2.new(0.5, 0, 0.5, -80),
+        Size = UDim2.new(0, 120, 0, 120),
+        anchor = Vector2.new(0.5, 0.5)
+    })
+    local logoicon = create("ImageLabel", {
+        Parent = loaderlogo,
+        bgt = 1,
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        anchor = Vector2.new(0.5, 0.5),
+        Size = UDim2.new(0, 80, 0, 80),
+        Image = "rbxassetid://7733715400",
+        ImageColor3 = theme.accent,
+        Rotation = 0
+    })
+    local logoglow = create("ImageLabel", {
+        Parent = logoicon,
+        bgt = 1,
+        Position = UDim2.new(0.5, 0, 0.5, 0),
+        anchor = Vector2.new(0.5, 0.5),
+        Size = UDim2.new(1.5, 0, 1.5, 0),
+        Image = "rbxassetid://5028857084",
+        ImageColor3 = theme.accent,
+        it = 0.4,
+        ScaleType = Enum.ScaleType.Slice,
+        SliceCenter = Rect.new(24, 24, 276, 276),
+        ZIndex = 0
+    })
+    task.spawn(function()
+        while loader and loader.Parent do
+            tween(logoicon, {Rotation = 360}, 2, Enum.EasingStyle.Linear)
+            task.wait(2)
+            if logoicon and logoicon.Parent then
+                logoicon.Rotation = 0
+            else
+                break
+            end
+        end
+    end)
+    local loadertitle = create("TextLabel", {
+        Parent = loader,
+        bgt = 1,
+        Position = UDim2.new(0.5, 0, 0.5, 60),
+        Size = UDim2.new(0, 400, 0, 30),
+        anchor = Vector2.new(0.5, 0.5),
+        Font = Enum.Font.GothamBlack,
+        Text = title or "Loading...",
+        tc = theme.text,
+        ts = 24
+    })
+    local loaderbar = create("Frame", {
+        Parent = loader,
+        bgc = Color3.fromRGB(20, 16, 32),
+        bsp = 0,
+        Position = UDim2.new(0.5, 0, 0.5, 100),
+        Size = UDim2.new(0, 300, 0, 6),
+        anchor = Vector2.new(0.5, 0.5)
+    })
+    corner(loaderbar, UDim.new(1, 0))
+    local loaderfill = create("Frame", {
+        Parent = loaderbar,
+        bgc = theme.accent,
+        bsp = 0,
+        Size = UDim2.new(0, 0, 1, 0)
+    })
+    corner(loaderfill, UDim.new(1, 0))
+    local fillgrad = create("UIGradient", {
+        Parent = loaderfill,
+        Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(100, 60, 180)),
+            ColorSequenceKeypoint.new(0.5, theme.accent),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 120, 255))
+        }),
+        Offset = Vector2.new(-1, 0)
+    })
+    task.spawn(function()
+        while loaderfill and loaderfill.Parent do
+            tween(fillgrad, {Offset = Vector2.new(1, 0)}, 1.5, Enum.EasingStyle.Linear)
+            task.wait(1.5)
+            if fillgrad and fillgrad.Parent then
+                fillgrad.Offset = Vector2.new(-1, 0)
+            else
+                break
+            end
+        end
+    end)
+    local loadertxt = create("TextLabel", {
+        Parent = loader,
+        bgt = 1,
+        Position = UDim2.new(0.5, 0, 0.5, 120),
+        Size = UDim2.new(0, 300, 0, 20),
+        anchor = Vector2.new(0.5, 0.5),
+        Font = Enum.Font.Gotham,
+        Text = "Initializing...",
+        tc = theme.textDim,
+        ts = 12
+    })
+    task.spawn(function()
+        local stages = {
+            {txt = "Initializing...", pct = 0.15},
+            {txt = "Loading assets...", pct = 0.35},
+            {txt = "Building interface...", pct = 0.60},
+            {txt = "Applying effects...", pct = 0.80},
+            {txt = "Finalizing...", pct = 0.95},
+            {txt = "Ready!", pct = 1}
+        }
+        for _, stage in ipairs(stages) do
+            loadertxt.Text = stage.txt
+            tween(loaderfill, {Size = UDim2.new(stage.pct, 0, 1, 0)}, 0.4, Enum.EasingStyle.Quad)
+            task.wait(0.3 + math.random() * 0.2)
+        end
+        task.wait(0.3)
+        tween(loader, {bgt = 1}, 0.5)
+        task.wait(0.5)
+        loader:Destroy()
+    end)
+    tween(blur, {Size = 6}, 1.5)
     local snowholder = create("Frame", {
         Parent = gui,
         bgt = 1,
