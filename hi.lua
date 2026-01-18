@@ -706,7 +706,7 @@ function lib:init(title, sub)
         Text = title or "BioHazard",
         tc = theme.text,
         ts = 16,
-        xa = Enum.xa.Left
+        xa = Enum.TextXAlignment.Left
     })
     local subLbl = create("TextLabel", {
         Parent = logo,
@@ -717,7 +717,7 @@ function lib:init(title, sub)
         Text = sub or "Sneak Peek",
         tc = theme.textDim,
         ts = 12,
-        xa = Enum.xa.Left
+        xa = Enum.TextXAlignment.Left
     })
     local divider = create("Frame", {
         Parent = sidebar,
@@ -801,7 +801,7 @@ function lib:init(title, sub)
         Text = "",
         tc = theme.text,
         ts = 13,
-        xa = Enum.xa.Left
+        xa = Enum.TextXAlignment.Left
     })
     searchinput.Focused:Connect(function()
         tween(search:find("UIStroke"), {Color = theme.accent, Transparency = 0.3}, 0.2)
@@ -1308,7 +1308,7 @@ function lib:init(title, sub)
             Text = name,
             tc = theme.textDim,
             ts = 13,
-            xa = Enum.xa.Left
+            xa = Enum.TextXAlignment.Left
         })
         local page = create("ScrollingFrame", {
             Parent = pages,
@@ -1459,7 +1459,7 @@ function lib:init(title, sub)
                 Text = name,
                 tc = theme.text,
                 ts = 14,
-                xa = Enum.xa.Left
+                xa = Enum.TextXAlignment.Left
             })
             local expbtn = create("TextButton", {
                 Parent = header,
@@ -1575,7 +1575,7 @@ function lib:init(title, sub)
                     Text = name,
                     tc = theme.text,
                     ts = 13,
-                    xa = Enum.xa.Left
+                    xa = Enum.TextXAlignment.Left
                 })
                 hover(btn, "bgc", 1.15)
                 btn.enter:Connect(function()
@@ -1626,7 +1626,7 @@ function lib:init(title, sub)
                     Text = name,
                     tc = theme.text,
                     ts = 13,
-                    xa = Enum.xa.Left
+                    xa = Enum.TextXAlignment.Left
                 })
                 local box = create("Frame", {
                     Parent = frame,
@@ -1741,7 +1741,7 @@ function lib:init(title, sub)
                     Text = name,
                     tc = theme.text,
                     ts = 13,
-                    xa = Enum.xa.Left
+                    xa = Enum.TextXAlignment.Left
                 })
                 local valbox = create("Frame", {
                     Parent = top,
@@ -1824,7 +1824,7 @@ function lib:init(title, sub)
                     Text = tostring(min),
                     tc = theme.textDark,
                     ts = 11,
-                    xa = Enum.xa.Left
+                    xa = Enum.TextXAlignment.Left
                 })
                 local maxlbl = create("TextLabel", {
                     Parent = frame,
@@ -1835,7 +1835,7 @@ function lib:init(title, sub)
                     Text = tostring(max),
                     tc = theme.textDark,
                     ts = 11,
-                    xa = Enum.xa.Right
+                    xa = Enum.TextXAlignment.Right
                 })
                 local slide = false
                 bar.began:Connect(function(inp)
@@ -1911,7 +1911,7 @@ function lib:init(title, sub)
                     Text = name,
                     tc = theme.text,
                     ts = 13,
-                    xa = Enum.xa.Left
+                    xa = Enum.TextXAlignment.Left
                 })
                 local box = create("Frame", {
                     Parent = frame,
@@ -1933,7 +1933,7 @@ function lib:init(title, sub)
                     tc = theme.text,
                     ts = 12,
                     ClearTextOnFocus = false,
-                    xa = Enum.xa.Left
+                    xa = Enum.TextXAlignment.Left
                 })
                 inp.Focused:Connect(function()
                     tween(box:find("UIStroke"), {Color = theme.accent, Transparency = 0.3}, 0.2)
@@ -1986,7 +1986,7 @@ function lib:init(title, sub)
                     Text = name,
                     tc = theme.text,
                     ts = 13,
-                    xa = Enum.xa.Left
+                    xa = Enum.TextXAlignment.Left
                 })
                 local valbox = create("Frame", {
                     Parent = header,
@@ -2005,7 +2005,7 @@ function lib:init(title, sub)
                     Text = val or "Select...",
                     tc = val and theme.accent or theme.textDim,
                     ts = 12,
-                    xa = Enum.xa.Left,
+                    xa = Enum.TextXAlignment.Left,
                     TextTruncate = Enum.TextTruncate.AtEnd
                 })
                 local arrow = create("ImageLabel", {
@@ -2053,7 +2053,7 @@ function lib:init(title, sub)
                         Text = opt,
                         tc = issel and theme.accent or theme.textDim,
                         ts = 12,
-                        xa = Enum.xa.Left
+                        xa = Enum.TextXAlignment.Left
                     })
                     local function upoptcolor()
                         local issel = false
@@ -2158,7 +2158,7 @@ function lib:init(title, sub)
                                 Text = opt,
                                 tc = issel and theme.accent or theme.textDim,
                                 ts = 12,
-                                xa = Enum.xa.Left
+                                xa = Enum.TextXAlignment.Left
                             })
                             obtn.enter:Connect(function()
                                 tween(obtn, {bgt = 0.1, bgc = Color3.fromRGB(70, 50, 125)}, 0.15)
@@ -2229,7 +2229,7 @@ function lib:init(title, sub)
                     Text = name,
                     tc = theme.text,
                     ts = 13,
-                    xa = Enum.xa.Left
+                    xa = Enum.TextXAlignment.Left
                 })
                 local prev = create("Frame", {
                     Parent = header,
@@ -2339,7 +2339,7 @@ function lib:init(title, sub)
                         Text = name,
                         tc = theme.textDim,
                         ts = 11,
-                        xa = Enum.xa.Left
+                        xa = Enum.TextXAlignment.Left
                     })
                     local rbox = create("TextBox", {
                         Parent = row,
@@ -2470,7 +2470,7 @@ function lib:init(title, sub)
                     Text = name,
                     tc = theme.text,
                     ts = 13,
-                    xa = Enum.xa.Left
+                    xa = Enum.TextXAlignment.Left
                 })
                 local btn = create("TextButton", {
                     Parent = frame,
@@ -2530,7 +2530,7 @@ function lib:init(title, sub)
                     Text = text,
                     tc = theme.textDim,
                     ts = 12,
-                    xa = Enum.xa.Left
+                    xa = Enum.TextXAlignment.Left
                 })
                 table.insert(elems, {name = text, frame = lblframe, tab = tab.name})
                 upsecsize()
@@ -2605,7 +2605,7 @@ function lib:init(title, sub)
             Text = title,
             tc = col,
             ts = 14,
-            xa = Enum.xa.Left
+            xa = Enum.TextXAlignment.Left
         })
         create("TextLabel", {
             Parent = notif,
@@ -2616,7 +2616,7 @@ function lib:init(title, sub)
             Text = text,
             tc = theme.textDim,
             ts = 12,
-            xa = Enum.xa.Left,
+            xa = Enum.TextXAlignment.Left,
             wrap = true
         })
         local progress = create("Frame", {
