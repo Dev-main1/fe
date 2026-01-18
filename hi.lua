@@ -110,8 +110,38 @@ local function tween(obj, props, dur, style, dir)
 end
 local function create(cls, props)
     local obj = Instance.new(cls)
+    local map = {
+        bgc = "BackgroundColor3",
+        bgt = "BackgroundTransparency",
+        bsp = "BorderSizePixel",
+        tc = "TextColor3",
+        ts = "TextSize",
+        xa = "TextXAlignment",
+        ya = "TextYAlignment",
+        it = "ImageTransparency",
+        sz = "AbsoluteSize",
+        pos = "AbsolutePosition",
+        anchor = "AnchorPoint",
+        clips = "ClipsDescendants",
+        vis = "Visible",
+        itype = "UserInputType",
+        down1 = "MouseButton1Down",
+        up1 = "MouseButton1Up",
+        click = "MouseButton1Click",
+        enter = "MouseEnter",
+        leave = "MouseLeave",
+        began = "InputBegan",
+        ended = "InputEnded",
+        changed = "Changed",
+        lost = "FocusLost",
+        wrap = "TextWrapped",
+        csz = "AbsoluteContentSize"
+    }
     for k, v in pairs(props) do
-        if k ~= "Parent" then obj[k] = v end
+        if k ~= "Parent" then
+            local prop = map[k] or k
+            obj[prop] = v
+        end
     end
     if props.Parent then obj.Parent = props.Parent end
     return obj
