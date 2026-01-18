@@ -388,17 +388,10 @@ function lib:init(title, sub)
         ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
         IgnoreGuiInset = true
     })
-    local protected = false
-    if syn and syn.protect_gui then
-        syn.protect_gui(gui)
-        protected = true
-    end
     if gethui then
         gui.Parent = gethui()
-    elseif protected then
-        gui.Parent = game:GetService("CoreGui")
     else
-        gui.Parent = player:wait("PlayerGui")
+        gui.Parent = game:GetService("CoreGui")
     end
     local blur = create("BlurEffect", {
         Parent = light,
@@ -1062,15 +1055,10 @@ function lib:init(title, sub)
         IgnoreGuiInset = true,
         DisplayOrder = 100
     })
-    if syn and syn.protect_gui then
-        syn.protect_gui(openGui)
-    end
     if gethui then
         openGui.Parent = gethui()
-    elseif protected then
-        openGui.Parent = game:GetService("CoreGui")
     else
-        openGui.Parent = player:wait("PlayerGui")
+        openGui.Parent = game:GetService("CoreGui")
     end
     local openbtn = create("TextButton", {
         Parent = openGui,
@@ -2788,8 +2776,9 @@ function lib:init(title, sub)
             local path = self.cfgdir .. "/" .. name .. ".json"
             if isfile(path) then
                 local data = readfile(path)
-                if setclipboard then
-                    setclipboard(data)
+                local clipboard = setclipboard or toclipboard or writeclipboard
+                if clipboard then
+                    clipboard(data)
                     return "clipboard"
                 end
                 return data
