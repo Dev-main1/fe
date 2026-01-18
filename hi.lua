@@ -1,4 +1,5 @@
 local lib = {}
+local csk = ColorSequenceKeypoint
 local tw = game:GetService("TweenService")
 local inp = game:GetService("UserInputService")
 local run = game:GetService("RunService")
@@ -525,9 +526,17 @@ function lib:init(title, sub)
             tween(loaderfill, {Size = UDim2.new(stage.pct, 0, 1, 0)}, 0.4, Enum.EasingStyle.Quad)
             task.wait(0.3 + math.random() * 0.2)
         end
+        task.wait(0.4)
+        tween(logoglow, {it = 1, Size = UDim2.new(2.5, 0, 2.5, 0)}, 0.5, Enum.EasingStyle.Quad)
+        tween(logoicon, {it = 1}, 0.5, Enum.EasingStyle.Quad)
+        tween(loadertitle, {tc = theme.accent}, 0.3, Enum.EasingStyle.Quad)
+        task.wait(0.2)
+        tween(loaderbar, {bgt = 1}, 0.4, Enum.EasingStyle.Quad)
+        tween(loadertxt, {tc = Color3.fromRGB(0, 0, 0)}, 0.4, Enum.EasingStyle.Quad)
+        tween(loadertitle, {Position = UDim2.new(0.5, 0, 0.5, -100)}, 0.5, Enum.EasingStyle.Quad)
         task.wait(0.3)
-        tween(loader, {bgt = 1}, 0.5)
-        task.wait(0.5)
+        tween(loader, {bgt = 1}, 0.6, Enum.EasingStyle.Quad)
+        task.wait(0.6)
         loader:Destroy()
     end)
     tween(blur, {Size = 6}, 1.5)
@@ -675,8 +684,8 @@ function lib:init(title, sub)
     local sidebarGrad = create("UIGradient", {
         Parent = sidebar,
         Color = ColorSequence.new({
-            csk.new(0, Color3.fromRGB(20, 15, 35)),
-            csk.new(1, Color3.fromRGB(8, 6, 16))
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(20, 15, 35)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(8, 6, 16))
         }),
         Rotation = 180
     })
