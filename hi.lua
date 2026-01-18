@@ -384,7 +384,7 @@ function lib:init(title, sub)
         bgt = 1,
         Size = UDim2.new(1, 0, 1, 0),
         ZIndex = 0,
-        vis = true
+        Visible = true
     })
     local snowflakes = {}
     for i = 1, 120 do
@@ -634,7 +634,7 @@ function lib:init(title, sub)
         Size = UDim2.new(0, 16, 0, 16),
         Image = "rbxassetid://10734898355",
         ImageColor3 = theme.textDim,
-        vis = false
+        Visible = false
     })
     local searchinput = create("TextBox", {
         Parent = search,
@@ -692,7 +692,7 @@ function lib:init(title, sub)
         Text = os.date("%H:%M:%S"),
         tc = theme.text,
         ts = 16,
-        vis = false
+        Visible = false
     })
     task.spawn(function()
         while timelbl and timelbl.Parent do
@@ -1172,7 +1172,7 @@ function lib:init(title, sub)
             ScrollBarThickness = 0,
             ScrollBarImageColor3 = theme.accent,
             ScrollBarit = 0.5,
-            vis = false,
+            Visible = false,
             clips = true
         })
         padding(page, 15, 15, 10, 10)
@@ -2105,7 +2105,7 @@ function lib:init(title, sub)
                     bgt = 1,
                     Position = UDim2.new(0, 14, 0, 50),
                     Size = UDim2.new(1, -28, 0, 130),
-                    vis = false
+                    Visible = false
                 })
                 local sat = create("ImageLabel", {
                     Parent = pick,
@@ -2122,7 +2122,7 @@ function lib:init(title, sub)
                     bsp = 0,
                     Position = UDim2.new(s, -7, 1 - v, -7),
                     Size = UDim2.new(0, 14, 0, 14),
-                    vis = false
+                    Visible = false
                 })
                 corner(satc, UDim.new(1, 0))
                 stroke(satc, theme.shadow, 2, 0)
