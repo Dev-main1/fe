@@ -116,8 +116,13 @@ local function tween(obj, props, dur, style, dir)
         pos = "AbsolutePosition",
         anchor = "AnchorPoint",
         clips = "ClipsDescendants",
-        vis = "Visible",
-        itype = "UserInputType"
+        Visible = "Visible",
+        Rotation = "Rotation",
+        Position = "Position",
+        Size = "Size",
+        Transparency = "Transparency",
+        Color = "Color",
+        ImageColor3 = "ImageColor3"
     }
     local mapped = {}
     for k, v in pairs(props) do
